@@ -3,9 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./doctor-management.style.css";
-import { getCookie, deleteCookie, getUserData } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const SPEC_CLASS: Record<string,string> = {
   Cardiology:"cardio",Dermatology:"derm",Neurology:"neuro",
@@ -49,31 +47,35 @@ export default function DoctorManagementPage() {
     toastRef.current = setTimeout(()=>setToast(null), 3200);
   };
 
-  const signOut = () => {
-    deleteCookie("accessToken"); deleteCookie("refreshToken");
-    deleteCookie("userId"); deleteCookie("role");
-    localStorage.clear(); router.push("/");
-  };
-
   useEffect(()=>{
     if (!getCookie("accessToken")) { router.push("/login"); return; }
-    if (getCookie("role") !== "Admin") { showToast("Access Denied","error"); router.back(); return; }
+    if (getCookie("role") !== "Admin") {
+      // router.back() risks bouncing right back to a page that
+      // redirects here again; send the user somewhere safe instead.
+      showToast("Access Denied","error"); router.push("/"); return;
+    }
     init();
   },[router]);
 
   const init = async () => {
-    const ud = await getUserData();
-    setUserData(ud);
-    const res = await fetch(`${apiUrl}/doctors`);
-    const data = await res.json();
-    setDoctors(data.doctors ?? []);
-    setFiltered(data.doctors ?? []);
-    setStats({
-      total: (data.doctors??[]).length,
-      active: data.countActive ?? 0,
-      inactive: data.countInactive ?? 0,
-      appointments: 0,
-    });
+    try {
+      const ud = await getUserData();
+      setUserData(ud);
+      const res = await fetch(`${apiUrl}/doctors`);
+      if (!res.ok) { showToast("Failed to load doctors.", "error"); return; }
+      const data = await res.json();
+      setDoctors(data.doctors ?? []);
+      setFiltered(data.doctors ?? []);
+      setStats({
+        total: (data.doctors??[]).length,
+        active: data.countActive ?? 0,
+        inactive: data.countInactive ?? 0,
+        appointments: 0,
+      });
+    } catch (e) {
+      console.error("Failed to load doctors:", e);
+      showToast("Failed to load doctors.", "error");
+    }
   };
 
   useEffect(()=>{
@@ -92,27 +94,37 @@ export default function DoctorManagementPage() {
   const deleteDoctor = async () => {
     if (!delTarget) return;
     const d = doctors.find(x=>x.id===delTarget);
-    const res = await fetch(`${apiUrl}/doctors/${delTarget}`,{method:"DELETE"});
-    const r = await res.json();
-    if (!r.success) { showToast(`${d?.user?.full_name??"Doctor"} could not be removed.`,"error"); return; }
-    setDoctors(prev=>prev.filter(x=>x.id!==delTarget));
-    setDelTarget(null);
-    showToast(`${d?.user?.full_name??"Doctor"} has been removed.`,"error");
+    try {
+      const res = await fetch(`${apiUrl}/doctors/${delTarget}`,{method:"DELETE"});
+      const r = await res.json();
+      if (!res.ok || !r.success) { showToast(`${d?.user?.full_name??"Doctor"} could not be removed.`,"error"); return; }
+      setDoctors(prev=>prev.filter(x=>x.id!==delTarget));
+      setDelTarget(null);
+      showToast(`${d?.user?.full_name??"Doctor"} has been removed.`,"error");
+    } catch (e) {
+      console.error("Failed to delete doctor:", e);
+      showToast("Something went wrong.","error");
+    }
   };
 
   const saveAdd = async () => {
     const {fname,lname,email,phone,pass,spec,dept,type,room,experience,bio} = addForm;
     if (!pass||pass.length<8) { showToast("Password must be at least 8 characters.","error"); return; }
     if (!fname||!lname||!email||!phone||!spec||!dept||!type||!room||!bio) { showToast("Please fill in all required fields.","error"); return; }
-    const res1 = await fetch(`${apiUrl}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({full_name:`${fname} ${lname}`,age:null,email,password:pass,phone,role:"Doctor"})});
-    const r1 = await res1.json();
-    if (!r1.success) { showToast(r1.message,"error"); return; }
-    const res2 = await fetch(`${apiUrl}/doctors`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({specialization:spec,department:dept,experience,bio,type,room_number:room,user_id:r1.userId})});
-    const r2 = await res2.json();
-    if (!r2.success) { showToast(r2.message,"error"); return; }
-    showToast(`Dr. ${fname} ${lname} added successfully.`,"success");
-    setDrawerMode(null);
-    init();
+    try {
+      const res1 = await fetch(`${apiUrl}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({full_name:`${fname} ${lname}`,age:null,email,password:pass,phone,role:"Doctor"})});
+      const r1 = await res1.json();
+      if (!res1.ok || !r1.success) { showToast(r1.message ?? "Could not create the doctor's account.","error"); return; }
+      const res2 = await fetch(`${apiUrl}/doctors`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({specialization:spec,department:dept,experience,bio,type,room_number:room,user_id:r1.userId})});
+      const r2 = await res2.json();
+      if (!res2.ok || !r2.success) { showToast(r2.message ?? "Could not create the doctor profile.","error"); return; }
+      showToast(`Dr. ${fname} ${lname} added successfully.`,"success");
+      setDrawerMode(null);
+      init();
+    } catch (e) {
+      console.error("Failed to add doctor:", e);
+      showToast("Something went wrong.","error");
+    }
   };
 
   const accessTelegram = async () => {
@@ -155,11 +167,18 @@ export default function DoctorManagementPage() {
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">Doctors <span>Management</span></div>
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>
@@ -245,7 +264,11 @@ export default function DoctorManagementPage() {
                       <td><input type="checkbox" checked={isSelected} onClick={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const n=new Set(selected);e.target.checked?n.add(d.id):n.delete(d.id);setSelected(n);}} style={{width:"16px",height:"16px",accentColor:"var(--teal-400)",cursor:"pointer"}}/></td>
                       <td>
                         <div className="doc-cell">
-                          <div className="doc-av" style={{background:COLORS[Math.floor(Math.random()*COLORS.length)]}}>{d.user?.full_name?.[0]?.toUpperCase()}</div>
+                          {/* Was Math.random() — picked a new color on every
+                              re-render (e.g. each keystroke in search),
+                              making each doctor's avatar flicker between
+                              colors instead of having a stable identity. */}
+                          <div className="doc-av" style={{background:COLORS[Number(d.id)%COLORS.length]}}>{d.user?.full_name?.[0]?.toUpperCase()}</div>
                           <div><div className="doc-name">{d.user?.full_name}</div><div className="doc-id">ID: {d.id} · {d.user?.email}</div></div>
                         </div>
                       </td>
@@ -371,8 +394,16 @@ export default function DoctorManagementPage() {
 
           <div className="drawer-footer">
             <button className="btn-ghost" onClick={()=>setDrawerMode(null)}>Cancel</button>
-            <button className="btn-save" onClick={()=>{if(drawerMode==="add")saveAdd();else if(drawerMode==="edit"){showToast("Doctor updated.","success");setDrawerMode(null);}else{setDrawerMode("edit");}}}>
-              {drawerMode==="add"?"Add Doctor":drawerMode==="edit"?"Save Changes":"Edit Doctor"}
+            {/*
+              Clicking "Edit Doctor" used to switch drawerMode to "edit",
+              but no edit form exists for that mode — the drawer body
+              rendered nothing, and "Save Changes" just popped a
+              "Doctor updated." toast without changing any real data.
+              Until a real edit form is built, be honest about it
+              instead of pretending the edit succeeded.
+            */}
+            <button className="btn-save" onClick={()=>{if(drawerMode==="add")saveAdd();else showToast("Editing doctor profiles isn't available yet.","warning");}}>
+              {drawerMode==="add"?"Add Doctor":"Edit Doctor"}
             </button>
           </div>
         </div>

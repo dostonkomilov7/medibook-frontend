@@ -3,9 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./all-patients.style.css";
-import { getCookie, deleteCookie, getUserData, strMonth, getAge } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, getUserData, strMonth, getAge, apiUrl, signOut } from "../../lib/utils";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const PER_PAGE = 8;
 
@@ -37,24 +35,32 @@ export default function AllPatientsPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Doctor" && role !== "Admin") {
+      // router.back() could bounce right back to a page that redirects
+      // here again; send the user somewhere safe instead.
       showToast("Access Denied: You do not have permission.", "error");
-      router.back();
+      router.push("/");
       return;
     }
     init();
   }, [router]);
 
   const init = async () => {
-    const ud = await getUserData();
-    if (!ud) return;
-    setUserData(ud);
-    const userId = getCookie("userId");
-    if (!userId) return;
-    const res = await fetch(`${apiUrl}/doctors/${userId}`);
-    const data = await res.json();
-    const appts = data.doctors?.[0]?.appointments || [];
-    setPatients(appts);
-    setFiltered(appts);
+    try {
+      const ud = await getUserData();
+      if (!ud) return;
+      setUserData(ud);
+      const userId = getCookie("userId");
+      if (!userId) return;
+      const res = await fetch(`${apiUrl}/doctors/${userId}`);
+      if (!res.ok) { showToast("Failed to load patients.", "error"); return; }
+      const data = await res.json();
+      const appts = data.doctors?.[0]?.appointments || [];
+      setPatients(appts);
+      setFiltered(appts);
+    } catch (e) {
+      console.error("Failed to load patients:", e);
+      showToast("Failed to load patients.", "error");
+    }
   };
 
   useEffect(() => {
@@ -84,30 +90,31 @@ export default function AllPatientsPage() {
   const doctor = userData?.users?.[0]?.doctors?.[0];
   const fullDate = new Date().toDateString();
 
-  const signOut = () => {
-    deleteCookie("accessToken");
-    deleteCookie("refreshToken");
-    deleteCookie("userId");
-    deleteCookie("role");
-    localStorage.clear();
-    router.push("/");
-  };
-
   const cancelAppointment = async (id: string, status: string) => {
     if (status !== "Pending") { showToast("Only Pending status can be edited","info"); return; }
-    const res = await fetch(`${apiUrl}/appointments/${id}`, { method:"DELETE" });
-    const response = await res.json();
-    showToast(response.message, response.success ? "info" : "error");
-    if (response.success) { const ud = await getUserData(); setUserData(ud); init(); }
+    try {
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method:"DELETE" });
+      const response = await res.json();
+      showToast(response.message ?? (res.ok ? "Appointment cancelled." : "Could not cancel appointment."), res.ok && response.success ? "info" : "error");
+      if (res.ok && response.success) { const ud = await getUserData(); setUserData(ud); init(); }
+    } catch (e) {
+      console.error("Failed to cancel appointment:", e);
+      showToast("Something went wrong.", "error");
+    }
   };
 
   const updateAppointment = async (id: string, status: string) => {
     if (status === "Completed") { showToast("Appointment has been completed","info"); return; }
     if (status === "Cancelled") { showToast("Appointment has been cancelled","info"); return; }
-    const res = await fetch(`${apiUrl}/appointments/${id}`, { method:"PATCH" });
-    const response = await res.json();
-    showToast(response.message, response.success ? "info" : "error");
-    if (response.success) init();
+    try {
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method:"PATCH" });
+      const response = await res.json();
+      showToast(response.message ?? (res.ok ? "Appointment updated." : "Could not update appointment."), res.ok && response.success ? "info" : "error");
+      if (res.ok && response.success) init();
+    } catch (e) {
+      console.error("Failed to update appointment:", e);
+      showToast("Something went wrong.", "error");
+    }
   };
 
   return (
@@ -184,11 +191,18 @@ export default function AllPatientsPage() {
           </a>
         </nav>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">My <span>Patients</span></div>
             <div className="topbar-sub">{doctor ? `Dr ${userData?.users?.[0]?.full_name} • ${doctor.department} • ${fullDate}` : ""}</div>
           </div>

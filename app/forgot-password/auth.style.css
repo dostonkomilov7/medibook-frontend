@@ -30,7 +30,7 @@
   --shadow-md:   0 4px 6px rgba(0,0,0,.07), 0 10px 30px rgba(0,0,0,.1);
 }
 
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -47,7 +47,11 @@ body {
   grid-template-columns: 1fr 1fr;
 }
 
-/* ── Left: Form panel ── */
+/* ── Left: Form panel ──
+   `align-items:center` here, combined with a fixed-height row and no
+   overflow handling, clipped the bottom of the form (submit button,
+   resend link, etc.) on any viewport shorter than the content. Let it
+   grow to at least one viewport tall and scroll internally instead. */
 .auth-panel {
   display: flex;
   align-items: center;
@@ -56,6 +60,9 @@ body {
   background: var(--white);
   position: relative;
   z-index: 1;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .panel-inner {
@@ -565,4 +572,11 @@ label {
   .auth-layout { grid-template-columns: 1fr; }
   .auth-deco { display: none; }
   .auth-panel { padding: 36px 24px; }
+}
+
+@media (max-height: 750px) {
+  .auth-panel { padding-top: 24px; padding-bottom: 24px; }
+  .brand { margin-bottom: 20px; }
+  .form-header { margin-bottom: 20px; }
+  .field-group { margin-bottom: 6px; }
 }

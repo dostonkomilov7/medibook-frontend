@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./user-dashboard.style.css";
 import "../alert.style.css";
-import { getCookie, setCookie, deleteCookie, getUserData, strMonth } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, getUserData, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 
 export default function UserDashboardPage() {
   const router = useRouter();
@@ -15,8 +13,11 @@ export default function UserDashboardPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "User") {
-      alert("Access Denied: You do not have permission to view this page.");
-      router.back();
+      // router.back() risks bouncing right back to a page that
+      // redirects here again; use MediAlert instead of a blocking
+      // native alert() and send the user somewhere safe.
+      (window as any).MediAlert?.toast({ type: "error", title: "Access Denied", message: "You do not have permission to view this page." });
+      router.push("/");
       return;
     }
     init();
@@ -62,24 +63,28 @@ export default function UserDashboardPage() {
       }
       if (totalAppointments) totalAppointments.textContent = data.appointments.count;
 
+      // Reset before appending — without this, re-running getAppointments
+      // (Strict Mode double-invoke in dev, or navigating back here)
+      // duplicated every row.
+      appointments.innerHTML = "";
       data.appointments.rows.forEach((element: any) => {
         appointments.innerHTML += `
           <tr>
             <td>
               <div class="doctor-cell">
-                <div class="doc-avatar a">${element.doctor.user.full_name[0]}</div>
+                <div class="doc-avatar a">${escapeHtml(element.doctor.user.full_name[0])}</div>
                 <div>
-                  <div class="doc-name">Dr. ${element.doctor.user.full_name}</div>
-                  <div class="doc-spec">${element.doctor.specialization}</div>
+                  <div class="doc-name">Dr. ${escapeHtml(element.doctor.user.full_name)}</div>
+                  <div class="doc-spec">${escapeHtml(element.doctor.specialization)}</div>
                 </div>
               </div>
             </td>
             <td>
-              <div class="apt-date">${element.appointment_date}</div>
-              <div class="apt-time">${element.appointment_time}</div>
+              <div class="apt-date">${escapeHtml(element.appointment_date)}</div>
+              <div class="apt-time">${escapeHtml(element.appointment_time)}</div>
             </td>
             <td><span class="type-tag in-person">In-person</span></td>
-            <td><span class="status-pill confirmed">${element.status}</span></td>
+            <td><span class="status-pill confirmed">${escapeHtml(element.status)}</span></td>
             <td><button class="row-action">Details</button></td>
           </tr>`;
       });
@@ -91,13 +96,6 @@ export default function UserDashboardPage() {
   const accessTelegram = () => {
     const userId = getCookie("userId");
     window.location.href = `https://t.me/medibook_clinic_bot?start=${userId}`;
-  };
-
-  const signOut = () => {
-    deleteCookie("accessToken"); deleteCookie("refreshToken");
-    deleteCookie("userId"); deleteCookie("role");
-    localStorage.clear();
-    window.location.href = "/";
   };
 
   return (
@@ -136,10 +134,17 @@ export default function UserDashboardPage() {
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
         </div>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
+          <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
           <h1 className="topbar-title">Good morning, <span className="headers"></span> 👋</h1>
           <div className="search-box">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>

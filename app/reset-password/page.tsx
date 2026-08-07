@@ -120,18 +120,27 @@ export default function ResetPasswordPage() {
     // Get token from URL
     const token = new URLSearchParams(window.location.search).get("token");
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/auth/reset-password`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password: pw }),
       });
+      // Previously the success screen was shown unconditionally,
+      // regardless of whether the request actually succeeded — even a
+      // failed/network-errored request told the user their password
+      // had been updated.
+      if (!res.ok) {
+        setFieldError("confirmPassword", "Could not reset your password. The link may have expired.");
+        return;
+      }
+      showState("state-success");
     } catch (e) {
       console.error(e);
+      setFieldError("confirmPassword", "Something went wrong. Please check your connection and try again.");
+    } finally {
+      resetBtn.disabled = false;
+      resetBtn.innerHTML = originalHTML;
     }
-
-    resetBtn.disabled = false;
-    resetBtn.innerHTML = originalHTML;
-    showState("state-success");
   };
 
   return (

@@ -879,7 +879,10 @@ body {
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  /* Was `overflow: hidden` — on narrow screens that clipped the right
+     side of the table (Status, Joined, Actions columns) instead of
+     letting it scroll into view. */
+  overflow-x: auto;
 }
 
 .users-table {
@@ -2066,12 +2069,63 @@ select.form-input {
   }
 }
 
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--gray-800);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .main {
     margin-left: 0;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 250;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
   }
 }

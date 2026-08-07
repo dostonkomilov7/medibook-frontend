@@ -4,9 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./my-appointments.style.css";
 import "../alert.style.css";
-import { getCookie, deleteCookie, getUserData, strMonth } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 
 export default function MyAppointmentsPage() {
   const router = useRouter();
@@ -61,51 +59,78 @@ export default function MyAppointmentsPage() {
 
     const upcomingGrid = document.getElementById("upcoming-grid");
     const pastList = document.getElementById("past-list");
+    // Clear before appending — previously these were never reset, so
+    // re-running loadAppointments (Strict Mode double-invoke in dev,
+    // or navigating back to this page) duplicated every card.
+    if (upcomingGrid) upcomingGrid.innerHTML = "";
+    if (pastList) pastList.innerHTML = "";
 
     data.appointments.rows.forEach((el: any) => {
       const status = el.status.toLowerCase();
       const mon = strMonth(el.appointment_date);
       const day = el.appointment_date.split("-").at(-1);
+      const docName = escapeHtml(el.doctor.user.full_name);
+      const spec = escapeHtml(el.doctor.specialization);
+      const statusLabel = escapeHtml(el.status);
       if (upcomingGrid) upcomingGrid.innerHTML += `
-        <div class="appt-card" data-status="${status}" data-doctor="Dr. ${el.doctor.user.full_name}" data-spec="${el.doctor.specialization}">
+        <div class="appt-card" data-id="${escapeHtml(String(el.id))}" data-status="${status}" data-doctor="Dr. ${docName}" data-spec="${spec}">
           <div class="appt-card-accent ${el.status === "Pending" ? "amber" : el.status === "Confirmed" ? "blue" : el.status === "Completed" ? "teal" : "coral"}"></div>
           <div class="appt-card-body">
             <div class="appt-card-top">
               <div class="appt-doc-row">
-                <div class="appt-doc-avatar b">${el.doctor.user.full_name[0]}</div>
-                <div><div class="appt-doc-name">Dr. ${el.doctor.user.full_name}</div><div class="appt-doc-spec">${el.doctor.specialization}</div></div>
+                <div class="appt-doc-avatar b">${escapeHtml(el.doctor.user.full_name[0])}</div>
+                <div><div class="appt-doc-name">Dr. ${docName}</div><div class="appt-doc-spec">${spec}</div></div>
               </div>
-              <span class="status-pill ${status}">${el.status}</span>
+              <span class="status-pill ${status}">${statusLabel}</span>
             </div>
             <div class="appt-divider"></div>
             <div class="appt-meta-row">
               <div class="appt-meta-item"><div class="appt-meta-label">Date</div><div class="appt-meta-val">${mon} ${day}</div></div>
-              <div class="appt-meta-item"><div class="appt-meta-label">Time</div><div class="appt-meta-val">${el.appointment_time}</div></div>
+              <div class="appt-meta-item"><div class="appt-meta-label">Time</div><div class="appt-meta-val">${escapeHtml(el.appointment_time)}</div></div>
               <div class="appt-meta-item"><div class="appt-meta-label">Type</div><div class="appt-meta-val"><div class="type-chip in-person">In-person</div></div></div>
             </div>
-            <div class="appt-notes">Room ${el.doctor.room_number}, ${el.doctor.department} Building.</div>
+            <div class="appt-notes">Room ${escapeHtml(el.doctor.room_number)}, ${escapeHtml(el.doctor.department)} Building.</div>
             <div class="appt-card-actions">
               <a href="https://yandex.com/maps/org/128432379794"><button class="card-btn primary">Directions</button></a>
-              <button class="card-btn danger">Cancel</button>
+              ${status === "cancelled" || status === "completed" ? "" : `<button class="card-btn danger" data-cancel-id="${escapeHtml(String(el.id))}">Cancel</button>`}
             </div>
           </div>
         </div>`;
       if (pastList) pastList.innerHTML += `
-        <div class="past-item" data-status="${status}" data-doctor="Dr. ${el.doctor.user.full_name}" data-spec="${el.doctor.specialization}">
+        <div class="past-item" data-status="${status}" data-doctor="Dr. ${docName}" data-spec="${spec}">
           <div class="past-date-box"><div class="day">${day}</div><div class="mon">${mon}</div></div>
           <div class="past-doc-row">
-            <div class="past-doc-avatar d">${el.doctor.user.full_name[0]}</div>
-            <div><div class="past-doc-name">Dr. ${el.doctor.user.full_name}</div><div class="past-doc-spec">${el.status} · ${el.appointment_time}</div></div>
+            <div class="past-doc-avatar d">${escapeHtml(el.doctor.user.full_name[0])}</div>
+            <div><div class="past-doc-name">Dr. ${docName}</div><div class="past-doc-spec">${statusLabel} · ${escapeHtml(el.appointment_time)}</div></div>
           </div>
-          <div class="past-tags"><span class="past-type in-person">In-person</span><span class="status-pill ${status}">${el.status}</span></div>
+          <div class="past-tags"><span class="past-type in-person">In-person</span><span class="status-pill ${status}">${statusLabel}</span></div>
         </div>`;
     });
-  };
 
-  const signOut = () => {
-    deleteCookie("accessToken"); deleteCookie("refreshToken");
-    deleteCookie("userId"); deleteCookie("role");
-    localStorage.clear(); window.location.href = "/";
+    // Wire up the Cancel buttons (previously dead — no handler at all).
+    // Delegated + assigned via onclick so re-running this function
+    // (which rebuilds the DOM anyway) can't stack duplicate listeners.
+    if (upcomingGrid) upcomingGrid.onclick = async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>("[data-cancel-id]");
+      if (!btn) return;
+      const id = btn.dataset.cancelId!;
+      btn.setAttribute("disabled", "true");
+      try {
+        const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
+        const result = await res.json();
+        if (!res.ok || !result.success) {
+          (window as any).MediAlert?.toast({ type: "error", title: "Could not cancel appointment" });
+          btn.removeAttribute("disabled");
+          return;
+        }
+        (window as any).MediAlert?.toast({ type: "success", title: "Appointment cancelled" });
+        await loadAppointments();
+      } catch (err) {
+        console.error("Failed to cancel appointment:", err);
+        (window as any).MediAlert?.toast({ type: "error", title: "Something went wrong" });
+        btn.removeAttribute("disabled");
+      }
+    };
   };
 
   const filterTab = (btn: HTMLElement, tab: string) => {
@@ -149,9 +174,16 @@ export default function MyAppointmentsPage() {
           <div className="user-meta"><p className="name">User</p><p className="role">User</p></div>
         </div>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       <div className="main">
         <header className="topbar">
+          <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
           <h1 className="topbar-title">My <span>Appointments</span></h1>
           <div className="search-box">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

@@ -1,19 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCookie } from "../../lib/utils";
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, apiUrl as BASE } from "../../lib/utils";
+import "./chat.style.css";
 
 interface Doctor { id: number; user: { id: number; full_name: string }; specialization: string; }
 interface Message { text: string; senderId: string; isMe: boolean; }
 interface RoomMeta { title: string; spec: string; notice: string; }
-
-function escapeHTML(str: string) {
-  const d = document.createElement("div");
-  d.textContent = str;
-  return d.innerHTML;
-}
 
 export default function ChatPage() {
   const router = useRouter();
@@ -30,6 +23,11 @@ export default function ChatPage() {
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     loadDoctors();
+    // initSocket() sets socketRef.current asynchronously; disconnecting
+    // here on unmount (instead of relying on initSocket's own unused
+    // return value) actually runs when the component leaves the page,
+    // preventing the socket connection from being left open.
+    return () => { socketRef.current?.disconnect(); };
   }, [router]);
 
   const loadDoctors = async () => {
@@ -106,11 +104,11 @@ export default function ChatPage() {
   const currentMessages = messages[currentRoom] ?? [];
 
   return (
-    <div className="h-full flex items-center justify-center p-4" style={{height:"100vh",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem",fontFamily:"system-ui,sans-serif"}}>
-      <div style={{width:"100%",maxWidth:"900px",height:"85vh",background:"rgba(30,41,59,0.5)",backdropFilter:"blur(20px)",border:"1px solid rgba(71,85,105,0.5)",borderRadius:"1rem",boxShadow:"0 25px 50px rgba(0,0,0,0.5)",display:"flex",overflow:"hidden"}}>
+    <div className="h-full flex items-center justify-center p-4 chat-outer" style={{height:"100vh",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem",fontFamily:"system-ui,sans-serif"}}>
+      <div className="chat-card" style={{width:"100%",maxWidth:"900px",height:"85vh",background:"rgba(30,41,59,0.5)",backdropFilter:"blur(20px)",border:"1px solid rgba(71,85,105,0.5)",borderRadius:"1rem",boxShadow:"0 25px 50px rgba(0,0,0,0.5)",display:"flex",overflow:"hidden"}}>
 
         {/* SIDEBAR */}
-        <aside style={{width:"256px",background:"rgba(15,23,42,0.4)",borderRight:"1px solid rgba(71,85,105,0.6)",display:"flex",flexDirection:"column"}}>
+        <aside className="chat-sidebar" style={{width:"256px",background:"rgba(15,23,42,0.4)",borderRight:"1px solid rgba(71,85,105,0.6)",display:"flex",flexDirection:"column"}}>
           <div style={{padding:"1rem",borderBottom:"1px solid rgba(71,85,105,0.6)"}}>
             <h2 style={{fontSize:"11px",fontWeight:700,letterSpacing:"0.1em",color:"#94a3b8",textTransform:"uppercase",margin:0}}>Chat Channels</h2>
           </div>

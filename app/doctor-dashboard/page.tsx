@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./doctor-dashboard.style.css";
 import "../alert.style.css";
-import { getCookie, deleteCookie, getUserData, strMonth, getAge } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, getUserData, strMonth, getAge, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 
 export default function DoctorDashboardPage() {
   const router = useRouter();
@@ -15,8 +13,12 @@ export default function DoctorDashboardPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
-      alert("Access Denied: You do not have permission to view this page.");
-      router.back();
+      // router.back() could bounce the user right back to a page that
+      // redirects here again (e.g. login), causing a loop. Send them
+      // somewhere safe instead, and use MediAlert instead of a
+      // blocking native alert().
+      (window as any).MediAlert?.toast({ type: "error", title: "Access Denied", message: "You do not have permission to view this page." });
+      router.push("/");
       return;
     }
     init();
@@ -55,22 +57,27 @@ export default function DoctorDashboardPage() {
     const userData = await getUserData();
     const doctor = userData?.users[0]?.doctors?.[0];
 
+    // Reset before appending — without this, re-running getDoctorApp
+    // (e.g. React Strict Mode double-invoking effects in dev, or the
+    // user navigating back to this page) kept appending rows on top
+    // of the ones already rendered, duplicating the list.
+    recentPatients.innerHTML = "";
     data.doctors[0].appointments.forEach((element: any) => {
       recentPatients.innerHTML += `
         <tr>
           <td>
             <div class="patient-cell">
-              <div class="pt-avatar b">${element.user.full_name[0].toUpperCase()}</div>
+              <div class="pt-avatar b">${escapeHtml(element.user.full_name[0].toUpperCase())}</div>
               <div>
-                <div class="pt-name">${element.user.full_name}</div>
-                <div class="pt-id">ID #${element.user.id} · ${getAge(element.user.age)}y</div>
+                <div class="pt-name">${escapeHtml(element.user.full_name)}</div>
+                <div class="pt-id">ID #${escapeHtml(String(element.user.id))} · ${getAge(element.user.age)}y</div>
               </div>
             </div>
           </td>
           <td style="color:var(--gray-600);font-size:13px;">${strMonth(element.appointment_date)} ${element.appointment_date.split("-").at(2)}</td>
-          <td style="font-size:13px;color:var(--gray-600);">Problem related to ${doctor?.department || ""}</td>
+          <td style="font-size:13px;color:var(--gray-600);">Problem related to ${escapeHtml(doctor?.department || "")}</td>
           <td><span class="risk-pill medium">Medium</span></td>
-          <td><span class="status-pill ${element.status.toLowerCase()}">${element.status}</span></td>
+          <td><span class="status-pill ${element.status.toLowerCase()}">${escapeHtml(element.status)}</span></td>
         </tr>`;
     });
   };
@@ -78,13 +85,6 @@ export default function DoctorDashboardPage() {
   const accessTelegram = () => {
     const userId = getCookie("userId");
     window.location.href = `https://t.me/medibook_clinic_bot?start=${userId}`;
-  };
-
-  const signOut = () => {
-    deleteCookie("accessToken"); deleteCookie("refreshToken");
-    deleteCookie("userId"); deleteCookie("role");
-    localStorage.clear();
-    window.location.href = "/";
   };
 
   return (
@@ -121,11 +121,18 @@ export default function DoctorDashboardPage() {
           <a className="nav-item" style={{ cursor: "pointer" }} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg><span>Sign out</span></a>
         </nav>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">Doctor <span>Overview</span></div>
             <div className="topbar-sub"></div>
           </div>

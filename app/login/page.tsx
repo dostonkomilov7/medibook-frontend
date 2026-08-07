@@ -3,9 +3,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./login.style.css";
-import { setCookie, getCookie } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { setCookie, getCookie, apiUrl } from "../../lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,17 +32,24 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
-    const email = (document.getElementById("email") as HTMLInputElement).value.trim();
-    const pw = (document.getElementById("password") as HTMLInputElement).value;
-    const alertEl = document.getElementById("alert") as HTMLElement;
-    const submitBtn = document.getElementById("login-submit") as HTMLElement;
+    const emailInput = document.getElementById("email") as HTMLInputElement | null;
+    const pwInput = document.getElementById("password") as HTMLInputElement | null;
+    const alertEl = document.getElementById("alert") as HTMLElement | null;
+    const submitBtn = document.getElementById("login-submit") as HTMLButtonElement | null;
+    if (!emailInput || !pwInput || !alertEl || !submitBtn) return;
+
+    const email = emailInput.value.trim();
+    const pw = pwInput.value;
 
     if (!email || !pw) {
       alertEl.textContent = "Please fill in all fields.";
       alertEl.style.display = "block";
       return;
     }
+    if (submitBtn.classList.contains("loading")) return; // guard against double submit
     alertEl.style.display = "none";
+    submitBtn.classList.add("loading");
+    submitBtn.setAttribute("disabled", "true");
 
     try {
       const res = await fetch(`${apiUrl}/auth/login`, {
@@ -54,25 +59,26 @@ export default function LoginPage() {
       });
       const response = await res.json();
 
-      if (!response.success) {
-        alertEl.textContent = response.message;
+      if (!res.ok || !response.success) {
+        alertEl.textContent = response.message || "Incorrect email or password. Please try again.";
         alertEl.style.display = "block";
         return;
       }
 
-      submitBtn.classList.add("loading");
-      setTimeout(() => {
-        setCookie("accessToken", response?.accessToken);
-        setCookie("refreshToken", response?.refreshToken);
-        setCookie("userId", response?.userId);
-        setCookie("role", response?.role);
-        if (response?.role === "Doctor") router.push("/doctor-dashboard");
-        else if (response?.role === "User") router.push("/user-dashboard");
-        else router.push("/doctor-management");
-        submitBtn.classList.remove("loading");
-      }, 1500);
+      setCookie("accessToken", response?.accessToken);
+      setCookie("refreshToken", response?.refreshToken);
+      setCookie("userId", response?.userId);
+      setCookie("role", response?.role);
+      if (response?.role === "Doctor") router.push("/doctor-dashboard");
+      else if (response?.role === "User") router.push("/user-dashboard");
+      else router.push("/doctor-management");
     } catch (error) {
       console.error(error);
+      alertEl.textContent = "Something went wrong. Please check your connection and try again.";
+      alertEl.style.display = "block";
+    } finally {
+      submitBtn.classList.remove("loading");
+      submitBtn.removeAttribute("disabled");
     }
   };
 

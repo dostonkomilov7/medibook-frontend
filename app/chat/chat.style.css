@@ -1,0 +1,28 @@
+/* This page is otherwise entirely inline-styled with a fixed 256px
+   sidebar sitting next to the chat window in a row that never wraps.
+   On a phone-width viewport that left barely 80-90px for the actual
+   conversation. These overrides stack the layout vertically instead. */
+@media (max-width: 700px) {
+  .chat-card {
+    flex-direction: column !important;
+    height: 92vh !important;
+  }
+
+  .chat-sidebar {
+    width: 100% !important;
+    max-height: 160px;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.6);
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-outer {
+    padding: 0 !important;
+  }
+
+  .chat-card {
+    border-radius: 0 !important;
+    height: 100vh !important;
+  }
+}

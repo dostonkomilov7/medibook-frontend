@@ -4,9 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import "./third.style.css";
-import { getCookie } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { getCookie, apiUrl } from "../../lib/utils";
 
 const SPECIALTIES = [
   { id: "Cardiologist", name: "Cardiologist", icon: "heart", color: "#D85A30", bg: "#FAECE7" },
@@ -256,38 +254,50 @@ function ThirdPageContent() {
     if (missing.includes("worktype")) { showToast("Please select your work type.", "error"); scrollToBlock("worktype"); return; }
 
     const userId = getCookie("userId");
+    const nextBtn = document.getElementById("nextBtn") as HTMLButtonElement | null;
+    if (nextBtn) nextBtn.disabled = true;
 
-    const res = await fetch(`${apiUrl}/doctors`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        specialization: stateRef.current.specialty,
-        department: stateRef.current.department,
-        experience: stateRef.current.experience,
-        type: stateRef.current.workType,
-        bio: stateRef.current.bio,
-        room_number,
-        user_id: userId,
-      }),
-    });
-    const response = await res.json();
-    if (!response.success) { showToast(response.message, "error"); return; }
+    try {
+      const res = await fetch(`${apiUrl}/doctors`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          specialization: stateRef.current.specialty,
+          department: stateRef.current.department,
+          experience: stateRef.current.experience,
+          type: stateRef.current.workType,
+          bio: stateRef.current.bio,
+          room_number,
+          user_id: userId,
+        }),
+      });
+      const response = await res.json();
+      if (!res.ok || !response.success) { showToast(response.message ?? "Could not save your profile.", "error"); return; }
 
-    const res1 = await fetch(`${apiUrl}/schedules`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        work_day: stateRef.current.days.join(", "),
-        start_time: stateRef.current.hours[0],
-        end_time: stateRef.current.hours[1],
-        doctor_id: response.userId,
-      }),
-    });
-    const response1 = await res1.json();
-    if (!response1.success) { showToast(response1.message, "error"); return; }
+      const res1 = await fetch(`${apiUrl}/schedules`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          work_day: stateRef.current.days.join(", "),
+          start_time: stateRef.current.hours[0],
+          end_time: stateRef.current.hours[1],
+          doctor_id: response.userId,
+        }),
+      });
+      const response1 = await res1.json();
+      if (!res1.ok || !response1.success) { showToast(response1.message ?? "Could not save your schedule.", "error"); return; }
 
-    showToast("Professional profile saved!");
-    setTimeout(() => { router.push(`/verify-email?email=${email}`); }, 1500);
+      showToast("Professional profile saved!");
+      // email came from a decoded search param — re-encode it before
+      // putting it back into a URL, or a "+" or "&" in the address
+      // would corrupt the query string on the next page.
+      setTimeout(() => { router.push(`/verify-email?email=${encodeURIComponent(email)}`); }, 1500);
+    } catch (e) {
+      console.error("Failed to save professional profile:", e);
+      showToast("Something went wrong. Please check your connection and try again.", "error");
+    } finally {
+      if (nextBtn) nextBtn.disabled = false;
+    }
   };
 
   // expose to window for inline onclick handlers

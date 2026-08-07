@@ -64,19 +64,26 @@ export default function AllUsersPage() {
   }, [router]);
 
   const init = async () => {
-    const ud = await getUserData();
-    setUserData(ud);
-    const res = await fetch(`${apiUrl}/users`);
-    const data = await res.json();
-    const rows = (data.users?.rows ?? []).map((u: any) => ({...u, id: String(u.id)}));
-    setAllUsers(rows);
-    setStats({
-      total: data.users?.count ?? rows.length,
-      patients: data.countPatients ?? 0,
-      doctors: data.countDoctors ?? 0,
-      inactive: data.countInactive ?? 0,
-      active: Math.max(0,(data.countActive??0)-1),
-    });
+    try {
+      const ud = await getUserData();
+      setUserData(ud);
+      const res = await fetch(`${apiUrl}/users`);
+      if (!res.ok) { showToast("Failed to load users.", "error"); return; }
+      const data = await res.json();
+      console.log(data, "AAA")
+      const rows = (data.users?.rows ?? []).map((u: any) => ({...u, id: String(u.id)}));
+      setAllUsers(rows);
+      setStats({
+        total: data.users?.count ?? rows.length,
+        patients: data.countPatients ?? 0,
+        doctors: data.countDoctors ?? 0,
+        inactive: data.countInactive ?? 0,
+        active: data.countActive ?? 0,
+      });
+    } catch (e) {
+      console.error("Failed to load users:", e);
+      showToast("Failed to load users.", "error");
+    }
   };
 
   // filtered list
@@ -116,6 +123,28 @@ export default function AllUsersPage() {
     setSelected(prev=>{const n=new Set(prev);n.delete(id);return n;});
     setDelTarget(null);
     showToast(`${u?.full_name??"User"} deleted.`,"error");
+  };
+
+  // Previously this only removed selected users from local React state —
+  // no request ever reached the server, so a page refresh brought every
+  // "deleted" user right back. Call the real DELETE endpoint per user,
+  // same as deleteSingle does for a single row.
+  const bulkDelete = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    const results = await Promise.allSettled(
+      ids.map((id) => fetch(`${apiUrl}/users/${id}`, { method: "DELETE" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
+    );
+    const succeededIds = new Set(
+      results.filter((r): r is PromiseFulfilledResult<{ id: string; ok: boolean }> => r.status === "fulfilled" && r.value.ok).map((r) => r.value.id)
+    );
+    setAllUsers(prev => prev.filter(u => !succeededIds.has(u.id)));
+    setSelected(new Set());
+    if (succeededIds.size === ids.length) {
+      showToast(`${succeededIds.size} users deleted.`, "error");
+    } else {
+      showToast(`${succeededIds.size} of ${ids.length} users deleted; some failed.`, "warning");
+    }
   };
 
   const adminName = userData?.users?.[0]?.full_name ?? "";
@@ -159,11 +188,18 @@ export default function AllUsersPage() {
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">All <span>Users</span></div>
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>
@@ -235,13 +271,18 @@ export default function AllUsersPage() {
             <div className="bulk-bar visible">
               <span>{selected.size} selected</span>
               <div className="bulk-actions">
-                <button className="bulk-btn teal" onClick={()=>{setAllUsers(prev=>prev.map(u=>selected.has(u.id)?{...u,verified:true}:u));showToast(`${selected.size} users verified.`,"success");setSelected(new Set());}}>
+                {/* Verify/Suspend are disabled: the backend's UpdateUserDto
+                    has no `status`/`verified` fields yet, so there is no
+                    real endpoint to call. Previously these buttons edited
+                    only local React state, which silently reverted on
+                    refresh and looked like a working feature. */}
+                <button className="bulk-btn teal" disabled title="Not supported by the backend yet" onClick={()=>showToast("Verifying users isn't supported by the server yet.","warning")}>
                   <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verify
                 </button>
-                <button className="bulk-btn amber" onClick={()=>{setAllUsers(prev=>prev.map(u=>selected.has(u.id)?{...u,status:"suspended"}:u));showToast(`${selected.size} users suspended.`,"warning");setSelected(new Set());}}>
+                <button className="bulk-btn amber" disabled title="Not supported by the backend yet" onClick={()=>showToast("Suspending users isn't supported by the server yet.","warning")}>
                   <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suspend
                 </button>
-                <button className="bulk-btn coral" onClick={()=>{const c=selected.size;setAllUsers(prev=>prev.filter(u=>!selected.has(u.id)));showToast(`${c} users deleted.`,"error");setSelected(new Set());}}>
+                <button className="bulk-btn coral" onClick={bulkDelete}>
                   <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Delete
                 </button>
                 <button className="bulk-btn ghost" onClick={()=>setSelected(new Set())}>Cancel</button>
@@ -397,7 +438,6 @@ export default function AllUsersPage() {
           )}
           <div className="drawer-footer">
             <button className="btn-ghost" onClick={()=>setDrawer(null)}>Cancel</button>
-            <button className="btn-save">Save Changes</button>
           </div>
         </div>
       </div>

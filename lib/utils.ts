@@ -14,7 +14,10 @@ export const getCookie = (name: string): string | null => {
   if (typeof document === 'undefined') return null;
   const cookies = document.cookie.split('; ');
   for (const c of cookies) {
-    const [key, value] = c.split('=');
+    const eq = c.indexOf('=');
+    if (eq === -1) continue;
+    const key = c.slice(0, eq);
+    const value = c.slice(eq + 1);
     if (key === name) return value;
   }
   return null;
@@ -83,8 +86,27 @@ export const strMonth = (date: string): string => {
   return months[month ?? ''] ?? '';
 };
 
-export const getAge = (age: string): number | string => {
-  const userAge = new Date().getFullYear() - new Date(age).getFullYear();
-  if (userAge < 1) return '-';
-  return userAge;
+// Escapes a string for safe insertion into innerHTML. Use this for any
+// backend-sourced value (names, notes, etc.) before interpolating it into
+// a template string that gets assigned to innerHTML, to avoid stored XSS.
+export const escapeHtml = (str: string): string => {
+  if (typeof document === 'undefined') {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+  }
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+};
+
+export const getAge = (dob: string): number | string => {
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate.getTime())) return '-';
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  if (age < 1) return '-';
+  return age;
 };

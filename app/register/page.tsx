@@ -3,9 +3,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./register.style.css";
-import { setCookie, getCookie } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { setCookie, getCookie, apiUrl } from "../../lib/utils";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -67,16 +65,26 @@ export default function RegisterPage() {
   };
 
   const handleRegister = async () => {
-    const fname = (document.getElementById("first-name") as HTMLInputElement).value.trim();
-    const lname = (document.getElementById("last-name") as HTMLInputElement).value.trim();
-    const email = (document.getElementById("email") as HTMLInputElement).value.trim();
-    const phone = (document.getElementById("phone") as HTMLInputElement).value.trim();
-    const dob = (document.getElementById("dob") as HTMLInputElement).value;
-    const pw = (document.getElementById("password") as HTMLInputElement).value;
-    const terms = (document.getElementById("terms") as HTMLInputElement).checked;
-    const alertEl = document.getElementById("alert") as HTMLElement;
-    const submitBtn = document.getElementById("submit-btn") as HTMLElement;
-    const isDoctor = (document.getElementById("role-doctor") as HTMLInputElement).value;
+    const fnameEl = document.getElementById("first-name") as HTMLInputElement | null;
+    const lnameEl = document.getElementById("last-name") as HTMLInputElement | null;
+    const emailEl = document.getElementById("email") as HTMLInputElement | null;
+    const phoneEl = document.getElementById("phone") as HTMLInputElement | null;
+    const dobEl = document.getElementById("dob") as HTMLInputElement | null;
+    const pwEl = document.getElementById("password") as HTMLInputElement | null;
+    const termsEl = document.getElementById("terms") as HTMLInputElement | null;
+    const alertEl = document.getElementById("alert") as HTMLElement | null;
+    const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null;
+    const roleDoctorEl = document.getElementById("role-doctor") as HTMLInputElement | null;
+    if (!fnameEl || !lnameEl || !emailEl || !phoneEl || !dobEl || !pwEl || !termsEl || !alertEl || !submitBtn || !roleDoctorEl) return;
+
+    const fname = fnameEl.value.trim();
+    const lname = lnameEl.value.trim();
+    const email = emailEl.value.trim();
+    const phone = phoneEl.value.trim();
+    const dob = dobEl.value;
+    const pw = pwEl.value;
+    const terms = termsEl.checked;
+    const isDoctor = roleDoctorEl.value;
 
     if (!fname || !lname || !email || !pw || !phone) {
       alertEl.textContent = "Please fill in all required fields.";
@@ -93,9 +101,12 @@ export default function RegisterPage() {
       alertEl.style.display = "block";
       return;
     }
+    if (submitBtn.classList.contains("loading")) return; // guard against double submit
 
     const fullName = fname + " " + lname;
     alertEl.style.display = "none";
+    submitBtn.classList.add("loading");
+    submitBtn.setAttribute("disabled", "true");
 
     try {
       const res = await fetch(`${apiUrl}/auth/register`, {
@@ -112,25 +123,27 @@ export default function RegisterPage() {
       });
       const response = await res.json();
 
-      if (!response.success) {
-        alertEl.textContent = response.message;
+      if (!res.ok || !response.success) {
+        alertEl.textContent = response.message || "Registration failed. Please try again.";
         alertEl.style.display = "block";
         return;
       }
 
-      submitBtn.classList.add("loading");
-      setTimeout(() => {
-        submitBtn.classList.remove("loading");
-        setCookie("userId", response?.userId);
-        setCookie("role", response?.role);
-        if (response.role === "Doctor") {
-          router.push(`/third-page?email=${email}`);
-        } else {
-          router.push(`/verify-email?email=${email}`);
-        }
-      }, 1500);
+      setCookie("userId", response?.userId);
+      setCookie("role", response?.role);
+      const emailParam = encodeURIComponent(email);
+      if (response.role === "Doctor") {
+        router.push(`/third-page?email=${emailParam}`);
+      } else {
+        router.push(`/verify-email?email=${emailParam}`);
+      }
     } catch (error) {
       console.error(error);
+      alertEl.textContent = "Something went wrong. Please check your connection and try again.";
+      alertEl.style.display = "block";
+    } finally {
+      submitBtn.classList.remove("loading");
+      submitBtn.removeAttribute("disabled");
     }
   };
 

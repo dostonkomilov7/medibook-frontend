@@ -32,6 +32,16 @@ interface ModalOptions {
 const MAX_TOASTS = 4;
 let toastIdCounter = 0;
 
+// Toast/modal content (title, message, detail) can contain data that
+// ultimately originates from user input (e.g. a patient's name echoed
+// back in a confirmation message). Since it's injected via innerHTML,
+// it must be escaped to avoid stored/reflected XSS.
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function dismissToast(el: HTMLElement): void {
   el.style.opacity = '0';
   el.style.transform = 'translateX(110%)';
@@ -57,8 +67,8 @@ function toast(opts: ToastOptions): void {
   el.innerHTML = `
     <div class="toast-icon">${ICONS[type] || ICONS.info}</div>
     <div class="toast-body">
-      <div class="toast-title">${title}</div>
-      ${message ? `<div class="toast-desc">${message}</div>` : ''}
+      <div class="toast-title">${escapeHtml(title)}</div>
+      ${message ? `<div class="toast-desc">${escapeHtml(message)}</div>` : ''}
     </div>
     <button class="toast-close" aria-label="Dismiss" onclick="MediAlert._dismissById('${id}')">
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -89,13 +99,13 @@ function modal(opts: ModalOptions): void {
 
   iconArea.innerHTML = `
     <div class="modal-icon modal-icon-${type}">${ICONS[type]}</div>
-    <div class="modal-title">${title}</div>
-    <div class="modal-message">${message}</div>
+    <div class="modal-title">${escapeHtml(title)}</div>
+    <div class="modal-message">${escapeHtml(message)}</div>
   `;
 
   if (detail && detailEl) {
     detailEl.style.display = '';
-    detailEl.innerHTML = `<div class="modal-detail-inner">${detail}</div>`;
+    detailEl.innerHTML = `<div class="modal-detail-inner">${escapeHtml(detail)}</div>`;
   }
 
   footerEl.innerHTML = '';

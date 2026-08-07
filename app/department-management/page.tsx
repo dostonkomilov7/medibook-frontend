@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./department-management.style.css";
-import { getCookie, deleteCookie, getUserData } from "../../lib/utils";
+import { getCookie, getUserData, signOut } from "../../lib/utils";
 
 const COLORS = ["#D85A30","#8B7EF8","#378ADD","#EF9F27","#34C97A","#22C5D9","#E0608A","#F07B3F","#1D9E75"];
 
@@ -32,6 +32,12 @@ type DrawerMode = "view"|"edit"|"add"|null;
 export default function DepartmentManagementPage() {
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
+  // Note: there is no departments module on the backend (no API for
+  // this data), so DEPTS is a fixed demo dataset. It's now kept in
+  // React state so Add/Edit/Delete in this page actually mutate the
+  // in-memory list instead of only popping a "success" toast while
+  // leaving the underlying data untouched.
+  const [depts, setDepts] = useState(DEPTS);
   const [filtered, setFiltered] = useState(DEPTS);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [search, setSearch] = useState("");
@@ -43,34 +49,75 @@ export default function DepartmentManagementPage() {
   const [toast, setToast] = useState<{msg:string;type:string}|null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout>|null>(null);
 
+  const nameRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
+  const buildingRef = useRef<HTMLSelectElement>(null);
+  const statusRef = useRef<HTMLSelectElement>(null);
+  const bedsRef = useRef<HTMLInputElement>(null);
+  const budgetRef = useRef<HTMLInputElement>(null);
+  const descRef = useRef<HTMLTextAreaElement>(null);
+
   const showToast = (msg: string, type = "success") => {
     setToast({msg,type});
     if (toastRef.current) clearTimeout(toastRef.current);
     toastRef.current = setTimeout(()=>setToast(null), 3200);
   };
 
-  const signOut = () => {
-    deleteCookie("accessToken"); deleteCookie("refreshToken");
-    deleteCookie("userId"); deleteCookie("role");
-    localStorage.clear(); router.push("/");
-  };
-
   useEffect(()=>{
     if (!getCookie("accessToken")) { router.push("/login"); return; }
-    if (getCookie("role") !== "Admin") { showToast("Access Denied","error"); router.back(); return; }
+    if (getCookie("role") !== "Admin") {
+      // router.back() risks bouncing straight back to a redirecting
+      // page; send the user somewhere safe instead.
+      showToast("Access Denied","error"); router.push("/"); return;
+    }
     getUserData().then(setUserData);
   },[router]);
 
   useEffect(()=>{
-    let list = [...DEPTS];
+    let list = [...depts];
     if (search) { const q=search.toLowerCase(); list=list.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q)||d.head.toLowerCase().includes(q)); }
     if (statusF) list = list.filter(d=>d.status===statusF);
     if (buildingF) list = list.filter(d=>d.building.includes(buildingF));
     setFiltered(list);
-  },[search,statusF,buildingF]);
+  },[search,statusF,buildingF,depts]);
+
+  const handleSaveDept = () => {
+    const name = nameRef.current?.value.trim() || "";
+    const code = codeRef.current?.value.trim() || "";
+    if (!name || !code) { showToast("Name and code are required.", "error"); return; }
+    const buildingLabel = buildingRef.current?.value || "Main Building";
+    const building = buildingLabel.split(" ")[0];
+    const status = statusRef.current?.value || "Active";
+    const beds = Number(bedsRef.current?.value || 0);
+    const budget = budgetRef.current?.value || "";
+    const desc = descRef.current?.value || "";
+
+    if (drawerMode === "add") {
+      const newDept = {
+        id: `DEPT-${String(depts.length + 1).padStart(3, "0")}`,
+        name, code, color: COLORS[depts.length % COLORS.length], colorKey: "", icon: "circle",
+        status, building, floor: "—", head: "Unassigned", headInitials: "—", headColor: "#9A9890",
+        staff: 0, doctors: 0, nurses: 0, beds, occupancy: 0, appts: 0, founded: String(new Date().getFullYear()),
+        phone: "—", email: "—", budget, desc, staffList: [] as any[],
+      };
+      setDepts(prev => [...prev, newDept]);
+      showToast("Department created.", "success");
+    } else if (drawerMode === "edit" && drawerDept) {
+      setDepts(prev => prev.map(d => d.id === drawerDept.id ? { ...d, name, code, status, building, beds, budget, desc } : d));
+      showToast("Department updated.", "success");
+    }
+    setDrawerMode(null);
+  };
 
   const adminName = userData?.users?.[0]?.full_name ?? "";
   const fullDate = new Date().toDateString();
+  const totalStaff = depts.reduce((s, d) => s + d.staff, 0);
+  const totalDoctors = depts.reduce((s, d) => s + d.doctors, 0);
+  const totalNurses = depts.reduce((s, d) => s + d.nurses, 0);
+  const totalBeds = depts.reduce((s, d) => s + d.beds, 0);
+  const totalAppts = depts.reduce((s, d) => s + d.appts, 0);
+  const buildingCount = new Set(depts.map(d => d.building)).size;
+  const avgOccupancy = totalBeds > 0 ? Math.round(depts.reduce((s, d) => s + d.occupancy * d.beds, 0) / totalBeds) : 0;
 
   return (
     <div className="app">
@@ -96,6 +143,10 @@ export default function DepartmentManagementPage() {
           <p className="nav-label">System</p>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span className="lbl">Analytics</span><span className="bdg r">Soon</span></a>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 104.93 19.07M19.07 4.93l-7.07 7.07"/></svg><span className="lbl">Settings</span><span className="bdg r">Soon</span></a>
+          {/* Previously missing on this page — every other admin/doctor
+              page has a sign-out link, but this one had no way to log
+              out without navigating elsewhere first. */}
+          <a className="nav-item" onClick={signOut} style={{cursor:"pointer"}}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="lbl">Sign out</span></a>
         </nav>
         <div className="sidebar-footer">
           <div className="admin-av">{adminName?.[0]?.toUpperCase()}</div>
@@ -103,11 +154,18 @@ export default function DepartmentManagementPage() {
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">Department <span>Management</span></div>
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>
@@ -128,10 +186,14 @@ export default function DepartmentManagementPage() {
 
           {/* Stats */}
           <div className="stats-strip">
-            <div className="stat-card"><div className="stat-icon si-teal"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div className="stat-text"><div className="val">9</div><div className="lbl">Total Departments</div><div className="sub">Across 3 buildings</div></div></div>
-            <div className="stat-card"><div className="stat-icon si-blue"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div className="stat-text"><div className="val">284</div><div className="lbl">Total Medical Staff</div><div className="sub">48 doctors · 236 nurses</div></div></div>
-            <div className="stat-card"><div className="stat-icon si-amber"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div className="stat-text"><div className="val">312</div><div className="lbl">Total Beds</div><div className="sub">74% currently occupied</div></div></div>
-            <div className="stat-card"><div className="stat-icon si-coral"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div className="stat-text"><div className="val">1,847</div><div className="lbl">Appointments This Month</div><div className="sub">↑ 12% vs last month</div></div></div>
+            {/* These were hardcoded (9 / 284 / 312 / 1,847) regardless of
+                the actual department list, so they went stale the moment
+                a department was added, edited, or removed. Now derived
+                from live state. */}
+            <div className="stat-card"><div className="stat-icon si-teal"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div className="stat-text"><div className="val">{depts.length}</div><div className="lbl">Total Departments</div><div className="sub">Across {buildingCount} buildings</div></div></div>
+            <div className="stat-card"><div className="stat-icon si-blue"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div className="stat-text"><div className="val">{totalStaff}</div><div className="lbl">Total Medical Staff</div><div className="sub">{totalDoctors} doctors · {totalNurses} nurses</div></div></div>
+            <div className="stat-card"><div className="stat-icon si-amber"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div className="stat-text"><div className="val">{totalBeds}</div><div className="lbl">Total Beds</div><div className="sub">{avgOccupancy}% currently occupied</div></div></div>
+            <div className="stat-card"><div className="stat-icon si-coral"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div className="stat-text"><div className="val">{totalAppts.toLocaleString()}</div><div className="lbl">Appointments This Month</div></div></div>
           </div>
 
           {/* Toolbar */}
@@ -309,32 +371,32 @@ export default function DepartmentManagementPage() {
             {(drawerMode==="edit"||drawerMode==="add") && (
               <div>
                 <div className="form-row">
-                  <div className="form-field"><label>Department Name</label><input className="form-input" defaultValue={drawerDept?.name??""} placeholder="e.g. Cardiology"/></div>
-                  <div className="form-field"><label>Code</label><input className="form-input" defaultValue={drawerDept?.code??""} placeholder="e.g. CARD"/></div>
+                  <div className="form-field"><label>Department Name</label><input ref={nameRef} className="form-input" defaultValue={drawerDept?.name??""} placeholder="e.g. Cardiology"/></div>
+                  <div className="form-field"><label>Code</label><input ref={codeRef} className="form-input" defaultValue={drawerDept?.code??""} placeholder="e.g. CARD"/></div>
                 </div>
                 <div className="form-row">
                   <div className="form-field"><label>Building</label>
-                    <select className="form-input" defaultValue={drawerDept?.building??"Main Building"}>
+                    <select ref={buildingRef} className="form-input" defaultValue={drawerDept?.building==="East"?"East Wing":drawerDept?.building==="North"?"North Block":"Main Building"}>
                       <option>Main Building</option><option>East Wing</option><option>North Block</option>
                     </select>
                   </div>
                   <div className="form-field"><label>Status</label>
-                    <select className="form-input" defaultValue={drawerDept?.status??"Active"}>
+                    <select ref={statusRef} className="form-input" defaultValue={drawerDept?.status??"Active"}>
                       <option>Active</option><option>Inactive</option><option>Expanding</option>
                     </select>
                   </div>
                 </div>
                 <div className="form-row">
-                  <div className="form-field"><label>Total Beds</label><input className="form-input" type="number" defaultValue={drawerDept?.beds??0}/></div>
-                  <div className="form-field"><label>Annual Budget</label><input className="form-input" defaultValue={drawerDept?.budget??""} placeholder="e.g. $1.5M"/></div>
+                  <div className="form-field"><label>Total Beds</label><input ref={bedsRef} className="form-input" type="number" defaultValue={drawerDept?.beds??0}/></div>
+                  <div className="form-field"><label>Annual Budget</label><input ref={budgetRef} className="form-input" defaultValue={drawerDept?.budget??""} placeholder="e.g. $1.5M"/></div>
                 </div>
-                <div className="form-field"><label>Description</label><textarea className="form-textarea" defaultValue={drawerDept?.desc??""} placeholder="Brief description…"/></div>
+                <div className="form-field"><label>Description</label><textarea ref={descRef} className="form-textarea" defaultValue={drawerDept?.desc??""} placeholder="Brief description…"/></div>
               </div>
             )}
           </div>
           <div className="drawer-footer">
             <button className="btn-ghost" onClick={()=>setDrawerMode(null)}>Cancel</button>
-            <button className="btn-save" onClick={()=>{if(drawerMode==="view"){setDrawerMode("edit");}else{showToast(drawerMode==="add"?"Department created.":"Department updated.","success");setDrawerMode(null);}}}>
+            <button className="btn-save" onClick={()=>{if(drawerMode==="view"){setDrawerMode("edit");}else{handleSaveDept();}}}>
               {drawerMode==="add"?"Create Department":drawerMode==="edit"?"Save Changes":"Edit Department"}
             </button>
           </div>
@@ -348,11 +410,11 @@ export default function DepartmentManagementPage() {
             <div className="modal-inner">
               <div className="modal-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
               <h3>Delete Department</h3>
-              <p>This will permanently remove <strong>{DEPTS.find(d=>d.id===delTarget)?.name??"this department"}</strong>.</p>
+              <p>This will permanently remove <strong>{depts.find(d=>d.id===delTarget)?.name??"this department"}</strong>.</p>
             </div>
             <div className="modal-footer-btns">
               <button className="btn-mcancel" onClick={()=>setDelTarget(null)}>Keep It</button>
-              <button className="btn-mdelete" onClick={()=>{const d=DEPTS.find(x=>x.id===delTarget);showToast(`${d?.name??"Department"} has been removed.`,"error");setDelTarget(null);}}>Delete</button>
+              <button className="btn-mdelete" onClick={()=>{const d=depts.find(x=>x.id===delTarget);setDepts(prev=>prev.filter(x=>x.id!==delTarget));showToast(`${d?.name??"Department"} has been removed.`,"error");setDelTarget(null);}}>Delete</button>
             </div>
           </div>
         </div>

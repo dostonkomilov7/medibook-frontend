@@ -8,7 +8,7 @@
   --font-display:'DM Serif Display',Georgia,serif;--font-body:'DM Sans',system-ui,sans-serif;
   --tr:0.22s cubic-bezier(0.4,0,0.2,1);--tr-spring:0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
-html,body{height:100%;font-family:var(--font-body);background:var(--gray-50);color:var(--gray-800)}
+html,body{min-height:100%;font-family:var(--font-body);background:var(--gray-50);color:var(--gray-800)}
 body{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
 .panel-left{background:var(--teal-800);position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:3rem;overflow:hidden}
 .panel-left::before{content:'';position:absolute;top:-140px;left:-100px;width:480px;height:480px;border-radius:50%;border:80px solid rgba(255,255,255,0.04);pointer-events:none}
@@ -45,7 +45,11 @@ body{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
 .step-pip.active{width:36px;background:#fff}
 .step-pip.future{width:16px}
 .step-label{font-size:12px;color:rgba(255,255,255,0.45);letter-spacing:0.04em;margin-left:4px}
-.panel-right{display:flex;align-items:center;justify-content:center;padding:3rem 2rem;position:relative;overflow:hidden}
+/* Was `overflow:hidden` — on any viewport shorter than the OTP form's
+   natural height, that hard-clipped the bottom of the form (the Verify
+   button, resend timer, security note) with no way to scroll to it at
+   all. Give it its own scroll instead of clipping. */
+.panel-right{display:flex;align-items:center;justify-content:center;padding:3rem 2rem;position:relative;min-height:100vh;max-height:100vh;overflow-y:auto}
 .panel-right::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(29,158,117,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
 .form-wrap{width:100%;max-width:420px;position:relative;z-index:1}
 .form-header{margin-bottom:2.5rem}
@@ -108,3 +112,4 @@ body{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
 .confetti-dot{position:absolute;border-radius:50%;animation:confettiFly var(--dur,1s) var(--delay,0s) ease-out forwards;opacity:0}
 @keyframes confettiFly{0%{transform:translate(0,0) scale(0);opacity:1}100%{transform:translate(var(--tx,30px),var(--ty,-60px)) scale(1);opacity:0}}
 @media(max-width:800px){body{grid-template-columns:1fr}.panel-left{display:none}.panel-right{padding:2.5rem 1.5rem}}
+@media(max-height:800px){.panel-right{padding-top:1.5rem;padding-bottom:1.5rem}.form-header{margin-bottom:1.5rem}.otp-status{margin-bottom:1rem}.resend-section{margin-bottom:1.25rem}.security-note{margin-top:1rem}}

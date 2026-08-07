@@ -29,7 +29,7 @@
 
     html,
     body {
-        height: 100%;
+        min-height: 100%;
         font-family: var(--font-body);
         background: var(--gray-50);
         color: var(--gray-800);
@@ -41,13 +41,23 @@
         min-height: 100vh;
     }
 
-    /* LEFT PANEL */
+    /* LEFT PANEL
+       Was `height:100%` on html/body + `align-items:center` here with
+       no overflow handling — on any viewport shorter than the form's
+       natural height (most laptops, and every phone), the centered
+       content overflowed the fixed-height box and the bottom of the
+       form (role selector, terms, the Register button) ended up
+       clipped with no reliable way to scroll to it. Giving this panel
+       its own min-height + scroll makes it grow instead of clip. */
     .panel-left {
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 3rem 2rem;
         background: var(--white);
+        min-height: 100vh;
+        max-height: 100vh;
+        overflow-y: auto;
     }
 
     .form-card {
@@ -599,5 +609,39 @@
 
         .panel-left {
             padding: 2rem 1.25rem;
+        }
+    }
+
+    /* Short viewports (small laptops, landscape phones): tighten
+       vertical rhythm so the form is more likely to fit without
+       scrolling, and the scroll that does happen covers less ground. */
+    @media (max-height: 800px) {
+        .panel-left {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .brand {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .steps {
+            margin-bottom: 1.25rem;
+        }
+
+        .field {
+            margin-bottom: 0.85rem;
+        }
+
+        .role-selector {
+            margin-bottom: 0.85rem;
+        }
+
+        .terms-row {
+            margin-bottom: 1rem;
         }
     }

@@ -3,9 +3,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import "./verify-email.style.css";
-import { setCookie, getCookie } from "../../lib/utils";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { setCookie, getCookie, apiUrl } from "../../lib/utils";
 const TOTAL_DIGITS = 6;
 const RESEND_COOLDOWN = 60;
 const CIRCUMFERENCE = 97.4;
@@ -191,6 +189,13 @@ function VerifyEmailContent() {
       }
     } catch (err) {
       console.error(err);
+      // Previously the button was left disabled with its spinner
+      // stuck forever on a network error — there was no way to retry.
+      setStatus("error", "Something went wrong. Please check your connection and try again.");
+      if (verifyBtn) {
+        verifyBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify Email`;
+        verifyBtn.disabled = false;
+      }
     }
   };
 
@@ -253,6 +258,11 @@ function VerifyEmailContent() {
     }
     clearStatus(); updateVerifyBtn();
     (document.getElementById("otp-0") as HTMLInputElement)?.focus();
+    // The backend has no "resend verification code" endpoint (auth
+    // controller only has register/login/activate/forgot/reset), so
+    // this restarts the cooldown UI without actually sending a new
+    // code. Say so instead of silently implying a fresh code went out.
+    setStatus("info", "Resending isn't available yet — please use the code from your original email.");
   };
 
   return (

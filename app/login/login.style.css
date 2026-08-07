@@ -30,7 +30,7 @@
 
     html,
     body {
-        height: 100%;
+        min-height: 100%;
         font-family: var(--font-body);
         background: var(--gray-50);
         color: var(--gray-800);
@@ -167,11 +167,19 @@
     }
 
     /* RIGHT PANEL */
+    /* `align-items:center` inside a fixed-height grid row with no
+       overflow handling clipped the bottom of the form (e.g. the
+       submit button) whenever the viewport was shorter than the
+       form's natural height. Let this panel grow to at least one
+       viewport tall and scroll internally instead of clipping. */
     .panel-right {
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 3rem 2rem;
+        min-height: 100vh;
+        max-height: 100vh;
+        overflow-y: auto;
     }
 
     .form-card {
@@ -468,5 +476,24 @@
 
         .panel-right {
             padding: 2.5rem 1.5rem;
+        }
+    }
+
+    @media (max-height: 750px) {
+        .panel-right {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .brand {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .field {
+            margin-bottom: 0.85rem;
         }
     }

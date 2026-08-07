@@ -1635,3 +1635,95 @@ select {
     gap: 12px;
     margin-top: 8px;
 }
+
+/* ── Responsive ──
+   This file previously had zero media queries: the 240px sidebar was
+   always in-flow (eating over half the width on a phone screen), and
+   .datetime-grid / .details-grid / .confirm-layout stayed 2-column,
+   squeezing every step of the booking wizard into unreadable slivers. */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--gray-800, #2C2C2A);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 300;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .hamburger-btn {
+        display: flex;
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 250;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+
+    .sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .topbar {
+        padding: 0 16px;
+        gap: 10px;
+    }
+
+    .search-box {
+        display: none;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    .steps-bar {
+        padding: 14px 16px;
+    }
+
+    .step span {
+        display: none;
+    }
+
+    .datetime-grid,
+    .details-grid,
+    .confirm-layout {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import "./home.style.css";
 
 export default function HomePage() {
+
   useEffect(() => {
     // ── Custom Cursor ──
     const cursorDot = document.getElementById("cursorDot") as HTMLElement;
@@ -99,23 +100,38 @@ export default function HomePage() {
     }, { threshold: 0.1 });
     reveals.forEach((el) => revealObserver.observe(el));
 
+    function getRating(rating: number) {
+      return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
+    }
+
     // ── Doctors Grid ──
     const doctorsGrid = document.getElementById("doctorsGrid");
     const sampleDoctors = [
-      { name: "Dr. Sarah Rahman", spec: "Cardiologist", rating: 4.9, reviews: 142, initials: "SR", color: "#1D9E75" },
-      { name: "Dr. Michael Kim", spec: "Dermatologist", rating: 4.7, reviews: 98, initials: "MK", color: "#378ADD" },
-      { name: "Dr. Ayesha Patel", spec: "Neurologist", rating: 4.8, reviews: 201, initials: "AP", color: "#D85A30" },
-      { name: "Dr. Thomas Nguyen", spec: "General Practitioner", rating: 4.6, reviews: 87, initials: "TN", color: "#EF9F27" },
+      { name: 'Dr. Sarah Rahman', initials: 'SR', specialty: 'Cardiologist', rating: 4.9, patients: 142, years: 12, bgColor: 'linear-gradient(135deg,#1D9E75,#085041)' },
+      { name: 'Dr. Michael Kim', initials: 'MK', specialty: 'Dermatologist', rating: 4.7, patients: 98, years: 8, bgColor: 'linear-gradient(135deg,#378ADD,#185FA5)' },
+      { name: 'Dr. Ayesha Patel', initials: 'AP', specialty: 'Neurologist', rating: 4.8, patients: 74, years: 10, bgColor: 'linear-gradient(135deg,#D85A30,#8B3515)' },
+      { name: 'Dr. Thomas Nguyen', initials: 'TN', specialty: 'General Practitioner', rating: 4.6, patients: 210, years: 15, bgColor: 'linear-gradient(135deg,#EF9F27,#A56B0A)' },
     ];
     if (doctorsGrid) {
-      doctorsGrid.innerHTML = sampleDoctors.map((d) => `
-        <div class="doctor-card">
-          <div class="doc-card-av" style="background:${d.color}">${d.initials}</div>
-          <div class="doc-card-name">${d.name}</div>
-          <div class="doc-card-spec">${d.spec}</div>
-          <div class="doc-card-rating">⭐ ${d.rating} · ${d.reviews} reviews</div>
-          <a href="/book-appointment" class="doc-card-btn">Book Now</a>
+      doctorsGrid.innerHTML = sampleDoctors.map((doc) => `
+      <div class="doctor-card">
+        <div class="doc-card-top" style="background:${doc.bgColor};">
+          <div class="doc-av-large" style="background:${doc.bgColor};">${doc.initials}</div>
         </div>
+        <div class="doc-card-body">
+          <div class="doc-card-name">${doc.name}</div>
+          <div class="doc-card-spec">${doc.specialty}</div>
+          <div class="doc-card-rating"><span class="stars">${getRating(doc.rating)}</span><span class="rating-num">${doc.rating}</span></div>
+          <div class="doc-card-meta">
+            <div class="dcm-item"><div class="dcm-val">${doc.patients}</div><div class="dcm-lbl">Patients</div></div>
+            <div class="dcm-div"></div>
+            <div class="dcm-item"><div class="dcm-val">${doc.years}yr</div><div class="dcm-lbl">Experience</div></div>
+            <div class="dcm-div"></div>
+            <div class="dcm-item"><div class="dcm-val">${doc.rating}</div><div class="dcm-lbl">Rating</div></div>
+          </div>
+          <button class="doc-book-btn" onChange="openBookingModal()">Book appointment</button>
+        </div>
+      </div>
       `).join("");
     }
 
@@ -128,7 +144,7 @@ export default function HomePage() {
     ];
     if (testiGrid) {
       testiGrid.innerHTML = testimonials.map((t) => `
-        <div class="testi-card">
+        < div class="testi-card" >
           <p class="testi-text">"${t.text}"</p>
           <div class="testi-author">
             <div class="testi-av">${t.name[0]}</div>
@@ -137,27 +153,31 @@ export default function HomePage() {
               <div class="testi-role">${t.role}</div>
             </div>
           </div>
-        </div>
-      `).join("");
+        </div >
+        `).join("");
     }
 
     return () => {
       document.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("scroll", handleScroll);
+      hamburger?.removeEventListener("click", handleHamburger);
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+      revealObserver.disconnect();
     };
   }, []);
 
-  const selectSlot = (el: HTMLElement) => {
+  function selectSlot(el: HTMLElement) {
     document.querySelectorAll(".slot").forEach((s) => s.classList.remove("selected"));
     el.classList.add("selected");
   };
 
-  const openBookingModal = () => {
+  function openBookingModal() {
     const modal = document.getElementById("bookingModal");
     if (modal) modal.style.display = "flex";
   };
 
-  const closeBookingModal = () => {
+  function closeBookingModal() {
     const modal = document.getElementById("bookingModal");
     if (modal) modal.style.display = "none";
   };
@@ -166,10 +186,11 @@ export default function HomePage() {
     if ((e.target as HTMLElement).id === "bookingModal") closeBookingModal();
   };
 
-  const submitBooking = () => {
+  function submitBooking() {
     closeBookingModal();
     alert("Booking submitted!");
   };
+
 
   return (
     <>
@@ -351,29 +372,30 @@ export default function HomePage() {
 
         <div className="spec-grid reveal">
           {[
-            { name: "Cardiology", count: "12 specialists", color: "#D85A30", bg: "#FAECE7" },
-            { name: "Neurology", count: "8 specialists", color: "#6366F1", bg: "#EEF2FF" },
-            { name: "General Practice", count: "24 specialists", color: "#378ADD", bg: "#E6F1FB" },
-            { name: "Orthopedics", count: "9 specialists", color: "#22A852", bg: "#E3F8EC" },
-            { name: "Pediatrics", count: "14 specialists", color: "#A855F7", bg: "#F5E6FA" },
-            { name: "Oncology", count: "7 specialists", color: "#C98227", bg: "#FAEEDA" },
-            { name: "Radiology", count: "6 specialists", color: "#378ADD", bg: "#E6F1FB" },
-            { name: "Emergency", count: "18 specialists", color: "#E07B3F", bg: "#FFF0E6" },
+            { name: "Cardiology", count: "12 specialists", color: "#D85A30", bg: "#FAECE7", path: `<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>` },
+            { name: "Neurology", count: "8 specialists", color: "#6366F1", bg: "#EEF2FF", path: `<path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>` },
+            { name: "General Practice", count: "24 specialists", color: "#378ADD", bg: "#E6F1FB", path: `<path d="M19 8a3 3 0 110 6 3 3 0 010-6z"/><path d="M13 8V5a3 3 0 00-6 0v8a5 5 0 0010 0v-3"/>` },
+            { name: "Orthopedics", count: "9 specialists", color: "#22A852", bg: "#E3F8EC", path: `<path d="M18.5 2.5a2.121 2.121 0 010 3l-6.5 6.5-3.5-3.5 6.5-6.5a2.121 2.121 0 013 0z"/><path d="M5.5 21.5a2.121 2.121 0 010-3l6.5-6.5 3.5 3.5-6.5 6.5a2.121 2.121 0 01-3 0z"/>` },
+            { name: "Pediatrics", count: "14 specialists", color: "#A855F7", bg: "#F5E6FA", path: `<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>` },
+            { name: "Oncology", count: "7 specialists", color: "#C98227", bg: "#FAEEDA", path: `<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>` },
+            { name: "Radiology", count: "6 specialists", color: "#378ADD", bg: "#E6F1FB", path: `<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>` },
+            { name: "Emergency", count: "18 specialists", color: "#E07B3F", bg: "#FFF0E6", path: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>` },
           ].map((spec) => (
             <div className="spec-card" key={spec.name}>
               <div className="spec-icon-wrap" style={{ background: spec.bg }}>
-                <svg viewBox="0 0 24 24" style={{ stroke: spec.color }}><circle cx="12" cy="12" r="10" /></svg>
+                <svg viewBox="0 0 24 24" style={{ stroke: spec.color }} dangerouslySetInnerHTML={{ __html: spec.path }}></svg>
               </div>
               <div className="spec-name">{spec.name}</div>
               <div className="spec-count">{spec.count}</div>
               <div className="spec-arrow"><Link href="/register">Book now</Link><span>→</span></div>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+          }
+        </div >
+      </section >
 
       {/* ── DOCTORS ── */}
-      <section className="doctors-section" id="doctors">
+      < section className="doctors-section" id="doctors" >
         <div className="doctors-header reveal">
           <div>
             <div className="section-tag">Our Team</div>
@@ -386,28 +408,28 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="doctors-grid reveal" id="doctorsGrid"></div>
-      </section>
+      </section >
 
       {/* ── STATS BAND ── */}
-      <div className="stats-band reveal">
+      < div className="stats-band reveal" >
         <div className="stat-item"><div className="stat-big">12k+</div><div className="stat-sub">Patients served</div></div>
         <div className="stat-item"><div className="stat-big">340</div><div className="stat-sub">Expert doctors</div></div>
         <div className="stat-item"><div className="stat-big">9</div><div className="stat-sub">Departments</div></div>
         <div className="stat-item"><div className="stat-big">98%</div><div className="stat-sub">Patient satisfaction</div></div>
-      </div>
+      </div >
 
       {/* ── TESTIMONIALS ── */}
-      <section className="testimonials-section" id="testimonials">
+      < section className="testimonials-section" id="testimonials" >
         <div className="testi-header reveal">
           <div className="section-tag">Reviews</div>
           <h2 className="section-title">Loved by <em>thousands.</em></h2>
           <p>Real stories from patients who&apos;ve transformed their healthcare experience with MediBook.</p>
         </div>
         <div className="testi-grid reveal" id="testiGrid"></div>
-      </section>
+      </section >
 
       {/* ── CTA ── */}
-      <section className="cta-section reveal">
+      < section className="cta-section reveal" >
         <div className="section-tag">Get started</div>
         <h2 className="cta-title">Ready to take control of<br />your <em>health journey?</em></h2>
         <p className="cta-desc">Join 12,000+ patients already using MediBook. It&apos;s free to sign up.</p>
@@ -415,10 +437,10 @@ export default function HomePage() {
           <Link href="/register" className="btn-cta-primary">Create free account</Link>
           <Link href="/login" className="btn-cta-ghost">Already have an account</Link>
         </div>
-      </section>
+      </section >
 
       {/* ── FOOTER ── */}
-      <footer>
+      < footer >
         <div className="footer-top">
           <div className="footer-brand">
             <Link href="/" className="nav-logo" style={{ marginBottom: "1rem", display: "inline-flex" }}>
@@ -435,10 +457,10 @@ export default function HomePage() {
           <p>© 2026 MediBook Technologies. All rights reserved.</p>
           <div className="footer-bottom-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Sitemap</a></div>
         </div>
-      </footer>
+      </footer >
 
       {/* ── BOOKING MODAL ── */}
-      <div className="modal-overlay" id="bookingModal" onClick={handleModalOverlay}>
+      < div className="modal-overlay" id="bookingModal" onClick={handleModalOverlay} >
         <div className="modal">
           <div className="modal-header">
             <div>
@@ -462,7 +484,7 @@ export default function HomePage() {
             <button className="btn-m-submit" onClick={submitBooking}>Confirm Booking</button>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 }

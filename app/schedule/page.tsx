@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import "./doctor-dashboard.style.css";
 import "./schedule.style.css";
 import "../alert.style.css";
-import { getCookie, deleteCookie } from "../../lib/utils";
+import { getCookie, apiUrl, escapeHtml, signOut } from "../../lib/utils";
 
 type ApptType = "in-person" | "virtual";
 type ApptTag = "" | "followup" | "new-pt" | "urgent";
@@ -26,28 +26,50 @@ export default function SchedulePage() {
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
-    if (role !== "Admin" && role !== "Doctor") { router.back(); return; }
-    apptsRef.current = seedData();
-    render();
+    if (role !== "Admin" && role !== "Doctor") {
+      // router.back() risks bouncing right back to a page that
+      // redirects here again; send the user somewhere safe instead.
+      router.push("/"); return;
+    }
+    loadAppointments();
   }, [router]);
 
-  const seedData = (): Appointment[] => {
-    const d = todayISO();
-    return [
-      { id: "a1", date: d, time: "09:00", name: "James Mitchell", reason: "Cardiac follow-up · ID #2841", type: "in-person", tag: "followup", status: "completed" },
-      { id: "a2", date: d, time: "10:30", name: "Priya Sharma", reason: "Echocardiogram review · ID #3102", type: "virtual", tag: "new-pt", status: "confirmed" },
-      { id: "a3", date: d, time: "13:00", name: "Robert Chen", reason: "Arrhythmia consult · ID #1975", type: "in-person", tag: "urgent", status: "pending" },
-      { id: "a4", date: d, time: "14:30", name: "Linda Park", reason: "Hypertension management · ID #4417", type: "virtual", tag: "followup", status: "confirmed" },
-      { id: "a5", date: d, time: "16:00", name: "Mark Thompson", reason: "Annual cardiac checkup · ID #3889", type: "in-person", tag: "", status: "confirmed" },
-    ];
+  // Previously this page showed the same 5 hardcoded fake appointments
+  // no matter which date you navigated to or which doctor was signed
+  // in — it never talked to the backend at all, so it didn't reflect
+  // the doctor's real schedule. Load their actual appointments instead
+  // (same endpoint doctor-dashboard/all-patients already use).
+  const loadAppointments = async () => {
+    const userId = getCookie("userId");
+    if (!userId) return;
+    try {
+      const res = await fetch(`${apiUrl}/doctors/${userId}`);
+      if (!res.ok) { render(); return; }
+      const data = await res.json();
+      const list = data.doctors?.[0]?.appointments ?? [];
+      apptsRef.current = list.map((a: any): Appointment => ({
+        id: String(a.id),
+        date: a.appointment_date,
+        time: a.appointment_time,
+        name: a.user?.full_name ?? "Unknown patient",
+        reason: `Appointment · ID #${a.user?.id ?? "—"}`,
+        type: "in-person",
+        tag: "",
+        status: (a.status ?? "Pending").toLowerCase() as ApptStatus,
+      }));
+    } catch (e) {
+      console.error("Failed to load schedule:", e);
+    }
+    render();
   };
 
-  const to12h = (t: string) => {
-    const [hStr, m] = t.split(":");
-    let h = parseInt(hStr, 10);
-    const ap = h >= 12 ? "PM" : "AM";
-    h = h % 12 || 12;
-    return { hour: `${h}:${m}`, min: ap };
+  // appointment_time is stored as a human string like "9:00 AM" (see
+  // the slot picker in book-appointment), not 24-hour "HH:MM" — the
+  // old to12h() assumed 24-hour input and would have mangled it (e.g.
+  // "9:00 AM".split(":") glues the AM/PM suffix onto the minutes).
+  const splitTime = (t: string) => {
+    const [hour, period] = t.split(" ");
+    return { hour: hour ?? t, min: period ?? "" };
   };
 
   const visibleAppts = () => apptsRef.current
@@ -71,22 +93,21 @@ export default function SchedulePage() {
     const emptyState = document.getElementById("emptyState") as HTMLElement;
     if (!list) return;
     list.innerHTML = items.map((a, i) => {
-      const { hour, min } = to12h(a.time);
+      const { hour, min } = splitTime(a.time);
       const tail = i < items.length - 1 ? '<div class="timeline-tail"></div>' : "";
       const typeTag = `<span class="tag ${a.type === "virtual" ? "virtual" : "in-person"}">${a.type === "virtual" ? "Virtual" : "In-person"}</span>`;
       const tagMap: Record<string, string> = { followup: '<span class="tag followup">Follow-up</span>', "new-pt": '<span class="tag new-pt">New Patient</span>', urgent: '<span class="tag urgent">Urgent</span>' };
       return `
-        <div class="schedule-item" data-id="${a.id}">
-          <div class="schedule-time"><div class="hour">${hour}</div><div class="min">${min}</div></div>
+        <div class="schedule-item" data-id="${escapeHtml(a.id)}">
+          <div class="schedule-time"><div class="hour">${escapeHtml(hour)}</div><div class="min">${escapeHtml(min)}</div></div>
           <div class="schedule-line"><div class="timeline-dot ${a.type === "virtual" ? "teal" : "blue"}"></div>${tail}</div>
           <div class="schedule-body">
-            <div class="appt-name">${a.name}</div>
-            <div class="appt-sub">${a.reason}</div>
+            <div class="appt-name">${escapeHtml(a.name)}</div>
+            <div class="appt-sub">${escapeHtml(a.reason)}</div>
             <div class="appt-tags">${typeTag}${a.tag ? tagMap[a.tag] || "" : ""}</div>
           </div>
           <div class="schedule-actions-group">
-            <button class="schedule-action edit" data-edit="${a.id}">Edit</button>
-            <button class="schedule-action" data-del="${a.id}">Remove</button>
+            <button class="schedule-action" data-del="${escapeHtml(a.id)}">Cancel</button>
           </div>
         </div>`;
     }).join("");
@@ -141,38 +162,37 @@ export default function SchedulePage() {
     stateRef.current.editingId = null;
   };
 
+  // There's no backend flow for a doctor creating an ad-hoc appointment
+  // for an arbitrary walk-in name from this screen (booking requires a
+  // real patient_id — see book-appointment), and editing free-form
+  // fields here had nothing to persist to either. Both used to silently
+  // "succeed" against an in-memory array only, discarding the change on
+  // refresh. Be upfront about it instead.
   const save = () => {
-    const name = (document.getElementById("fName") as HTMLInputElement).value.trim();
-    if (!name) return;
-    const apptData = {
-      name,
-      reason: (document.getElementById("fReason") as HTMLInputElement).value.trim() || "General consultation",
-      time: (document.getElementById("fTime") as HTMLInputElement).value,
-      type: (document.getElementById("fType") as HTMLSelectElement).value as ApptType,
-      tag: (document.getElementById("fTag") as HTMLSelectElement).value as ApptTag,
-      status: (document.getElementById("fStatus") as HTMLSelectElement).value as ApptStatus,
-    };
-    const eid = stateRef.current.editingId;
-    if (eid) {
-      apptsRef.current = apptsRef.current.map((a) => a.id === eid ? { ...a, ...apptData } : a);
-    } else {
-      apptsRef.current.push({ id: `a${Date.now()}`, date: stateRef.current.currentDate, ...apptData });
-    }
-    closeModal(); render();
+    (window as any).MediAlert?.toast({ type: "warning", title: "Not supported yet", message: "Creating or editing appointments isn't available from this screen yet." });
+    closeModal();
   };
 
-  const removeAppt = (id: string) => { apptsRef.current = apptsRef.current.filter((a) => a.id !== id); render(); };
-
-  const signOut = () => { deleteCookie("accessToken"); deleteCookie("refreshToken"); deleteCookie("userId"); deleteCookie("role"); localStorage.clear(); window.location.href = "/"; };
+  const removeAppt = async (id: string) => {
+    try {
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        (window as any).MediAlert?.toast({ type: "error", title: "Could not cancel appointment" });
+        return;
+      }
+      apptsRef.current = apptsRef.current.filter((a) => a.id !== id);
+      render();
+    } catch (e) {
+      console.error("Failed to cancel appointment:", e);
+      (window as any).MediAlert?.toast({ type: "error", title: "Something went wrong" });
+    }
+  };
 
   const handleListClick = (e: React.MouseEvent) => {
     const t = e.target as HTMLElement;
-    const editId = t.dataset.edit;
     const delId = t.dataset.del;
-    if (editId) { openModal(editId); return; }
     if (delId) { removeAppt(delId); return; }
-    const item = t.closest(".schedule-item") as HTMLElement | null;
-    if (item?.dataset.id) openModal(item.dataset.id);
   };
 
   return (
@@ -193,10 +213,17 @@ export default function SchedulePage() {
           <a className="nav-item" style={{cursor:"pointer"}} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></a>
         </nav>
       </aside>
+      {/* Below 768px .sidebar slides off-screen (see CSS); without this
+          overlay + button there was no way to bring it back, so all
+          navigation (including Sign out) became unreachable on mobile. */}
+      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
 
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
             <div className="topbar-title">Manage <span>Schedule</span></div>
             <div className="topbar-sub">Plan, edit and track your appointments</div>
           </div>

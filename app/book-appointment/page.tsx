@@ -3,7 +3,6 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./book-appointment.style.css";
-import "../alert.style.css";
 import { getCookie, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 
 interface DoctorData { id: string; full_name: string; specialization: string; department: string; }
@@ -333,10 +332,8 @@ export default function BookAppointmentPage() {
         </div>
       </div>
 
-      <div className="ma-modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
-        <div className="ma-modal-box" id="mediModalBox"><div className="ma-modal-icon-area" id="mediModalIconArea"></div><div className="ma-modal-detail" id="mediModalDetail" style={{ display: "none" }}></div><div className="ma-modal-footer" id="mediModalFooter"></div></div>
-      </div>
-      <div className="ma-toast-stack" id="toastStack"></div>
+      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
+          mounted once from the root layout. */}
     </div>
   );
 }

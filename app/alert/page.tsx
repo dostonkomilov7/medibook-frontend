@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import "./alert.style.css";
 
 // ── Inline MediAlert for Next.js (no external script) ──
 type AlertType = "error"|"success"|"warning"|"info"|"confirm";

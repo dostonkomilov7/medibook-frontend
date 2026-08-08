@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./alert.style.css";
 import MediAlertInit from "./MediAlertInit";
+import MediAlertWidget from "../components/MediAlertWidget";
 
 export const metadata: Metadata = {
   title: "MediBook — Smart Clinic Appointments",
@@ -23,6 +25,7 @@ export default function RootLayout({
       <body>
         <MediAlertInit />
         {children}
+        <MediAlertWidget />
       </body>
     </html>
   );

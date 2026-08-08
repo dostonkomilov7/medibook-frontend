@@ -207,15 +207,8 @@ export default function ForgotPasswordPage() {
         <div className="deco-grid"></div>
       </div>
 
-      {/* Modal & Toast */}
-      <div className="ma-modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
-        <div className="ma-modal-box" id="mediModalBox">
-          <div className="ma-modal-icon-area" id="mediModalIconArea"></div>
-          <div className="ma-modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
-          <div className="ma-modal-footer" id="mediModalFooter"></div>
-        </div>
-      </div>
-      <div className="ma-toast-stack" id="toastStack"></div>
+      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
+          mounted once from the root layout. */}
     </div>
   );
 }

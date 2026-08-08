@@ -13,13 +13,26 @@ export default function RegisterPage() {
     // redirects: those pages' CSS is unscoped global stylesheets, and
     // a client-side transition could paint before it's loaded. A full
     // page nav always waits for CSS first — see app/login/page.tsx.
-    if (getCookie("accessToken")) {
-      const role = getCookie("role");
-      if (role === "Doctor") window.location.href = "/doctor-dashboard";
-      else if (role === "User") window.location.href = "/user-dashboard";
-      else if (role === "Admin") window.location.href = "/doctor-management";
-      else router.push("/");
-    }
+    const redirectIfAuth = () => {
+      if (getCookie("accessToken")) {
+        const role = getCookie("role");
+        if (role === "Doctor") window.location.href = "/doctor-dashboard";
+        else if (role === "User") window.location.href = "/user-dashboard";
+        else if (role === "Admin") window.location.href = "/doctor-management";
+        else router.push("/");
+      }
+    };
+
+    redirectIfAuth();
+
+    // Swiping/navigating "back" to this page can restore it from the
+    // browser's bfcache instead of remounting it, which skips the
+    // effect above — see app/login/page.tsx for the full explanation.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) redirectIfAuth();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, [router]);
 
   const togglePw = () => {

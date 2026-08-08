@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import "./book-appointment.style.css";
 import { getCookie, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -21,6 +21,10 @@ export default function BookAppointmentPage() {
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
+    const role = getCookie("role");
+    if (role !== "User" && role !== "Admin") {
+      notFound();
+    }
     fetchDoctors();
   }, [router]);
 

@@ -16,13 +16,29 @@ export default function LoginPage() {
     // page's stylesheet has fully loaded/applied, showing a broken
     // layout until a manual refresh. window.location.href forces a
     // real full-page load, which always waits for CSS first.
-    if (getCookie("accessToken")) {
-      const role = getCookie("role");
-      if (role === "Doctor") window.location.href = "/doctor-dashboard";
-      else if (role === "User") window.location.href = "/user-dashboard";
-      else if (role === "Admin") window.location.href = "/doctor-management";
-      else router.push("/");
-    }
+    const redirectIfAuth = () => {
+      if (getCookie("accessToken")) {
+        const role = getCookie("role");
+        if (role === "Doctor") window.location.href = "/doctor-dashboard";
+        else if (role === "User") window.location.href = "/user-dashboard";
+        else if (role === "Admin") window.location.href = "/doctor-management";
+        else router.push("/");
+      }
+    };
+
+    redirectIfAuth();
+
+    // Swiping/navigating "back" to this page can restore it from the
+    // browser's bfcache instead of remounting it — the effect above
+    // never re-runs in that case, so a logged-in user swiping back to
+    // /login briefly sees the login form again instead of being sent
+    // straight to their dashboard. `pageshow` with event.persisted is
+    // the reliable cross-browser signal for a bfcache restore.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) redirectIfAuth();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, [router]);
 
   const togglePw = () => {

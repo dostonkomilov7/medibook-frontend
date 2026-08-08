@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import "./my-appointments.style.css";
 import { getCookie, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -21,6 +21,10 @@ export default function MyAppointmentsPage() {
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
+    const role = getCookie("role");
+    if (role !== "User" && role !== "Admin") {
+      notFound();
+    }
     init();
   }, [router]);
 
@@ -166,13 +170,13 @@ export default function MyAppointmentsPage() {
       <Sidebar>
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
-          <Link prefetch={false} className="nav-item" href="/user-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></Link>
-          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Appointments</span><span className="badge">3</span></a>
-          <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Messages</span></Link>
+          <Link prefetch={false} className="nav-item" href="/user-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></Link>
+          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span><span className="badge">3</span></a>
+          <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Account</p>
-          <a className="nav-item" style={{cursor:"pointer"}} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></a>
+          <a className="nav-item" style={{ cursor: "pointer" }} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg><span>Sign out</span></a>
         </nav>
         <div className="sidebar-user">
           <div className="user-avatar">U</div>
@@ -185,11 +189,11 @@ export default function MyAppointmentsPage() {
           <HamburgerToggle />
           <h1 className="topbar-title">My <span>Appointments</span></h1>
           <div className="search-box">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="Search doctor, specialty…" onChange={(e) => handleSearch(e.target.value)}/>
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            <input type="text" placeholder="Search doctor, specialty…" onChange={(e) => handleSearch(e.target.value)} />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span className="notif-dot"></span></button>
+            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button>
             <div className="topbar-avatar">U</div>
           </div>
         </header>
@@ -200,18 +204,18 @@ export default function MyAppointmentsPage() {
               <h1>All <em>Appointments</em></h1>
               <p>Manage, reschedule or book new appointments.</p>
             </div>
-            <Link href="/book-appointment"><button className="btn-primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Book Appointment</button></Link>
+            <Link href="/book-appointment"><button className="btn-primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>Book Appointment</button></Link>
           </div>
 
           <div className="summary-strip">
             {[
-              {id:"upcoming",icon:"teal",label:"Upcoming"},
-              {id:"pending",icon:"amber",label:"Pending"},
-              {id:"completed",icon:"blue",label:"Completed"},
-              {id:"cancelled",icon:"coral",label:"Cancelled"},
+              { id: "upcoming", icon: "teal", label: "Upcoming" },
+              { id: "pending", icon: "amber", label: "Pending" },
+              { id: "completed", icon: "blue", label: "Completed" },
+              { id: "cancelled", icon: "coral", label: "Cancelled" },
             ].map((s) => (
               <div className="strip-card" key={s.id}>
-                <div className={`strip-icon ${s.icon}`}><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>
+                <div className={`strip-icon ${s.icon}`}><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /></svg></div>
                 <div className="strip-text"><div className="val" id={`${s.id}-val`}>0</div><div className="lbl">{s.label}</div></div>
               </div>
             ))}
@@ -219,10 +223,10 @@ export default function MyAppointmentsPage() {
 
           <div className="filter-bar">
             <div className="tabs">
-              {["all","upcoming","pending","completed","cancelled"].map((tab) => (
-                <button key={tab} className={`tab-btn${tab==="all"?" active":""}`}
+              {["all", "upcoming", "pending", "completed", "cancelled"].map((tab) => (
+                <button key={tab} className={`tab-btn${tab === "all" ? " active" : ""}`}
                   onClick={(e) => filterTab(e.currentTarget, tab)}>
-                  {tab.charAt(0).toUpperCase()+tab.slice(1)} <span className="count" id={`${tab}-count`}>0</span>
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)} <span className="count" id={`${tab}-count`}>0</span>
                 </button>
               ))}
             </div>
@@ -232,15 +236,15 @@ export default function MyAppointmentsPage() {
             <p className="appt-section-label">Upcoming & Pending</p>
             <div className="appts-grid" id="upcoming-grid"></div>
           </div>
-          <div id="past-section" style={{marginTop:"0.5rem"}}>
+          <div id="past-section" style={{ marginTop: "0.5rem" }}>
             <p className="appt-section-label">Past Appointments</p>
             <div className="past-list" id="past-list"></div>
           </div>
-          <div className="empty-state" id="empty-state" style={{display:"none"}}>
-            <div className="empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>
+          <div className="empty-state" id="empty-state" style={{ display: "none" }}>
+            <div className="empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /></svg></div>
             <h3>No appointments found</h3>
             <p>Book a new appointment to get started.</p>
-            <Link href="/book-appointment"><button className="btn-primary" style={{display:"inline-flex"}}>Book Appointment</button></Link>
+            <Link href="/book-appointment"><button className="btn-primary" style={{ display: "inline-flex" }}>Book Appointment</button></Link>
           </div>
         </div>
       </div>

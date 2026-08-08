@@ -10,11 +10,17 @@ export default function LoginPage() {
 
   useEffect(() => {
     // redirectIfAuth
+    // These three land on the Sidebar-based dashboards, whose CSS is
+    // several thousand lines of unscoped global rules per page. A
+    // router.push() client-side transition could paint before that
+    // page's stylesheet has fully loaded/applied, showing a broken
+    // layout until a manual refresh. window.location.href forces a
+    // real full-page load, which always waits for CSS first.
     if (getCookie("accessToken")) {
       const role = getCookie("role");
-      if (role === "Doctor") router.push("/doctor-dashboard");
-      else if (role === "User") router.push("/user-dashboard");
-      else if (role === "Admin") router.push("/doctor-management");
+      if (role === "Doctor") window.location.href = "/doctor-dashboard";
+      else if (role === "User") window.location.href = "/user-dashboard";
+      else if (role === "Admin") window.location.href = "/doctor-management";
       else router.push("/");
     }
   }, [router]);
@@ -69,9 +75,10 @@ export default function LoginPage() {
       setCookie("refreshToken", response?.refreshToken);
       setCookie("userId", response?.userId);
       setCookie("role", response?.role);
-      if (response?.role === "Doctor") router.push("/doctor-dashboard");
-      else if (response?.role === "User") router.push("/user-dashboard");
-      else router.push("/doctor-management");
+      // Full-page nav, not router.push() — see comment above.
+      if (response?.role === "Doctor") window.location.href = "/doctor-dashboard";
+      else if (response?.role === "User") window.location.href = "/user-dashboard";
+      else window.location.href = "/doctor-management";
     } catch (error) {
       console.error(error);
       alertEl.textContent = "Something went wrong. Please check your connection and try again.";

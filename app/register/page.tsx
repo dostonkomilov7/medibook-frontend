@@ -9,11 +9,15 @@ export default function RegisterPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // window.location.href (not router.push) for the dashboard
+    // redirects: those pages' CSS is unscoped global stylesheets, and
+    // a client-side transition could paint before it's loaded. A full
+    // page nav always waits for CSS first — see app/login/page.tsx.
     if (getCookie("accessToken")) {
       const role = getCookie("role");
-      if (role === "Doctor") router.push("/doctor-dashboard");
-      else if (role === "User") router.push("/user-dashboard");
-      else if (role === "Admin") router.push("/doctor-management");
+      if (role === "Doctor") window.location.href = "/doctor-dashboard";
+      else if (role === "User") window.location.href = "/user-dashboard";
+      else if (role === "Admin") window.location.href = "/doctor-management";
       else router.push("/");
     }
   }, [router]);

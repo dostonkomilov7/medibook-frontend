@@ -89,7 +89,8 @@ export default function DoctorDashboardPage() {
   };
 
   return (
-    <div className="app doctor-shell">
+    <div className="doctor-shell">
+    <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{ padding: "0.75rem 0.75rem 0.25rem" }}>
@@ -218,6 +219,7 @@ export default function DoctorDashboardPage() {
 
       {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
           mounted once from the root layout. */}
+    </div>
     </div>
   );
 }

@@ -197,7 +197,8 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="app doctor-shell page-schedule">
+    <div className="doctor-shell">
+    <div className="app page-schedule">
       <Sidebar badge={<span className="brand-badge">MD</span>}>
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
@@ -299,6 +300,7 @@ export default function SchedulePage() {
 
       {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
           mounted once from the root layout. */}
+    </div>
     </div>
   );
 }

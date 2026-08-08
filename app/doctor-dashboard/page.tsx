@@ -106,9 +106,9 @@ export default function DoctorDashboardPage() {
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
           <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></a>
-          <Link className="nav-item" href="/schedule"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Schedule</span></Link>
-          <Link className="nav-item" href="/all-patients"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg><span>My Patients</span></Link>
-          <Link className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
+          <Link prefetch={false} className="nav-item" href="/schedule"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Schedule</span></Link>
+          <Link prefetch={false} className="nav-item" href="/all-patients"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg><span>My Patients</span></Link>
+          <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Clinical</p>
@@ -226,14 +226,14 @@ export default function DoctorDashboardPage() {
         </div>
       </div>
 
-      <div className="modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
-        <div className="modal-box" id="mediModalBox">
-          <div className="modal-icon-area" id="mediModalIconArea"></div>
-          <div className="modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
-          <div className="modal-footer" id="mediModalFooter"></div>
+      <div className="ma-modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
+        <div className="ma-modal-box" id="mediModalBox">
+          <div className="ma-modal-icon-area" id="mediModalIconArea"></div>
+          <div className="ma-modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
+          <div className="ma-modal-footer" id="mediModalFooter"></div>
         </div>
       </div>
-      <div className="toast-stack" id="toastStack"></div>
+      <div className="ma-toast-stack" id="toastStack"></div>
     </div>
   );
 }

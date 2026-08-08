@@ -208,14 +208,14 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Modal & Toast */}
-      <div className="modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
-        <div className="modal-box" id="mediModalBox">
-          <div className="modal-icon-area" id="mediModalIconArea"></div>
-          <div className="modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
-          <div className="modal-footer" id="mediModalFooter"></div>
+      <div className="ma-modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
+        <div className="ma-modal-box" id="mediModalBox">
+          <div className="ma-modal-icon-area" id="mediModalIconArea"></div>
+          <div className="ma-modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
+          <div className="ma-modal-footer" id="mediModalFooter"></div>
         </div>
       </div>
-      <div className="toast-stack" id="toastStack"></div>
+      <div className="ma-toast-stack" id="toastStack"></div>
     </div>
   );
 }

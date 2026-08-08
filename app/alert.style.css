@@ -31,7 +31,7 @@
         /* ═══════════════════════════════════════
      TOAST SYSTEM
   ═══════════════════════════════════════ */
-        .toast-stack {
+        .ma-toast-stack {
             position: fixed;
             bottom: 1.75rem;
             left: 50%;
@@ -46,7 +46,7 @@
             max-width: calc(100vw - 2rem);
         }
 
-        .toast {
+        .ma-toast {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -69,18 +69,18 @@
             overflow: hidden;
         }
 
-        .toast.show {
+        .ma-toast.show {
             opacity: 1;
             transform: translateY(0) scale(1);
         }
 
-        .toast.hide {
+        .ma-toast.hide {
             opacity: 0;
             transform: translateY(8px) scale(0.96);
         }
 
         /* Progress bar inside toast */
-        .toast-progress {
+        .ma-toast-progress {
             position: absolute;
             bottom: 0;
             left: 0;
@@ -101,7 +101,7 @@
         }
 
         /* Toast icon wrapper */
-        .toast-icon {
+        .ma-toast-icon {
             width: 28px;
             height: 28px;
             border-radius: 8px;
@@ -111,7 +111,7 @@
             flex-shrink: 0;
         }
 
-        .toast-icon svg {
+        .ma-toast-icon svg {
             width: 14px;
             height: 14px;
             fill: none;
@@ -119,24 +119,24 @@
             stroke-linecap: round;
         }
 
-        .toast-body {
+        .ma-toast-body {
             flex: 1;
             min-width: 0;
         }
 
-        .toast-title {
+        .ma-toast-title {
             font-weight: 600;
             line-height: 1.2;
         }
 
-        .toast-desc {
+        .ma-toast-desc {
             font-size: 12px;
             opacity: 0.75;
             margin-top: 2px;
             line-height: 1.4;
         }
 
-        .toast-close {
+        .ma-toast-close {
             width: 20px;
             height: 20px;
             background: none;
@@ -151,11 +151,11 @@
             padding: 0;
         }
 
-        .toast-close:hover {
+        .ma-toast-close:hover {
             opacity: 1;
         }
 
-        .toast-close svg {
+        .ma-toast-close svg {
             width: 12px;
             height: 12px;
             fill: none;
@@ -164,132 +164,132 @@
         }
 
         /* Toast themes */
-        .toast-error {
+        .ma-toast-error {
             background: #FFF5F3;
             border-color: rgba(216, 90, 48, 0.2);
             color: var(--coral-600);
         }
 
-        .toast-error .toast-icon {
+        .ma-toast-error .ma-toast-icon {
             background: var(--coral-50);
         }
 
-        .toast-error .toast-icon svg {
+        .ma-toast-error .ma-toast-icon svg {
             stroke: var(--coral-400);
         }
 
-        .toast-error .toast-progress {
+        .ma-toast-error .ma-toast-progress {
             background: var(--coral-400);
         }
 
-        .toast-error .toast-close svg {
+        .ma-toast-error .ma-toast-close svg {
             stroke: var(--coral-600);
         }
 
-        .toast-success {
+        .ma-toast-success {
             background: #F2FBF7;
             border-color: rgba(29, 158, 117, 0.2);
             color: var(--teal-600);
         }
 
-        .toast-success .toast-icon {
+        .ma-toast-success .ma-toast-icon {
             background: var(--teal-50);
         }
 
-        .toast-success .toast-icon svg {
+        .ma-toast-success .ma-toast-icon svg {
             stroke: var(--teal-400);
         }
 
-        .toast-success .toast-progress {
+        .ma-toast-success .ma-toast-progress {
             background: var(--teal-400);
         }
 
-        .toast-success .toast-close svg {
+        .ma-toast-success .ma-toast-close svg {
             stroke: var(--teal-600);
         }
 
-        .toast-warning {
+        .ma-toast-warning {
             background: #FFFBF2;
             border-color: rgba(239, 159, 39, 0.25);
             color: var(--amber-600);
         }
 
-        .toast-warning .toast-icon {
+        .ma-toast-warning .ma-toast-icon {
             background: var(--amber-50);
         }
 
-        .toast-warning .toast-icon svg {
+        .ma-toast-warning .ma-toast-icon svg {
             stroke: var(--amber-400);
         }
 
-        .toast-warning .toast-progress {
+        .ma-toast-warning .ma-toast-progress {
             background: var(--amber-400);
         }
 
-        .toast-warning .toast-close svg {
+        .ma-toast-warning .ma-toast-close svg {
             stroke: var(--amber-600);
         }
 
-        .toast-info {
+        .ma-toast-info {
             background: #F3F8FE;
             border-color: rgba(55, 138, 221, 0.2);
             color: var(--blue-600);
         }
 
-        .toast-info .toast-icon {
+        .ma-toast-info .ma-toast-icon {
             background: var(--blue-50);
         }
 
-        .toast-info .toast-icon svg {
+        .ma-toast-info .ma-toast-icon svg {
             stroke: var(--blue-400);
         }
 
-        .toast-info .toast-progress {
+        .ma-toast-info .ma-toast-progress {
             background: var(--blue-400);
         }
 
-        .toast-info .toast-close svg {
+        .ma-toast-info .ma-toast-close svg {
             stroke: var(--blue-600);
         }
 
         /* Dark variant (for admin pages) */
-        .toast-error.dark-theme {
+        .ma-toast-error.dark-theme {
             background: #2A1A16;
             border-color: rgba(216, 90, 48, 0.35);
             color: #F5A08A;
         }
 
-        .toast-error.dark-theme .toast-icon {
+        .ma-toast-error.dark-theme .ma-toast-icon {
             background: rgba(216, 90, 48, 0.15);
         }
 
-        .toast-success.dark-theme {
+        .ma-toast-success.dark-theme {
             background: #142820;
             border-color: rgba(29, 158, 117, 0.35);
             color: #80D4B8;
         }
 
-        .toast-success.dark-theme .toast-icon {
+        .ma-toast-success.dark-theme .ma-toast-icon {
             background: rgba(29, 158, 117, 0.15);
         }
 
-        .toast-warning.dark-theme {
+        .ma-toast-warning.dark-theme {
             background: #252010;
             border-color: rgba(239, 159, 39, 0.3);
             color: #F0C070;
         }
 
-        .toast-warning.dark-theme .toast-icon {
+        .ma-toast-warning.dark-theme .ma-toast-icon {
             background: rgba(239, 159, 39, 0.15);
         }
 
-        .toast-info.dark-theme {
+        .ma-toast-info.dark-theme {
             background: #12202E;
             border-color: rgba(55, 138, 221, 0.3);
             color: #80B8F0;
         }
 
-        .toast-info.dark-theme .toast-icon {
+        .ma-toast-info.dark-theme .ma-toast-icon {
             background: rgba(55, 138, 221, 0.15);
         }
 
@@ -552,7 +552,7 @@
         /* ═══════════════════════════════════════
      CONFIRM MODAL
   ═══════════════════════════════════════ */
-        .modal-overlay {
+        .ma-modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
@@ -567,12 +567,12 @@
             transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .modal-overlay.open {
+        .ma-modal-overlay.open {
             opacity: 1;
             pointer-events: all;
         }
 
-        .modal-box {
+        .ma-modal-box {
             background: var(--white);
             border-radius: 18px;
             width: 100%;
@@ -584,18 +584,18 @@
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .modal-overlay.open .modal-box {
+        .ma-modal-overlay.open .ma-modal-box {
             transform: scale(1) translateY(0);
         }
 
         /* Dark modal variant */
-        .modal-box.dark-theme {
+        .ma-modal-box.dark-theme {
             background: #1E2029;
             border-color: rgba(255, 255, 255, 0.08);
         }
 
         /* Modal icon area */
-        .modal-icon-area {
+        .ma-modal-icon-area {
             padding: 2rem 2rem 1.25rem;
             display: flex;
             flex-direction: column;
@@ -604,7 +604,7 @@
             text-align: center;
         }
 
-        .modal-icon-ring {
+        .ma-modal-icon-ring {
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -626,7 +626,7 @@
             }
         }
 
-        .modal-icon-ring svg {
+        .ma-modal-icon-ring svg {
             width: 26px;
             height: 26px;
             fill: none;
@@ -634,7 +634,7 @@
             stroke-linecap: round;
         }
 
-        .modal-heading {
+        .ma-modal-heading {
             font-family: var(--font-display);
             font-size: 22px;
             color: var(--gray-800);
@@ -642,11 +642,11 @@
             animation: modalTextIn 0.4s ease 0.15s both;
         }
 
-        .modal-box.dark-theme .modal-heading {
+        .ma-modal-box.dark-theme .ma-modal-heading {
             color: #F0EFE8;
         }
 
-        .modal-message {
+        .ma-modal-message {
             font-size: 14px;
             color: var(--gray-600);
             line-height: 1.65;
@@ -654,7 +654,7 @@
             max-width: 320px;
         }
 
-        .modal-box.dark-theme .modal-message {
+        .ma-modal-box.dark-theme .ma-modal-message {
             color: rgba(255, 255, 255, 0.55);
         }
 
@@ -671,7 +671,7 @@
         }
 
         /* Modal detail block (optional) */
-        .modal-detail {
+        .ma-modal-detail {
             margin: 0 1.75rem 1.25rem;
             background: var(--gray-50);
             border: 1px solid var(--gray-100);
@@ -685,13 +685,13 @@
             animation: modalTextIn 0.4s ease 0.28s both;
         }
 
-        .modal-box.dark-theme .modal-detail {
+        .ma-modal-box.dark-theme .ma-modal-detail {
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.08);
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .modal-detail svg {
+        .ma-modal-detail svg {
             width: 14px;
             height: 14px;
             fill: none;
@@ -701,7 +701,7 @@
         }
 
         /* Modal footer */
-        .modal-footer {
+        .ma-modal-footer {
             padding: 0 1.5rem 1.5rem;
             display: flex;
             flex-direction: column;
@@ -709,7 +709,7 @@
             animation: modalTextIn 0.4s ease 0.3s both;
         }
 
-        .modal-btn {
+        .ma-modal-btn {
             width: 100%;
             height: 46px;
             border-radius: 11px;
@@ -727,7 +727,7 @@
             overflow: hidden;
         }
 
-        .modal-btn svg {
+        .ma-modal-btn svg {
             width: 15px;
             height: 15px;
             fill: none;
@@ -735,22 +735,22 @@
             stroke-linecap: round;
         }
 
-        .modal-btn-primary {
+        .ma-modal-btn-primary {
             color: #fff;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
         }
 
-        .modal-btn-primary:hover {
+        .ma-modal-btn-primary:hover {
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
         }
 
-        .modal-btn-primary:active {
+        .ma-modal-btn-primary:active {
             transform: scale(0.99);
         }
 
         /* Shimmer on primary btn */
-        .modal-btn-primary::after {
+        .ma-modal-btn-primary::after {
             content: '';
             position: absolute;
             top: 0;
@@ -761,153 +761,153 @@
             transition: left 0.45s;
         }
 
-        .modal-btn-primary:hover::after {
+        .ma-modal-btn-primary:hover::after {
             left: 150%;
         }
 
-        .modal-btn-secondary {
+        .ma-modal-btn-secondary {
             background: var(--gray-50);
             border: 1.5px solid var(--gray-100);
             color: var(--gray-600);
         }
 
-        .modal-btn-secondary:hover {
+        .ma-modal-btn-secondary:hover {
             background: var(--gray-100);
             border-color: var(--gray-200);
             color: var(--gray-800);
         }
 
-        .modal-box.dark-theme .modal-btn-secondary {
+        .ma-modal-box.dark-theme .ma-modal-btn-secondary {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.6);
         }
 
-        .modal-box.dark-theme .modal-btn-secondary:hover {
+        .ma-modal-box.dark-theme .ma-modal-btn-secondary:hover {
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.9);
         }
 
         /* Modal type themes */
-        .modal-error .modal-icon-ring {
+        .ma-modal-error .ma-modal-icon-ring {
             background: var(--coral-50);
         }
 
-        .modal-error .modal-icon-ring svg {
+        .ma-modal-error .ma-modal-icon-ring svg {
             stroke: var(--coral-400);
         }
 
-        .modal-error .modal-btn-primary {
+        .ma-modal-error .ma-modal-btn-primary {
             background: var(--coral-400);
         }
 
-        .modal-error .modal-btn-primary:hover {
+        .ma-modal-error .ma-modal-btn-primary:hover {
             background: var(--coral-600);
         }
 
-        .modal-error .modal-detail svg {
+        .ma-modal-error .ma-modal-detail svg {
             stroke: var(--coral-400);
         }
 
-        .modal-success .modal-icon-ring {
+        .ma-modal-success .ma-modal-icon-ring {
             background: var(--teal-50);
         }
 
-        .modal-success .modal-icon-ring svg {
+        .ma-modal-success .ma-modal-icon-ring svg {
             stroke: var(--teal-400);
         }
 
-        .modal-success .modal-btn-primary {
+        .ma-modal-success .ma-modal-btn-primary {
             background: var(--teal-600);
         }
 
-        .modal-success .modal-btn-primary:hover {
+        .ma-modal-success .ma-modal-btn-primary:hover {
             background: var(--teal-800);
         }
 
-        .modal-success .modal-detail svg {
+        .ma-modal-success .ma-modal-detail svg {
             stroke: var(--teal-400);
         }
 
-        .modal-warning .modal-icon-ring {
+        .ma-modal-warning .ma-modal-icon-ring {
             background: var(--amber-50);
         }
 
-        .modal-warning .modal-icon-ring svg {
+        .ma-modal-warning .ma-modal-icon-ring svg {
             stroke: var(--amber-400);
         }
 
-        .modal-warning .modal-btn-primary {
+        .ma-modal-warning .ma-modal-btn-primary {
             background: var(--amber-400);
             color: #fff;
         }
 
-        .modal-warning .modal-btn-primary:hover {
+        .ma-modal-warning .ma-modal-btn-primary:hover {
             background: var(--amber-600);
         }
 
-        .modal-warning .modal-detail svg {
+        .ma-modal-warning .ma-modal-detail svg {
             stroke: var(--amber-400);
         }
 
-        .modal-info .modal-icon-ring {
+        .ma-modal-info .ma-modal-icon-ring {
             background: var(--blue-50);
         }
 
-        .modal-info .modal-icon-ring svg {
+        .ma-modal-info .ma-modal-icon-ring svg {
             stroke: var(--blue-400);
         }
 
-        .modal-info .modal-btn-primary {
+        .ma-modal-info .ma-modal-btn-primary {
             background: var(--blue-400);
         }
 
-        .modal-info .modal-btn-primary:hover {
+        .ma-modal-info .ma-modal-btn-primary:hover {
             background: var(--blue-600);
         }
 
-        .modal-info .modal-detail svg {
+        .ma-modal-info .ma-modal-detail svg {
             stroke: var(--blue-400);
         }
 
-        .modal-confirm .modal-icon-ring {
+        .ma-modal-confirm .ma-modal-icon-ring {
             background: var(--purple-50);
         }
 
-        .modal-confirm .modal-icon-ring svg {
+        .ma-modal-confirm .ma-modal-icon-ring svg {
             stroke: var(--purple-400);
         }
 
-        .modal-confirm .modal-btn-primary {
+        .ma-modal-confirm .ma-modal-btn-primary {
             background: var(--purple-400);
         }
 
-        .modal-confirm .modal-btn-primary:hover {
+        .ma-modal-confirm .ma-modal-btn-primary:hover {
             background: var(--purple-600);
         }
 
-        .modal-confirm .modal-detail svg {
+        .ma-modal-confirm .ma-modal-detail svg {
             stroke: var(--purple-400);
         }
 
         /* Dark icon rings */
-        .modal-box.dark-theme.modal-error .modal-icon-ring {
+        .ma-modal-box.dark-theme.ma-modal-error .ma-modal-icon-ring {
             background: rgba(216, 90, 48, 0.15);
         }
 
-        .modal-box.dark-theme.modal-success .modal-icon-ring {
+        .ma-modal-box.dark-theme.ma-modal-success .ma-modal-icon-ring {
             background: rgba(29, 158, 117, 0.15);
         }
 
-        .modal-box.dark-theme.modal-warning .modal-icon-ring {
+        .ma-modal-box.dark-theme.ma-modal-warning .ma-modal-icon-ring {
             background: rgba(239, 159, 39, 0.15);
         }
 
-        .modal-box.dark-theme.modal-info .modal-icon-ring {
+        .ma-modal-box.dark-theme.ma-modal-info .ma-modal-icon-ring {
             background: rgba(55, 138, 221, 0.15);
         }
 
-        .modal-box.dark-theme.modal-confirm .modal-icon-ring {
+        .ma-modal-box.dark-theme.ma-modal-confirm .ma-modal-icon-ring {
             background: rgba(139, 126, 248, 0.15);
         }
 

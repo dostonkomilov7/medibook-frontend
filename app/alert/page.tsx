@@ -128,19 +128,19 @@ export default function AlertPage() {
 
       {/* MODAL OVERLAY */}
       {modal?.open && (
-        <div className={`modal-overlay open${modal.theme==="dark"?" dark":""}`} onClick={e=>{if((e.target as HTMLElement).classList.contains("modal-overlay"))setModal(null);}}>
-          <div className="modal-box">
-            <div className={`modal-icon-area ${modal.type}`} dangerouslySetInnerHTML={{__html:ICON_MAP[modal.type]}}/>
-            <div className="modal-detail" style={{display:"block"}}>
+        <div className={`ma-modal-overlay open${modal.theme==="dark"?" dark":""}`} onClick={e=>{if((e.target as HTMLElement).classList.contains("ma-modal-overlay"))setModal(null);}}>
+          <div className="ma-modal-box">
+            <div className={`ma-modal-icon-area ${modal.type}`} dangerouslySetInnerHTML={{__html:ICON_MAP[modal.type]}}/>
+            <div className="ma-modal-detail" style={{display:"block"}}>
               <h3>{modal.title}</h3>
               <p>{modal.message}</p>
               {modal.detail && <small>{modal.detail}</small>}
             </div>
-            <div className="modal-footer">
+            <div className="ma-modal-footer">
               {modal.cancelText && (
-                <button className="modal-btn cancel" onClick={()=>{modal.onCancel?.();setModal(null);}}>{modal.cancelText}</button>
+                <button className="ma-modal-btn cancel" onClick={()=>{modal.onCancel?.();setModal(null);}}>{modal.cancelText}</button>
               )}
-              <button className={`modal-btn confirm ${modal.type}`} onClick={()=>{modal.onConfirm?.();setModal(null);}}>
+              <button className={`ma-modal-btn confirm ${modal.type}`} onClick={()=>{modal.onConfirm?.();setModal(null);}}>
                 {modal.confirmText??"OK"}
               </button>
             </div>
@@ -149,7 +149,7 @@ export default function AlertPage() {
       )}
 
       {/* TOAST STACK */}
-      <div className="toast-stack">
+      <div className="ma-toast-stack">
         {toasts.map(t=>(
           <div key={t.id} className={`toast-item ${t.type}${t.theme==="dark"?" dark":""} show`}>
             <div className="ti-icon" dangerouslySetInnerHTML={{__html:ICON_MAP[t.type]}}/>

@@ -32,10 +32,13 @@ export default function LoginPage() {
     // browser's bfcache instead of remounting it — the effect above
     // never re-runs in that case, so a logged-in user swiping back to
     // /login briefly sees the login form again instead of being sent
-    // straight to their dashboard. `pageshow` with event.persisted is
-    // the reliable cross-browser signal for a bfcache restore.
+    // straight to their dashboard. On top of that, this page's CSS is
+    // a large unscoped stylesheet, so the restored snapshot can also
+    // come back visibly broken. A real reload (not just re-running the
+    // redirect check) fixes both the same way a manual refresh does,
+    // and still ends up redirecting once the page comes back fresh.
     const handlePageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) redirectIfAuth();
+      if (e.persisted) window.location.reload();
     };
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);

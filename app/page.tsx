@@ -167,6 +167,21 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    // Swiping/navigating "back" to this page can restore it from the
+    // browser's bfcache instead of remounting it — none of the effect
+    // above (cursor listeners, scroll handler, reveal observer) re-runs
+    // in that case, and this page's CSS is a large unscoped
+    // stylesheet, so the restored snapshot can come back visibly
+    // broken until a manual refresh. Forcing a real reload on a
+    // bfcache restore is the automated version of that same fix.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
   function selectSlot(el: HTMLElement) {
     document.querySelectorAll(".slot").forEach((s) => s.classList.remove("selected"));
     el.classList.add("selected");

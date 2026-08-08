@@ -152,6 +152,7 @@ export default function AllPatientsPage() {
   };
 
   return (
+    <div className="page-all-patients">
     <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="brand-badge">MD</span>}>
@@ -423,6 +424,7 @@ export default function AllPatientsPage() {
 
       {/* TOAST */}
       {toast && <div className={`toast ${toast.type} show`}>{toast.msg}</div>}
+    </div>
     </div>
   );
 }

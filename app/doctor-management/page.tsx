@@ -136,6 +136,7 @@ export default function DoctorManagementPage() {
   const fullDate = new Date().toDateString();
 
   return (
+    <div className="page-doctor-management">
     <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
@@ -416,6 +417,7 @@ export default function DoctorManagementPage() {
       )}
 
       {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
+    </div>
     </div>
   );
 }

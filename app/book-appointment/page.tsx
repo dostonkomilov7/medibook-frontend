@@ -190,6 +190,7 @@ export default function BookAppointmentPage() {
   };
 
   return (
+    <div className="page-book-appointment">
     <div className="app">
       <Sidebar>
         <nav className="nav-section">
@@ -331,6 +332,7 @@ export default function BookAppointmentPage() {
         </div>
       </div>
 
+    </div>
     </div>
   );
 }

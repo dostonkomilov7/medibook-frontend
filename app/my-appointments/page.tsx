@@ -166,6 +166,7 @@ export default function MyAppointmentsPage() {
   };
 
   return (
+    <div className="page-my-appointments">
     <div className="app">
       <Sidebar>
         <nav className="nav-section">
@@ -250,6 +251,7 @@ export default function MyAppointmentsPage() {
       </div>
 
       {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
+    </div>
     </div>
   );
 }

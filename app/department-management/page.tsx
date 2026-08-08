@@ -120,6 +120,7 @@ export default function DepartmentManagementPage() {
   const avgOccupancy = totalBeds > 0 ? Math.round(depts.reduce((s, d) => s + d.occupancy * d.beds, 0) / totalBeds) : 0;
 
   return (
+    <div className="page-department-management">
     <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
@@ -410,6 +411,7 @@ export default function DepartmentManagementPage() {
       )}
 
       {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
+    </div>
     </div>
   );
 }

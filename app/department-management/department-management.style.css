@@ -1,12 +1,12 @@
-  *,
-  *::before,
-  *::after {
+*,
+*::before,
+*::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
   }
 
-  :root {
+:root {
       --bg: #0F1117;
       --bg-2: #161820;
       --bg-3: #1E2029;
@@ -44,21 +44,20 @@
       --tr: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  html,
-  body {
+html,
+body {
       height: 100%;
       font-family: var(--font-body);
       background: var(--bg);
       color: var(--text-1);
   }
 
-  .app {
+.page-department-management .app {
       display: flex;
       min-height: 100vh;
   }
 
-  /* ─── SIDEBAR ─── */
-  .sidebar {
+.page-department-management /* ─── SIDEBAR ─── */ .sidebar {
       width: var(--sidebar-w);
       background: var(--bg-2);
       border-right: 1px solid var(--border);
@@ -71,7 +70,7 @@
       z-index: 100;
   }
 
-  .sidebar-brand {
+.page-department-management .sidebar-brand {
       padding: 1.6rem 1.5rem 1.25rem;
       display: flex;
       align-items: center;
@@ -80,7 +79,7 @@
       margin-bottom: 0.5rem;
   }
 
-  .brand-dot {
+.page-department-management .brand-dot {
       width: 32px;
       height: 32px;
       background: var(--teal-400);
@@ -90,7 +89,7 @@
       justify-content: center;
   }
 
-  .brand-dot svg {
+.page-department-management .brand-dot svg {
       width: 16px;
       height: 16px;
       stroke: #fff;
@@ -99,13 +98,13 @@
       stroke-linecap: round;
   }
 
-  .brand-text {
+.page-department-management .brand-text {
       font-family: var(--font-display);
       font-size: 18px;
       color: var(--text-1);
   }
 
-  .admin-chip {
+.page-department-management .admin-chip {
       margin-left: auto;
       font-size: 9px;
       font-weight: 700;
@@ -118,12 +117,12 @@
       border-radius: 4px;
   }
 
-  .nav-section {
+.page-department-management .nav-section {
       padding: 0 0.75rem;
       margin-bottom: 0.25rem;
   }
 
-  .nav-label {
+.page-department-management .nav-label {
       font-size: 9.5px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -131,7 +130,7 @@
       padding: 0.7rem 0.75rem 0.35rem;
   }
 
-  .nav-item {
+.page-department-management .nav-item {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -144,7 +143,7 @@
       position: relative;
   }
 
-  .nav-item svg {
+.page-department-management .nav-item svg {
       width: 16px;
       height: 16px;
       stroke: var(--text-3);
@@ -155,7 +154,7 @@
       transition: stroke var(--tr);
   }
 
-  .nav-item .lbl {
+.page-department-management .nav-item .lbl {
       font-size: 13.5px;
       color: var(--text-2);
       font-weight: 400;
@@ -163,50 +162,50 @@
       flex: 1;
   }
 
-  .nav-item .bdg {
+.page-department-management .nav-item .bdg {
       font-size: 10px;
       font-weight: 600;
       padding: 2px 7px;
       border-radius: 100px;
   }
 
-  .nav-item .bdg.g {
+.page-department-management .nav-item .bdg.g {
       background: var(--teal-glow);
       color: var(--teal-400);
       border: 1px solid var(--teal-ring);
   }
 
-  .nav-item .bdg.r {
+.page-department-management .nav-item .bdg.r {
       background: var(--coral-glow);
       color: var(--coral-400);
   }
 
-  .nav-item:hover {
+.page-department-management .nav-item:hover {
       background: rgba(255, 255, 255, 0.04);
   }
 
-  .nav-item:hover svg {
+.page-department-management .nav-item:hover svg {
       stroke: var(--text-1);
   }
 
-  .nav-item:hover .lbl {
+.page-department-management .nav-item:hover .lbl {
       color: var(--text-1);
   }
 
-  .nav-item.active {
+.page-department-management .nav-item.active {
       background: var(--teal-glow);
   }
 
-  .nav-item.active svg {
+.page-department-management .nav-item.active svg {
       stroke: var(--teal-400);
   }
 
-  .nav-item.active .lbl {
+.page-department-management .nav-item.active .lbl {
       color: var(--text-1);
       font-weight: 500;
   }
 
-  .nav-item.active::before {
+.page-department-management .nav-item.active::before {
       content: '';
       position: absolute;
       left: 0;
@@ -217,7 +216,7 @@
       border-radius: 0 2px 2px 0;
   }
 
-  .sidebar-footer {
+.page-department-management .sidebar-footer {
       margin-top: auto;
       padding: 1rem 1.25rem;
       border-top: 1px solid var(--border);
@@ -226,7 +225,7 @@
       gap: 10px;
   }
 
-  .admin-av {
+.page-department-management .admin-av {
       width: 34px;
       height: 34px;
       border-radius: 50%;
@@ -240,12 +239,12 @@
       flex-shrink: 0;
   }
 
-  .admin-meta {
+.page-department-management .admin-meta {
       flex: 1;
       min-width: 0;
   }
 
-  .admin-meta .nm {
+.page-department-management .admin-meta .nm {
       font-size: 13px;
       font-weight: 500;
       color: var(--text-1);
@@ -254,12 +253,12 @@
       text-overflow: ellipsis;
   }
 
-  .admin-meta .rl {
+.page-department-management .admin-meta .rl {
       font-size: 11px;
       color: var(--text-3);
   }
 
-  .sidebar-footer>svg {
+.page-department-management .sidebar-footer>svg {
       width: 14px;
       height: 14px;
       stroke: var(--text-3);
@@ -268,8 +267,7 @@
       stroke-linecap: round;
   }
 
-  /* ─── MAIN ─── */
-  .main {
+.page-department-management /* ─── MAIN ─── */ .main {
       margin-left: var(--sidebar-w);
       flex: 1;
       display: flex;
@@ -277,7 +275,7 @@
       min-height: 100vh;
   }
 
-  .topbar {
+.page-department-management .topbar {
       height: 60px;
       background: var(--bg-2);
       border-bottom: 1px solid var(--border);
@@ -290,34 +288,34 @@
       z-index: 50;
   }
 
-  .topbar-left {
+.page-department-management .topbar-left {
       flex: 1;
   }
 
-  .topbar-title {
+.page-department-management .topbar-title {
       font-family: var(--font-display);
       font-size: 18px;
       color: var(--text-1);
   }
 
-  .topbar-title span {
+.page-department-management .topbar-title span {
       font-style: italic;
       color: var(--teal-400);
   }
 
-  .topbar-sub {
+.page-department-management .topbar-sub {
       font-size: 11.5px;
       color: var(--text-3);
       margin-top: 1px;
   }
 
-  .topbar-right {
+.page-department-management .topbar-right {
       display: flex;
       align-items: center;
       gap: 8px;
   }
 
-  .icon-btn {
+.page-department-management .icon-btn {
       width: 36px;
       height: 36px;
       border-radius: 50%;
@@ -331,11 +329,11 @@
       transition: border-color var(--tr), background var(--tr);
   }
 
-  .icon-btn:hover {
+.page-department-management .icon-btn:hover {
       border-color: var(--border-2);
   }
 
-  .icon-btn svg {
+.page-department-management .icon-btn svg {
       width: 15px;
       height: 15px;
       stroke: var(--text-2);
@@ -344,7 +342,7 @@
       stroke-linecap: round;
   }
 
-  .notif-dot {
+.page-department-management .notif-dot {
       position: absolute;
       top: 7px;
       right: 7px;
@@ -355,14 +353,12 @@
       border: 1.5px solid var(--bg-2);
   }
 
-  /* ─── CONTENT ─── */
-  .content {
+.page-department-management /* ─── CONTENT ─── */ .content {
       padding: 1.75rem 2rem;
       flex: 1;
   }
 
-  /* Page header */
-  .page-header {
+.page-department-management /* Page header */ .page-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -370,7 +366,7 @@
       gap: 1rem;
   }
 
-  .page-header-left h1 {
+.page-department-management .page-header-left h1 {
       font-family: var(--font-display);
       font-size: 28px;
       color: var(--text-1);
@@ -378,23 +374,23 @@
       margin-bottom: 4px;
   }
 
-  .page-header-left h1 em {
+.page-department-management .page-header-left h1 em {
       font-style: italic;
       color: var(--teal-400);
   }
 
-  .page-header-left p {
+.page-department-management .page-header-left p {
       font-size: 13.5px;
       color: var(--text-2);
   }
 
-  .header-actions {
+.page-department-management .header-actions {
       display: flex;
       gap: 10px;
       flex-shrink: 0;
   }
 
-  .btn-primary {
+.page-department-management .btn-primary {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -411,11 +407,11 @@
       white-space: nowrap;
   }
 
-  .btn-primary:hover {
+.page-department-management .btn-primary:hover {
       background: var(--teal-500);
   }
 
-  .btn-primary svg {
+.page-department-management .btn-primary svg {
       width: 15px;
       height: 15px;
       stroke: #fff;
@@ -424,7 +420,7 @@
       stroke-linecap: round;
   }
 
-  .btn-secondary {
+.page-department-management .btn-secondary {
       display: flex;
       align-items: center;
       gap: 7px;
@@ -440,11 +436,11 @@
       white-space: nowrap;
   }
 
-  .btn-secondary:hover {
+.page-department-management .btn-secondary:hover {
       background: var(--bg-4);
   }
 
-  .btn-secondary svg {
+.page-department-management .btn-secondary svg {
       width: 14px;
       height: 14px;
       stroke: var(--text-2);
@@ -453,15 +449,14 @@
       stroke-linecap: round;
   }
 
-  /* ─── STATS ─── */
-  .stats-strip {
+.page-department-management /* ─── STATS ─── */ .stats-strip {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 1.75rem;
   }
 
-  .stat-card {
+.page-department-management .stat-card {
       background: var(--bg-2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -472,12 +467,12 @@
       transition: border-color var(--tr), box-shadow var(--tr);
   }
 
-  .stat-card:hover {
+.page-department-management .stat-card:hover {
       border-color: var(--border-2);
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
 
-  .stat-icon {
+.page-department-management .stat-icon {
       width: 40px;
       height: 40px;
       border-radius: 10px;
@@ -487,7 +482,7 @@
       flex-shrink: 0;
   }
 
-  .stat-icon svg {
+.page-department-management .stat-icon svg {
       width: 18px;
       height: 18px;
       fill: none;
@@ -495,59 +490,58 @@
       stroke-linecap: round;
   }
 
-  .si-teal {
+.page-department-management .si-teal {
       background: var(--teal-glow);
   }
 
-  .si-teal svg {
+.page-department-management .si-teal svg {
       stroke: var(--teal-400);
   }
 
-  .si-blue {
+.page-department-management .si-blue {
       background: var(--blue-glow);
   }
 
-  .si-blue svg {
+.page-department-management .si-blue svg {
       stroke: var(--blue-400);
   }
 
-  .si-amber {
+.page-department-management .si-amber {
       background: var(--amber-glow);
   }
 
-  .si-amber svg {
+.page-department-management .si-amber svg {
       stroke: var(--amber-400);
   }
 
-  .si-coral {
+.page-department-management .si-coral {
       background: var(--coral-glow);
   }
 
-  .si-coral svg {
+.page-department-management .si-coral svg {
       stroke: var(--coral-400);
   }
 
-  .stat-text .val {
+.page-department-management .stat-text .val {
       font-family: var(--font-display);
       font-size: 26px;
       color: var(--text-1);
       line-height: 1;
   }
 
-  .stat-text .lbl {
+.page-department-management .stat-text .lbl {
       font-size: 11.5px;
       color: var(--text-2);
       margin-top: 3px;
   }
 
-  .stat-text .sub {
+.page-department-management .stat-text .sub {
       font-size: 11px;
       color: var(--text-3);
       margin-top: 1px;
   }
 
-  /* ─── TOOLBAR ─── */
-  .toolbar {
+.page-department-management /* ─── TOOLBAR ─── */ .toolbar {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -555,7 +549,7 @@
       flex-wrap: wrap;
   }
 
-  .search-box {
+.page-department-management .search-box {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -570,12 +564,12 @@
       transition: border-color var(--tr), box-shadow var(--tr);
   }
 
-  .search-box:focus-within {
+.page-department-management .search-box:focus-within {
       border-color: var(--teal-400);
       box-shadow: 0 0 0 3px var(--teal-glow);
   }
 
-  .search-box svg {
+.page-department-management .search-box svg {
       width: 14px;
       height: 14px;
       stroke: var(--text-3);
@@ -585,7 +579,7 @@
       flex-shrink: 0;
   }
 
-  .search-box input {
+.page-department-management .search-box input {
       border: none;
       background: none;
       outline: none;
@@ -595,11 +589,11 @@
       width: 100%;
   }
 
-  .search-box input::placeholder {
+.page-department-management .search-box input::placeholder {
       color: var(--text-3);
   }
 
-  .filter-select {
+.page-department-management .filter-select {
       height: 38px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -617,11 +611,11 @@
       transition: border-color var(--tr);
   }
 
-  .filter-select:focus {
+.page-department-management .filter-select:focus {
       border-color: var(--teal-400);
   }
 
-  .view-toggle {
+.page-department-management .view-toggle {
       display: flex;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -630,7 +624,7 @@
       margin-left: auto;
   }
 
-  .view-btn {
+.page-department-management .view-btn {
       width: 36px;
       height: 36px;
       border: none;
@@ -642,7 +636,7 @@
       transition: background var(--tr);
   }
 
-  .view-btn svg {
+.page-department-management .view-btn svg {
       width: 14px;
       height: 14px;
       stroke: var(--text-3);
@@ -651,26 +645,25 @@
       stroke-linecap: round;
   }
 
-  .view-btn.active {
+.page-department-management .view-btn.active {
       background: var(--teal-glow);
   }
 
-  .view-btn.active svg {
+.page-department-management .view-btn.active svg {
       stroke: var(--teal-400);
   }
 
-  .view-btn:hover:not(.active) {
+.page-department-management .view-btn:hover:not(.active) {
       background: var(--bg-3);
   }
 
-  /* ─── GRID VIEW ─── */
-  .dept-grid {
+.page-department-management /* ─── GRID VIEW ─── */ .dept-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.1rem;
   }
 
-  .dept-card {
+.page-department-management .dept-card {
       background: var(--bg-2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -692,18 +685,18 @@
       }
   }
 
-  .dept-card:hover {
+.page-department-management .dept-card:hover {
       border-color: var(--border-2);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
       transform: translateY(-2px);
   }
 
-  .card-top-band {
+.page-department-management .card-top-band {
       height: 5px;
       width: 100%;
   }
 
-  .card-header {
+.page-department-management .card-header {
       padding: 1.2rem 1.3rem 1rem;
       display: flex;
       align-items: flex-start;
@@ -711,7 +704,7 @@
       gap: 10px;
   }
 
-  .dept-icon-wrap {
+.page-department-management .dept-icon-wrap {
       width: 44px;
       height: 44px;
       border-radius: 12px;
@@ -721,7 +714,7 @@
       flex-shrink: 0;
   }
 
-  .dept-icon-wrap svg {
+.page-department-management .dept-icon-wrap svg {
       width: 20px;
       height: 20px;
       fill: none;
@@ -729,12 +722,12 @@
       stroke-linecap: round;
   }
 
-  .dept-head-right {
+.page-department-management .dept-head-right {
       flex: 1;
       min-width: 0;
   }
 
-  .dept-name {
+.page-department-management .dept-name {
       font-family: var(--font-display);
       font-size: 17px;
       color: var(--text-1);
@@ -742,14 +735,14 @@
       line-height: 1.2;
   }
 
-  .dept-code {
+.page-department-management .dept-code {
       font-size: 11px;
       color: var(--text-3);
       letter-spacing: 0.06em;
       text-transform: uppercase;
   }
 
-  .dept-status-pill {
+.page-department-management .dept-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -760,38 +753,38 @@
       flex-shrink: 0;
   }
 
-  .dept-status-pill::before {
+.page-department-management .dept-status-pill::before {
       content: '';
       width: 5px;
       height: 5px;
       border-radius: 50%;
   }
 
-  .dept-status-pill.active {
+.page-department-management .dept-status-pill.active {
       background: var(--green-glow);
       color: var(--green-400);
   }
 
-  .dept-status-pill.active::before {
+.page-department-management .dept-status-pill.active::before {
       background: var(--green-400);
       animation: blink 2s infinite;
   }
 
-  .dept-status-pill.inactive {
+.page-department-management .dept-status-pill.inactive {
       background: var(--amber-glow);
       color: var(--amber-400);
   }
 
-  .dept-status-pill.inactive::before {
+.page-department-management .dept-status-pill.inactive::before {
       background: var(--amber-400);
   }
 
-  .dept-status-pill.expanding {
+.page-department-management .dept-status-pill.expanding {
       background: var(--blue-glow);
       color: var(--blue-400);
   }
 
-  .dept-status-pill.expanding::before {
+.page-department-management .dept-status-pill.expanding::before {
       background: var(--blue-400);
   }
 
@@ -807,13 +800,13 @@
       }
   }
 
-  .card-divider {
+.page-department-management .card-divider {
       height: 1px;
       background: var(--border);
       margin: 0 1.3rem;
   }
 
-  .card-stats {
+.page-department-management .card-stats {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 1px;
@@ -821,27 +814,27 @@
       margin: 0;
   }
 
-  .card-stat {
+.page-department-management .card-stat {
       background: var(--bg-2);
       padding: 0.85rem 1.1rem;
       text-align: center;
   }
 
-  .card-stat .cs-val {
+.page-department-management .card-stat .cs-val {
       font-family: var(--font-display);
       font-size: 20px;
       color: var(--text-1);
       line-height: 1;
   }
 
-  .card-stat .cs-lbl {
+.page-department-management .card-stat .cs-lbl {
       font-size: 10.5px;
       color: var(--text-3);
       margin-top: 3px;
       letter-spacing: 0.03em;
   }
 
-  .card-footer {
+.page-department-management .card-footer {
       padding: 0.9rem 1.3rem;
       display: flex;
       align-items: center;
@@ -849,13 +842,13 @@
       gap: 8px;
   }
 
-  .card-head-doc {
+.page-department-management .card-head-doc {
       display: flex;
       align-items: center;
       gap: 8px;
   }
 
-  .head-av {
+.page-department-management .head-av {
       width: 26px;
       height: 26px;
       border-radius: 50%;
@@ -868,23 +861,23 @@
       flex-shrink: 0;
   }
 
-  .head-info .head-name {
+.page-department-management .head-info .head-name {
       font-size: 12px;
       font-weight: 500;
       color: var(--text-1);
   }
 
-  .head-info .head-role {
+.page-department-management .head-info .head-role {
       font-size: 10.5px;
       color: var(--text-3);
   }
 
-  .card-actions {
+.page-department-management .card-actions {
       display: flex;
       gap: 5px;
   }
 
-  .ca-btn {
+.page-department-management .ca-btn {
       width: 28px;
       height: 28px;
       border-radius: 6px;
@@ -897,7 +890,7 @@
       transition: border-color var(--tr), background var(--tr);
   }
 
-  .ca-btn svg {
+.page-department-management .ca-btn svg {
       width: 12px;
       height: 12px;
       fill: none;
@@ -905,64 +898,62 @@
       stroke-linecap: round;
   }
 
-  .ca-btn.edit svg {
+.page-department-management .ca-btn.edit svg {
       stroke: var(--teal-400);
   }
 
-  .ca-btn.del svg {
+.page-department-management .ca-btn.del svg {
       stroke: var(--coral-400);
   }
 
-  .ca-btn.edit:hover {
+.page-department-management .ca-btn.edit:hover {
       border-color: var(--teal-400);
       background: var(--teal-glow);
   }
 
-  .ca-btn.del:hover {
+.page-department-management .ca-btn.del:hover {
       border-color: var(--coral-400);
       background: var(--coral-glow);
   }
 
-  /* Occupancy bar */
-  .card-occupancy {
+.page-department-management /* Occupancy bar */ .card-occupancy {
       padding: 0 1.3rem 1.1rem;
   }
 
-  .occ-row {
+.page-department-management .occ-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 5px;
   }
 
-  .occ-label {
+.page-department-management .occ-label {
       font-size: 10.5px;
       color: var(--text-3);
       letter-spacing: 0.04em;
       text-transform: uppercase;
   }
 
-  .occ-pct {
+.page-department-management .occ-pct {
       font-size: 11.5px;
       font-weight: 500;
       color: var(--text-2);
   }
 
-  .occ-bar {
+.page-department-management .occ-bar {
       height: 4px;
       background: var(--bg-4);
       border-radius: 100px;
       overflow: hidden;
   }
 
-  .occ-fill {
+.page-department-management .occ-fill {
       height: 100%;
       border-radius: 100px;
       transition: width 1s ease;
   }
 
-  /* ─── LIST VIEW ─── */
-  .dept-list-wrap {
+.page-department-management /* ─── LIST VIEW ─── */ .dept-list-wrap {
       background: var(--bg-2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -972,12 +963,12 @@
       display: none;
   }
 
-  table {
+.page-department-management table {
       width: 100%;
       border-collapse: collapse;
   }
 
-  thead th {
+.page-department-management thead th {
       font-size: 10.5px;
       font-weight: 500;
       letter-spacing: 0.08em;
@@ -993,52 +984,52 @@
       transition: color var(--tr);
   }
 
-  thead th:hover {
+.page-department-management thead th:hover {
       color: var(--text-2);
   }
 
-  thead th.sorted {
+.page-department-management thead th.sorted {
       color: var(--teal-400);
   }
 
-  .sort-ic {
+.page-department-management .sort-ic {
       margin-left: 4px;
       opacity: 0.35;
       font-size: 9px;
   }
 
-  thead th.sorted .sort-ic {
+.page-department-management thead th.sorted .sort-ic {
       opacity: 1;
   }
 
-  tbody tr {
+.page-department-management tbody tr {
       border-bottom: 1px solid var(--border);
       transition: background var(--tr);
       cursor: pointer;
   }
 
-  tbody tr:last-child {
+.page-department-management tbody tr:last-child {
       border-bottom: none;
   }
 
-  tbody tr:hover {
+.page-department-management tbody tr:hover {
       background: rgba(255, 255, 255, 0.022);
   }
 
-  tbody td {
+.page-department-management tbody td {
       padding: 14px 18px;
       font-size: 13.5px;
       color: var(--text-1);
       vertical-align: middle;
   }
 
-  .dept-cell {
+.page-department-management .dept-cell {
       display: flex;
       align-items: center;
       gap: 12px;
   }
 
-  .tbl-dept-icon {
+.page-department-management .tbl-dept-icon {
       width: 36px;
       height: 36px;
       border-radius: 9px;
@@ -1048,7 +1039,7 @@
       flex-shrink: 0;
   }
 
-  .tbl-dept-icon svg {
+.page-department-management .tbl-dept-icon svg {
       width: 16px;
       height: 16px;
       fill: none;
@@ -1056,26 +1047,26 @@
       stroke-linecap: round;
   }
 
-  .tbl-dept-name {
+.page-department-management .tbl-dept-name {
       font-size: 13.5px;
       font-weight: 500;
       color: var(--text-1);
   }
 
-  .tbl-dept-code {
+.page-department-management .tbl-dept-code {
       font-size: 11px;
       color: var(--text-3);
       margin-top: 1px;
       letter-spacing: 0.05em;
   }
 
-  .head-cell {
+.page-department-management .head-cell {
       display: flex;
       align-items: center;
       gap: 8px;
   }
 
-  .sm-av {
+.page-department-management .sm-av {
       width: 28px;
       height: 28px;
       border-radius: 50%;
@@ -1088,13 +1079,13 @@
       flex-shrink: 0;
   }
 
-  .mini-bar {
+.page-department-management .mini-bar {
       display: flex;
       align-items: center;
       gap: 8px;
   }
 
-  .mb-track {
+.page-department-management .mb-track {
       width: 60px;
       height: 4px;
       background: var(--bg-4);
@@ -1103,18 +1094,18 @@
       flex-shrink: 0;
   }
 
-  .mb-fill {
+.page-department-management .mb-fill {
       height: 100%;
       border-radius: 100px;
   }
 
-  .tbl-actions {
+.page-department-management .tbl-actions {
       display: flex;
       gap: 5px;
       justify-content: flex-end;
   }
 
-  .tbl-btn {
+.page-department-management .tbl-btn {
       width: 30px;
       height: 30px;
       border-radius: 7px;
@@ -1127,7 +1118,7 @@
       transition: border-color var(--tr), background var(--tr);
   }
 
-  .tbl-btn svg {
+.page-department-management .tbl-btn svg {
       width: 13px;
       height: 13px;
       fill: none;
@@ -1135,35 +1126,34 @@
       stroke-linecap: round;
   }
 
-  .tbl-btn.view svg {
+.page-department-management .tbl-btn.view svg {
       stroke: var(--blue-400);
   }
 
-  .tbl-btn.view:hover {
+.page-department-management .tbl-btn.view:hover {
       border-color: var(--blue-400);
       background: var(--blue-glow);
   }
 
-  .tbl-btn.edit svg {
+.page-department-management .tbl-btn.edit svg {
       stroke: var(--teal-400);
   }
 
-  .tbl-btn.edit:hover {
+.page-department-management .tbl-btn.edit:hover {
       border-color: var(--teal-400);
       background: var(--teal-glow);
   }
 
-  .tbl-btn.del svg {
+.page-department-management .tbl-btn.del svg {
       stroke: var(--coral-400);
   }
 
-  .tbl-btn.del:hover {
+.page-department-management .tbl-btn.del:hover {
       border-color: var(--coral-400);
       background: var(--coral-glow);
   }
 
-  /* Shared status pill for table */
-  .s-pill {
+.page-department-management /* Shared status pill for table */ .s-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -1173,42 +1163,41 @@
       font-weight: 500;
   }
 
-  .s-pill::before {
+.page-department-management .s-pill::before {
       content: '';
       width: 5px;
       height: 5px;
       border-radius: 50%;
   }
 
-  .s-pill.active {
+.page-department-management .s-pill.active {
       background: var(--green-glow);
       color: var(--green-400);
   }
 
-  .s-pill.active::before {
+.page-department-management .s-pill.active::before {
       background: var(--green-400);
   }
 
-  .s-pill.inactive {
+.page-department-management .s-pill.inactive {
       background: var(--amber-glow);
       color: var(--amber-400);
   }
 
-  .s-pill.inactive::before {
+.page-department-management .s-pill.inactive::before {
       background: var(--amber-400);
   }
 
-  .s-pill.expanding {
+.page-department-management .s-pill.expanding {
       background: var(--blue-glow);
       color: var(--blue-400);
   }
 
-  .s-pill.expanding::before {
+.page-department-management .s-pill.expanding::before {
       background: var(--blue-400);
   }
 
-  /* ─── DRAWER ─── */
-  .drawer-overlay {
+.page-department-management /* ─── DRAWER ─── */ .drawer-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.6);
@@ -1218,12 +1207,12 @@
       transition: opacity var(--tr);
   }
 
-  .drawer-overlay.open {
+.page-department-management .drawer-overlay.open {
       opacity: 1;
       pointer-events: all;
   }
 
-  .drawer {
+.page-department-management .drawer {
       position: fixed;
       top: 0;
       right: 0;
@@ -1239,11 +1228,11 @@
       overflow: hidden;
   }
 
-  .drawer-overlay.open .drawer {
+.page-department-management .drawer-overlay.open .drawer {
       transform: translateX(0);
   }
 
-  .drawer-header {
+.page-department-management .drawer-header {
       padding: 1.5rem 1.75rem 1.25rem;
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -1252,19 +1241,19 @@
       flex-shrink: 0;
   }
 
-  .drawer-header h2 {
+.page-department-management .drawer-header h2 {
       font-family: var(--font-display);
       font-size: 22px;
       color: var(--text-1);
       margin-bottom: 3px;
   }
 
-  .drawer-header p {
+.page-department-management .drawer-header p {
       font-size: 13px;
       color: var(--text-3);
   }
 
-  .drawer-close {
+.page-department-management .drawer-close {
       width: 32px;
       height: 32px;
       border-radius: 50%;
@@ -1278,12 +1267,12 @@
       flex-shrink: 0;
   }
 
-  .drawer-close:hover {
+.page-department-management .drawer-close:hover {
       border-color: var(--border-2);
       background: var(--bg-3);
   }
 
-  .drawer-close svg {
+.page-department-management .drawer-close svg {
       width: 13px;
       height: 13px;
       stroke: var(--text-2);
@@ -1292,23 +1281,22 @@
       stroke-linecap: round;
   }
 
-  .drawer-body {
+.page-department-management .drawer-body {
       flex: 1;
       overflow-y: auto;
       padding: 1.5rem 1.75rem;
   }
 
-  .drawer-body::-webkit-scrollbar {
+.page-department-management .drawer-body::-webkit-scrollbar {
       width: 4px;
   }
 
-  .drawer-body::-webkit-scrollbar-thumb {
+.page-department-management .drawer-body::-webkit-scrollbar-thumb {
       background: var(--border-2);
       border-radius: 100px;
   }
 
-  /* Dept hero inside drawer */
-  .drawer-dept-hero {
+.page-department-management /* Dept hero inside drawer */ .drawer-dept-hero {
       border-radius: var(--radius);
       padding: 1.4rem;
       margin-bottom: 1.5rem;
@@ -1318,7 +1306,7 @@
       border: 1px solid var(--border);
   }
 
-  .hero-icon {
+.page-department-management .hero-icon {
       width: 52px;
       height: 52px;
       border-radius: 13px;
@@ -1328,7 +1316,7 @@
       flex-shrink: 0;
   }
 
-  .hero-icon svg {
+.page-department-management .hero-icon svg {
       width: 24px;
       height: 24px;
       fill: none;
@@ -1336,14 +1324,14 @@
       stroke-linecap: round;
   }
 
-  .hero-info .dept-big-name {
+.page-department-management .hero-info .dept-big-name {
       font-family: var(--font-display);
       font-size: 21px;
       color: var(--text-1);
       margin-bottom: 4px;
   }
 
-  .hero-info .dept-code-big {
+.page-department-management .hero-info .dept-code-big {
       font-size: 12px;
       color: var(--text-3);
       letter-spacing: 0.08em;
@@ -1351,20 +1339,20 @@
       margin-bottom: 8px;
   }
 
-  .hero-info .dept-tags {
+.page-department-management .hero-info .dept-tags {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
   }
 
-  .kpi-row {
+.page-department-management .kpi-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       margin-bottom: 1.5rem;
   }
 
-  .kpi-box {
+.page-department-management .kpi-box {
       background: var(--bg-3);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -1372,14 +1360,14 @@
       text-align: center;
   }
 
-  .kpi-box .kv {
+.page-department-management .kpi-box .kv {
       font-family: var(--font-display);
       font-size: 22px;
       color: var(--text-1);
       line-height: 1;
   }
 
-  .kpi-box .kl {
+.page-department-management .kpi-box .kl {
       font-size: 10.5px;
       color: var(--text-3);
       margin-top: 3px;
@@ -1387,11 +1375,11 @@
       text-transform: uppercase;
   }
 
-  .info-section {
+.page-department-management .info-section {
       margin-bottom: 1.5rem;
   }
 
-  .info-section h4 {
+.page-department-management .info-section h4 {
       font-size: 10.5px;
       font-weight: 500;
       letter-spacing: 0.08em;
@@ -1402,20 +1390,20 @@
       padding-bottom: 8px;
   }
 
-  .info-grid {
+.page-department-management .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
   }
 
-  .info-box {
+.page-department-management .info-box {
       background: var(--bg-3);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 10px 12px;
   }
 
-  .info-box .ib-label {
+.page-department-management .info-box .ib-label {
       font-size: 10px;
       color: var(--text-3);
       letter-spacing: 0.06em;
@@ -1423,24 +1411,23 @@
       margin-bottom: 3px;
   }
 
-  .info-box .ib-val {
+.page-department-management .info-box .ib-val {
       font-size: 13.5px;
       color: var(--text-1);
       font-weight: 500;
   }
 
-  .info-box.full {
+.page-department-management .info-box.full {
       grid-column: 1 / -1;
   }
 
-  /* Staff list in drawer */
-  .staff-list {
+.page-department-management /* Staff list in drawer */ .staff-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
   }
 
-  .staff-item {
+.page-department-management .staff-item {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -1451,11 +1438,11 @@
       transition: border-color var(--tr);
   }
 
-  .staff-item:hover {
+.page-department-management .staff-item:hover {
       border-color: var(--border-2);
   }
 
-  .staff-av {
+.page-department-management .staff-av {
       width: 30px;
       height: 30px;
       border-radius: 50%;
@@ -1468,18 +1455,18 @@
       flex-shrink: 0;
   }
 
-  .staff-name {
+.page-department-management .staff-name {
       font-size: 13px;
       font-weight: 500;
       color: var(--text-1);
   }
 
-  .staff-role {
+.page-department-management .staff-role {
       font-size: 11px;
       color: var(--text-3);
   }
 
-  .staff-tag {
+.page-department-management .staff-tag {
       margin-left: auto;
       font-size: 10.5px;
       padding: 2px 8px;
@@ -1487,23 +1474,22 @@
       font-weight: 500;
   }
 
-  .staff-tag.head {
+.page-department-management .staff-tag.head {
       background: var(--teal-glow);
       color: var(--teal-400);
       border: 1px solid var(--teal-ring);
   }
 
-  .staff-tag.sr {
+.page-department-management .staff-tag.sr {
       background: var(--blue-glow);
       color: var(--blue-400);
   }
 
-  /* Form fields */
-  .form-field {
+.page-department-management /* Form fields */ .form-field {
       margin-bottom: 1rem;
   }
 
-  .form-field label {
+.page-department-management .form-field label {
       display: block;
       font-size: 12.5px;
       font-weight: 500;
@@ -1512,7 +1498,7 @@
       letter-spacing: 0.02em;
   }
 
-  .form-input {
+.page-department-management .form-input {
       width: 100%;
       height: 42px;
       border: 1px solid var(--border);
@@ -1527,12 +1513,12 @@
       appearance: none;
   }
 
-  .form-input:focus {
+.page-department-management .form-input:focus {
       border-color: var(--teal-400);
       box-shadow: 0 0 0 3px var(--teal-glow);
   }
 
-  select.form-input {
+.page-department-management select.form-input {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235C5B56' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 11px center;
@@ -1540,7 +1526,7 @@
       cursor: pointer;
   }
 
-  .form-textarea {
+.page-department-management .form-textarea {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -1555,25 +1541,24 @@
       transition: border-color var(--tr), box-shadow var(--tr);
   }
 
-  .form-textarea:focus {
+.page-department-management .form-textarea:focus {
       border-color: var(--teal-400);
       box-shadow: 0 0 0 3px var(--teal-glow);
   }
 
-  .form-row {
+.page-department-management .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
   }
 
-  /* Color picker for department */
-  .color-picker-row {
+.page-department-management /* Color picker for department */ .color-picker-row {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
   }
 
-  .color-opt {
+.page-department-management .color-opt {
       width: 28px;
       height: 28px;
       border-radius: 50%;
@@ -1582,16 +1567,16 @@
       transition: transform var(--tr), border-color var(--tr);
   }
 
-  .color-opt:hover {
+.page-department-management .color-opt:hover {
       transform: scale(1.15);
   }
 
-  .color-opt.selected {
+.page-department-management .color-opt.selected {
       border-color: #fff;
       box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   }
 
-  .drawer-footer {
+.page-department-management .drawer-footer {
       padding: 1rem 1.75rem 1.25rem;
       border-top: 1px solid var(--border);
       display: flex;
@@ -1600,7 +1585,7 @@
       flex-shrink: 0;
   }
 
-  .btn-ghost {
+.page-department-management .btn-ghost {
       height: 40px;
       padding: 0 18px;
       border: 1px solid var(--border);
@@ -1613,11 +1598,11 @@
       transition: background var(--tr);
   }
 
-  .btn-ghost:hover {
+.page-department-management .btn-ghost:hover {
       background: var(--bg-3);
   }
 
-  .btn-save {
+.page-department-management .btn-save {
       height: 40px;
       padding: 0 22px;
       background: var(--teal-400);
@@ -1631,12 +1616,11 @@
       transition: background var(--tr);
   }
 
-  .btn-save:hover {
+.page-department-management .btn-save:hover {
       background: var(--teal-500);
   }
 
-  /* ─── DELETE MODAL ─── */
-  .modal-overlay {
+.page-department-management /* ─── DELETE MODAL ─── */ .modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.65);
@@ -1650,12 +1634,12 @@
       padding: 1rem;
   }
 
-  .modal-overlay.open {
+.page-department-management .modal-overlay.open {
       opacity: 1;
       pointer-events: all;
   }
 
-  .modal {
+.page-department-management .modal {
       background: var(--bg-2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -1666,16 +1650,16 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 
-  .modal-overlay.open .modal {
+.page-department-management .modal-overlay.open .modal {
       transform: scale(1);
   }
 
-  .modal-inner {
+.page-department-management .modal-inner {
       padding: 1.75rem;
       text-align: center;
   }
 
-  .modal-icon {
+.page-department-management .modal-icon {
       width: 52px;
       height: 52px;
       border-radius: 50%;
@@ -1687,7 +1671,7 @@
       margin: 0 auto 1rem;
   }
 
-  .modal-icon svg {
+.page-department-management .modal-icon svg {
       width: 22px;
       height: 22px;
       stroke: var(--coral-400);
@@ -1696,30 +1680,30 @@
       stroke-linecap: round;
   }
 
-  .modal-inner h3 {
+.page-department-management .modal-inner h3 {
       font-family: var(--font-display);
       font-size: 20px;
       color: var(--text-1);
       margin-bottom: 8px;
   }
 
-  .modal-inner p {
+.page-department-management .modal-inner p {
       font-size: 13.5px;
       color: var(--text-2);
       line-height: 1.55;
   }
 
-  .modal-inner p strong {
+.page-department-management .modal-inner p strong {
       color: var(--text-1);
   }
 
-  .modal-footer-btns {
+.page-department-management .modal-footer-btns {
       padding: 0 1.75rem 1.5rem;
       display: flex;
       gap: 10px;
   }
 
-  .btn-mcancel {
+.page-department-management .btn-mcancel {
       flex: 1;
       height: 40px;
       border: 1px solid var(--border);
@@ -1732,11 +1716,11 @@
       transition: background var(--tr);
   }
 
-  .btn-mcancel:hover {
+.page-department-management .btn-mcancel:hover {
       background: var(--bg-3);
   }
 
-  .btn-mdelete {
+.page-department-management .btn-mdelete {
       flex: 1;
       height: 40px;
       background: var(--coral-400);
@@ -1750,12 +1734,11 @@
       transition: background var(--tr);
   }
 
-  .btn-mdelete:hover {
+.page-department-management .btn-mdelete:hover {
       background: #be4d28;
   }
 
-  /* ─── TOAST ─── */
-  .toast {
+.page-department-management /* ─── TOAST ─── */ .toast {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
@@ -1772,34 +1755,33 @@
       pointer-events: none;
   }
 
-  .toast.show {
+.page-department-management .toast.show {
       opacity: 1;
       transform: translateY(0);
   }
 
-  .toast.success {
+.page-department-management .toast.success {
       background: var(--teal-400);
       color: #fff;
   }
 
-  .toast.error {
+.page-department-management .toast.error {
       background: var(--coral-400);
       color: #fff;
   }
 
-  .toast.info {
+.page-department-management .toast.info {
       background: var(--blue-400);
       color: #fff;
   }
 
-  /* ─── EMPTY STATE ─── */
-  .empty-state {
+.page-department-management /* ─── EMPTY STATE ─── */ .empty-state {
       text-align: center;
       padding: 4rem 2rem;
       display: none;
   }
 
-  .empty-icon {
+.page-department-management .empty-icon {
       width: 60px;
       height: 60px;
       background: var(--bg-3);
@@ -1810,7 +1792,7 @@
       margin: 0 auto 1rem;
   }
 
-  .empty-icon svg {
+.page-department-management .empty-icon svg {
       width: 26px;
       height: 26px;
       stroke: var(--text-3);
@@ -1819,36 +1801,36 @@
       stroke-linecap: round;
   }
 
-  .empty-state h3 {
+.page-department-management .empty-state h3 {
       font-family: var(--font-display);
       font-size: 20px;
       color: var(--text-1);
       margin-bottom: 6px;
   }
 
-  .empty-state p {
+.page-department-management .empty-state p {
       font-size: 13.5px;
       color: var(--text-2);
       margin-bottom: 1.5rem;
   }
 
   @media (max-width: 1100px) {
-      .stats-strip {
+.page-department-management .stats-strip {
           grid-template-columns: repeat(2, 1fr);
       }
   }
 
   @media (max-width: 900px) {
-      .drawer {
+.page-department-management .drawer {
           width: 100%;
       }
 
-      .dept-grid {
+.page-department-management .dept-grid {
           grid-template-columns: 1fr;
       }
   }
 
-  .hamburger-btn {
+.page-department-management .hamburger-btn {
       display: none;
       background: none;
       border: none;
@@ -1860,7 +1842,7 @@
       justify-content: center;
   }
 
-  .hamburger-btn svg {
+.page-department-management .hamburger-btn svg {
       width: 22px;
       height: 22px;
       stroke: var(--gray-800);
@@ -1869,30 +1851,30 @@
       stroke-linecap: round;
   }
 
-  .sidebar-overlay {
+.page-department-management .sidebar-overlay {
       display: none;
   }
 
   @media (max-width: 768px) {
-      .sidebar {
+.page-department-management .sidebar {
           transform: translateX(-100%);
           transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 300;
       }
 
-      .sidebar.open {
+.page-department-management .sidebar.open {
           transform: translateX(0);
       }
 
-      .main {
+.page-department-management .main {
           margin-left: 0;
       }
 
-      .hamburger-btn {
+.page-department-management .hamburger-btn {
           display: flex;
       }
 
-      .sidebar-overlay {
+.page-department-management .sidebar-overlay {
           display: block;
           position: fixed;
           inset: 0;
@@ -1903,7 +1885,7 @@
           transition: opacity 0.2s;
       }
 
-      .sidebar-overlay.open {
+.page-department-management .sidebar-overlay.open {
           opacity: 1;
           pointer-events: auto;
       }

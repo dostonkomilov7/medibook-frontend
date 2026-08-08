@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./user-dashboard.style.css";
 import { getCookie, getUserData, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -14,12 +14,7 @@ export default function UserDashboardPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "User") {
-      // router.back() risks bouncing right back to a page that
-      // redirects here again; use MediAlert instead of a blocking
-      // native alert() and send the user somewhere safe.
-      (window as any).MediAlert?.toast({ type: "error", title: "Access Denied", message: "You do not have permission to view this page." });
-      router.push("/");
-      return;
+      notFound();
     }
     init();
   }, [router]);
@@ -244,8 +239,6 @@ export default function UserDashboardPage() {
         </div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
     </div>
   );
 }

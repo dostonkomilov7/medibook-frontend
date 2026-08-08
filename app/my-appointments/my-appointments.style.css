@@ -1704,3 +1704,46 @@
           align-items: flex-start;
       }
   }
+
+  /* ── Toast (local, replaces the removed shared MediAlert widget) ── */
+  .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 9999;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .4);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+  }
+
+  .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+  }
+
+  .toast.success {
+      background: var(--teal-400);
+      color: #fff;
+  }
+
+  .toast.error {
+      background: var(--coral-400);
+      color: #fff;
+  }
+
+  .toast.info {
+      background: var(--blue-400);
+      color: #fff;
+  }
+
+  .toast.warning {
+      background: var(--amber-400);
+      color: #fff;
+  }

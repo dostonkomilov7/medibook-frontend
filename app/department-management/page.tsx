@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./department-management.style.css";
 import { getCookie, getUserData, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -68,9 +68,7 @@ export default function DepartmentManagementPage() {
   useEffect(()=>{
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
-      // router.back() risks bouncing straight back to a redirecting
-      // page; send the user somewhere safe instead.
-      showToast("Access Denied","error"); router.push("/"); return;
+      notFound();
     }
     getUserData().then(setUserData);
   },[router]);

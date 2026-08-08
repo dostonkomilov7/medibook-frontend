@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./my-appointments.style.css";
 import { getCookie, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
@@ -10,6 +10,14 @@ import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 export default function MyAppointmentsPage() {
   const router = useRouter();
   const dataRef = useRef<any[]>([]);
+  const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+  const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (msg: string, type = "info") => {
+    setToast({ msg, type });
+    if (toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(() => setToast(null), 3200);
+  };
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
@@ -120,15 +128,15 @@ export default function MyAppointmentsPage() {
         const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
         const result = await res.json();
         if (!res.ok || !result.success) {
-          (window as any).MediAlert?.toast({ type: "error", title: "Could not cancel appointment" });
+          showToast("Could not cancel appointment", "error");
           btn.removeAttribute("disabled");
           return;
         }
-        (window as any).MediAlert?.toast({ type: "success", title: "Appointment cancelled" });
+        showToast("Appointment cancelled", "success");
         await loadAppointments();
       } catch (err) {
         console.error("Failed to cancel appointment:", err);
-        (window as any).MediAlert?.toast({ type: "error", title: "Something went wrong" });
+        showToast("Something went wrong", "error");
         btn.removeAttribute("disabled");
       }
     };
@@ -237,8 +245,7 @@ export default function MyAppointmentsPage() {
         </div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
+      {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
     </div>
   );
 }

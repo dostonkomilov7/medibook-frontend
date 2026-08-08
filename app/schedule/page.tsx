@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, notFound } from "next/navigation";
 import "../doctor-dashboard/doctor-dashboard.style.css";
 import "./schedule.style.css";
 import { getCookie, apiUrl, escapeHtml, signOut } from "../../lib/utils";
@@ -23,14 +23,20 @@ export default function SchedulePage() {
   const todayISO = () => new Date().toISOString().slice(0, 10);
   const apptsRef = useRef<Appointment[]>([]);
   const stateRef = useRef({ currentDate: todayISO(), activeFilter: "all" as Filter, searchTerm: "", editingId: null as string | null });
+  const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+  const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (msg: string, type = "info") => {
+    setToast({ msg, type });
+    if (toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(() => setToast(null), 3200);
+  };
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
-      // router.back() risks bouncing right back to a page that
-      // redirects here again; send the user somewhere safe instead.
-      router.push("/"); return;
+      notFound();
     }
     loadAppointments();
   }, [router]);
@@ -170,7 +176,7 @@ export default function SchedulePage() {
   // "succeed" against an in-memory array only, discarding the change on
   // refresh. Be upfront about it instead.
   const save = () => {
-    (window as any).MediAlert?.toast({ type: "warning", title: "Not supported yet", message: "Creating or editing appointments isn't available from this screen yet." });
+    showToast("Creating or editing appointments isn't available from this screen yet.", "warning");
     closeModal();
   };
 
@@ -179,14 +185,14 @@ export default function SchedulePage() {
       const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
       const result = await res.json();
       if (!res.ok || !result.success) {
-        (window as any).MediAlert?.toast({ type: "error", title: "Could not cancel appointment" });
+        showToast("Could not cancel appointment", "error");
         return;
       }
       apptsRef.current = apptsRef.current.filter((a) => a.id !== id);
       render();
     } catch (e) {
       console.error("Failed to cancel appointment:", e);
-      (window as any).MediAlert?.toast({ type: "error", title: "Something went wrong" });
+      showToast("Something went wrong", "error");
     }
   };
 
@@ -298,8 +304,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
+      {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
     </div>
     </div>
   );

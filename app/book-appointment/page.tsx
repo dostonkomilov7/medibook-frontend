@@ -327,8 +327,6 @@ export default function BookAppointmentPage() {
         </div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
     </div>
   );
 }

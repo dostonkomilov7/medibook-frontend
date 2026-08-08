@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./all-users.style.css";
 import { getCookie, deleteCookie, getUserData } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -60,7 +60,7 @@ export default function AllUsersPage() {
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
-      showToast("Access Denied","error"); router.back(); return;
+      notFound();
     }
     init();
   }, [router]);

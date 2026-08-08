@@ -207,8 +207,6 @@ export default function ForgotPasswordPage() {
         <div className="deco-grid"></div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
     </div>
   );
 }

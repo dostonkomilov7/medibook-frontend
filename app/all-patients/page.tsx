@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./all-patients.style.css";
 import { getCookie, getUserData, strMonth, getAge, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -37,11 +37,7 @@ export default function AllPatientsPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Doctor" && role !== "Admin") {
-      // router.back() could bounce right back to a page that redirects
-      // here again; send the user somewhere safe instead.
-      showToast("Access Denied: You do not have permission.", "error");
-      router.push("/");
-      return;
+      notFound();
     }
     init();
   }, [router]);

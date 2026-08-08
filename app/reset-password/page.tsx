@@ -144,6 +144,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
+    <div className="page-reset-password">
     <div className="auth-layout">
       <div className="auth-panel">
         <div className="panel-inner">
@@ -264,6 +265,7 @@ export default function ResetPasswordPage() {
         <div className="deco-bg-orb orb2"></div>
         <div className="deco-grid"></div>
       </div>
+    </div>
     </div>
   );
 }

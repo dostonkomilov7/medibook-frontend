@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import "./doctor-dashboard.style.css";
+import "../doctor-dashboard/doctor-dashboard.style.css";
 import "./schedule.style.css";
 import { getCookie, apiUrl, escapeHtml, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";

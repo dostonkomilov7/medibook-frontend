@@ -95,6 +95,7 @@ export default function UserDashboardPage() {
   };
 
   return (
+    <div className="page-user-dashboard">
     <div className="app">
       {/* SIDEBAR */}
       <Sidebar>
@@ -239,6 +240,7 @@ export default function UserDashboardPage() {
         </div>
       </div>
 
+    </div>
     </div>
   );
 }

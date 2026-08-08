@@ -1,12 +1,12 @@
-  *,
-  *::before,
-  *::after {
+*,
+*::before,
+*::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
   }
 
-  :root {
+:root {
       --teal-50: #E1F5EE;
       --teal-100: #9FE1CB;
       --teal-400: #1D9E75;
@@ -34,22 +34,20 @@
       --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  html,
-  body {
+html,
+body {
       height: 100%;
       font-family: var(--font-body);
       background: var(--gray-50);
       color: var(--gray-800);
   }
 
-  /* ── LAYOUT ── */
-  .app {
+.page-user-dashboard /* ── LAYOUT ── */ .app {
       display: flex;
       min-height: 100vh;
   }
 
-  /* ── SIDEBAR ── */
-  .sidebar {
+.page-user-dashboard /* ── SIDEBAR ── */ .sidebar {
       width: var(--sidebar-w);
       background: var(--teal-800);
       display: flex;
@@ -62,7 +60,7 @@
       overflow: hidden;
   }
 
-  .sidebar::after {
+.page-user-dashboard .sidebar::after {
       content: '';
       position: absolute;
       bottom: -80px;
@@ -74,7 +72,7 @@
       pointer-events: none;
   }
 
-  .sidebar-brand {
+.page-user-dashboard .sidebar-brand {
       padding: 1.75rem 1.5rem 1.25rem;
       display: flex;
       align-items: center;
@@ -83,7 +81,7 @@
       margin-bottom: 0.5rem;
   }
 
-  .brand-dot {
+.page-user-dashboard .brand-dot {
       width: 32px;
       height: 32px;
       background: rgba(255, 255, 255, 0.15);
@@ -93,7 +91,7 @@
       justify-content: center;
   }
 
-  .brand-dot svg {
+.page-user-dashboard .brand-dot svg {
       width: 16px;
       height: 16px;
       stroke: #fff;
@@ -102,19 +100,18 @@
       stroke-linecap: round;
   }
 
-  .brand-text {
+.page-user-dashboard .brand-text {
       font-family: var(--font-display);
       font-size: 18px;
       color: #fff;
   }
 
-  /* Nav */
-  .nav-section {
+.page-user-dashboard /* Nav */ .nav-section {
       padding: 0 0.75rem;
       margin-bottom: 0.25rem;
   }
 
-  .nav-label {
+.page-user-dashboard .nav-label {
       font-size: 10px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -122,7 +119,7 @@
       padding: 0.75rem 0.75rem 0.4rem;
   }
 
-  .nav-item {
+.page-user-dashboard .nav-item {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -135,7 +132,7 @@
       position: relative;
   }
 
-  .nav-item svg {
+.page-user-dashboard .nav-item svg {
       width: 17px;
       height: 17px;
       stroke: rgba(255, 255, 255, 0.5);
@@ -146,14 +143,14 @@
       transition: stroke var(--transition);
   }
 
-  .nav-item span {
+.page-user-dashboard .nav-item span {
       font-size: 14px;
       color: rgba(255, 255, 255, 0.6);
       font-weight: 400;
       transition: color var(--transition);
   }
 
-  .nav-item .badge {
+.page-user-dashboard .nav-item .badge {
       margin-left: auto;
       background: var(--coral-400);
       color: #fff;
@@ -163,32 +160,32 @@
       border-radius: 100px;
   }
 
-  .nav-item:hover {
+.page-user-dashboard .nav-item:hover {
       background: rgba(255, 255, 255, 0.07);
   }
 
-  .nav-item:hover svg {
+.page-user-dashboard .nav-item:hover svg {
       stroke: rgba(255, 255, 255, 0.85);
   }
 
-  .nav-item:hover span {
+.page-user-dashboard .nav-item:hover span {
       color: rgba(255, 255, 255, 0.85);
   }
 
-  .nav-item.active {
+.page-user-dashboard .nav-item.active {
       background: rgba(255, 255, 255, 0.12);
   }
 
-  .nav-item.active svg {
+.page-user-dashboard .nav-item.active svg {
       stroke: #fff;
   }
 
-  .nav-item.active span {
+.page-user-dashboard .nav-item.active span {
       color: #fff;
       font-weight: 500;
   }
 
-  .nav-item.active::before {
+.page-user-dashboard .nav-item.active::before {
       content: '';
       position: absolute;
       left: 0;
@@ -199,8 +196,7 @@
       border-radius: 0 3px 3px 0;
   }
 
-  /* User card at bottom */
-  .sidebar-user {
+.page-user-dashboard /* User card at bottom */ .sidebar-user {
       margin-top: auto;
       padding: 1rem 1.25rem;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -210,7 +206,7 @@
       cursor: pointer;
   }
 
-  .user-avatar {
+.page-user-dashboard .user-avatar {
       width: 34px;
       height: 34px;
       border-radius: 50%;
@@ -224,12 +220,12 @@
       flex-shrink: 0;
   }
 
-  .user-meta {
+.page-user-dashboard .user-meta {
       flex: 1;
       min-width: 0;
   }
 
-  .user-meta .name {
+.page-user-dashboard .user-meta .name {
       font-size: 13px;
       font-weight: 500;
       color: #fff;
@@ -238,12 +234,12 @@
       text-overflow: ellipsis;
   }
 
-  .user-meta .role {
+.page-user-dashboard .user-meta .role {
       font-size: 11px;
       color: rgba(255, 255, 255, 0.5);
   }
 
-  .sidebar-user svg {
+.page-user-dashboard .sidebar-user svg {
       width: 15px;
       height: 15px;
       stroke: rgba(255, 255, 255, 0.4);
@@ -253,8 +249,7 @@
       flex-shrink: 0;
   }
 
-  /* ── MAIN ── */
-  .main {
+.page-user-dashboard /* ── MAIN ── */ .main {
       margin-left: var(--sidebar-w);
       flex: 1;
       display: flex;
@@ -262,8 +257,7 @@
       min-height: 100vh;
   }
 
-  /* Topbar */
-  .topbar {
+.page-user-dashboard /* Topbar */ .topbar {
       height: 64px;
       background: var(--white);
       border-bottom: 1px solid var(--gray-100);
@@ -276,19 +270,19 @@
       z-index: 50;
   }
 
-  .topbar-title {
+.page-user-dashboard .topbar-title {
       font-family: var(--font-display);
       font-size: 20px;
       color: var(--gray-800);
       flex: 1;
   }
 
-  .topbar-title span {
+.page-user-dashboard .topbar-title span {
       font-style: italic;
       color: var(--teal-600);
   }
 
-  .search-box {
+.page-user-dashboard .search-box {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -301,12 +295,12 @@
       transition: border-color var(--transition), box-shadow var(--transition);
   }
 
-  .search-box:focus-within {
+.page-user-dashboard .search-box:focus-within {
       border-color: var(--teal-400);
       box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
   }
 
-  .search-box svg {
+.page-user-dashboard .search-box svg {
       width: 15px;
       height: 15px;
       stroke: var(--gray-400);
@@ -316,7 +310,7 @@
       flex-shrink: 0;
   }
 
-  .search-box input {
+.page-user-dashboard .search-box input {
       border: none;
       background: none;
       outline: none;
@@ -326,17 +320,17 @@
       width: 100%;
   }
 
-  .search-box input::placeholder {
+.page-user-dashboard .search-box input::placeholder {
       color: var(--gray-400);
   }
 
-  .topbar-actions {
+.page-user-dashboard .topbar-actions {
       display: flex;
       align-items: center;
       gap: 8px;
   }
 
-  .icon-btn {
+.page-user-dashboard .icon-btn {
       width: 38px;
       height: 38px;
       border-radius: 50%;
@@ -350,12 +344,12 @@
       transition: background var(--transition), border-color var(--transition);
   }
 
-  .icon-btn:hover {
+.page-user-dashboard .icon-btn:hover {
       background: var(--gray-50);
       border-color: var(--gray-200);
   }
 
-  .icon-btn svg {
+.page-user-dashboard .icon-btn svg {
       width: 16px;
       height: 16px;
       stroke: var(--gray-600);
@@ -364,7 +358,7 @@
       stroke-linecap: round;
   }
 
-  .notif-dot {
+.page-user-dashboard .notif-dot {
       position: absolute;
       top: 7px;
       right: 7px;
@@ -375,7 +369,7 @@
       border: 1.5px solid #fff;
   }
 
-  .topbar-avatar {
+.page-user-dashboard .topbar-avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
@@ -389,14 +383,12 @@
       cursor: pointer;
   }
 
-  /* ── CONTENT ── */
-  .content {
+.page-user-dashboard /* ── CONTENT ── */ .content {
       padding: 2rem;
       flex: 1;
   }
 
-  /* Welcome banner */
-  .welcome-banner {
+.page-user-dashboard /* Welcome banner */ .welcome-banner {
       background: var(--teal-600);
       border-radius: var(--radius);
       padding: 1.75rem 2rem;
@@ -408,7 +400,7 @@
       overflow: hidden;
   }
 
-  .welcome-banner::before {
+.page-user-dashboard .welcome-banner::before {
       content: '';
       position: absolute;
       top: -60px;
@@ -419,7 +411,7 @@
       border: 40px solid rgba(255, 255, 255, 0.06);
   }
 
-  .welcome-banner::after {
+.page-user-dashboard .welcome-banner::after {
       content: '';
       position: absolute;
       bottom: -50px;
@@ -430,44 +422,44 @@
       border: 35px solid rgba(255, 255, 255, 0.06);
   }
 
-  .welcome-copy {
+.page-user-dashboard .welcome-copy {
       position: relative;
       z-index: 1;
   }
 
-  .welcome-copy p {
+.page-user-dashboard .welcome-copy p {
       font-size: 13px;
       color: rgba(255, 255, 255, 0.65);
       margin-bottom: 4px;
       letter-spacing: 0.02em;
   }
 
-  .welcome-copy h2 {
+.page-user-dashboard .welcome-copy h2 {
       font-family: var(--font-display);
       font-size: 28px;
       color: #fff;
       line-height: 1.2;
   }
 
-  .welcome-copy h2 em {
+.page-user-dashboard .welcome-copy h2 em {
       font-style: italic;
       color: var(--teal-100);
   }
 
-  .welcome-copy .sub {
+.page-user-dashboard .welcome-copy .sub {
       font-size: 13.5px;
       color: rgba(255, 255, 255, 0.6);
       margin-top: 6px;
   }
 
-  .welcome-actions {
+.page-user-dashboard .welcome-actions {
       display: flex;
       gap: 10px;
       position: relative;
       z-index: 1;
   }
 
-  .btn-white {
+.page-user-dashboard .btn-white {
       background: #fff;
       color: var(--teal-800);
       border: none;
@@ -481,11 +473,11 @@
       white-space: nowrap;
   }
 
-  .btn-white:hover {
+.page-user-dashboard .btn-white:hover {
       background: var(--teal-50);
   }
 
-  .btn-outline-white {
+.page-user-dashboard .btn-outline-white {
       background: rgba(255, 255, 255, 0.12);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.25);
@@ -499,19 +491,18 @@
       white-space: nowrap;
   }
 
-  .btn-outline-white:hover {
+.page-user-dashboard .btn-outline-white:hover {
       background: rgba(255, 255, 255, 0.2);
   }
 
-  /* Stats row */
-  .stats-grid {
+.page-user-dashboard /* Stats row */ .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 1.75rem;
   }
 
-  .stat-card {
+.page-user-dashboard .stat-card {
       background: var(--white);
       border: 1px solid var(--gray-100);
       border-radius: var(--radius);
@@ -522,17 +513,17 @@
       transition: box-shadow var(--transition);
   }
 
-  .stat-card:hover {
+.page-user-dashboard .stat-card:hover {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   }
 
-  .stat-card-top {
+.page-user-dashboard .stat-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
   }
 
-  .stat-icon {
+.page-user-dashboard .stat-icon {
       width: 38px;
       height: 38px;
       border-radius: 10px;
@@ -541,7 +532,7 @@
       justify-content: center;
   }
 
-  .stat-icon svg {
+.page-user-dashboard .stat-icon svg {
       width: 18px;
       height: 18px;
       fill: none;
@@ -549,106 +540,103 @@
       stroke-linecap: round;
   }
 
-  .stat-icon.teal {
+.page-user-dashboard .stat-icon.teal {
       background: var(--teal-50);
   }
 
-  .stat-icon.teal svg {
+.page-user-dashboard .stat-icon.teal svg {
       stroke: var(--teal-600);
   }
 
-  .stat-icon.coral {
+.page-user-dashboard .stat-icon.coral {
       background: var(--coral-50);
   }
 
-  .stat-icon.coral svg {
+.page-user-dashboard .stat-icon.coral svg {
       stroke: var(--coral-400);
   }
 
-  .stat-icon.amber {
+.page-user-dashboard .stat-icon.amber {
       background: var(--amber-50);
   }
 
-  .stat-icon.amber svg {
+.page-user-dashboard .stat-icon.amber svg {
       stroke: var(--amber-400);
   }
 
-  .stat-icon.blue {
+.page-user-dashboard .stat-icon.blue {
       background: var(--blue-50);
   }
 
-  .stat-icon.blue svg {
+.page-user-dashboard .stat-icon.blue svg {
       stroke: var(--blue-400);
   }
 
-  .stat-change {
+.page-user-dashboard .stat-change {
       font-size: 11.5px;
       font-weight: 500;
       padding: 3px 8px;
       border-radius: 100px;
   }
 
-  .stat-change.up {
+.page-user-dashboard .stat-change.up {
       background: var(--teal-50);
       color: var(--teal-600);
   }
 
-  .stat-change.down {
+.page-user-dashboard .stat-change.down {
       background: var(--coral-50);
       color: var(--coral-400);
   }
 
-  .stat-change.neu {
+.page-user-dashboard .stat-change.neu {
       background: var(--gray-100);
       color: var(--gray-600);
   }
 
-  .stat-value {
+.page-user-dashboard .stat-value {
       font-family: var(--font-display);
       font-size: 30px;
       color: var(--gray-800);
       line-height: 1;
   }
 
-  .stat-label {
+.page-user-dashboard .stat-label {
       font-size: 13px;
       color: var(--gray-400);
   }
 
-  /* Main grid */
-  .main-grid {
+.page-user-dashboard /* Main grid */ .main-grid {
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 1.5rem;
   }
 
-  /* Section headings */
-  .section-head {
+.page-user-dashboard /* Section headings */ .section-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1rem;
   }
 
-  .section-head h3 {
+.page-user-dashboard .section-head h3 {
       font-family: var(--font-display);
       font-size: 18px;
       color: var(--gray-800);
   }
 
-  .section-head a {
+.page-user-dashboard .section-head a {
       font-size: 13px;
       color: var(--teal-600);
       text-decoration: none;
       font-weight: 500;
   }
 
-  .section-head a:hover {
+.page-user-dashboard .section-head a:hover {
       text-decoration: underline;
   }
 
-  /* Appointments table */
-  .table-card {
+.page-user-dashboard /* Appointments table */ .table-card {
       background: var(--white);
       border: 1px solid var(--gray-100);
       border-radius: var(--radius);
@@ -658,12 +646,12 @@
       margin-bottom: 1.5rem;
   }
 
-  .table-card table {
+.page-user-dashboard .table-card table {
       width: 100%;
       border-collapse: collapse;
   }
 
-  .table-card thead th {
+.page-user-dashboard .table-card thead th {
       font-size: 11.5px;
       font-weight: 500;
       color: var(--gray-400);
@@ -675,34 +663,34 @@
       background: var(--gray-50);
   }
 
-  .table-card tbody tr {
+.page-user-dashboard .table-card tbody tr {
       border-bottom: 1px solid var(--gray-100);
       transition: background var(--transition);
       cursor: pointer;
   }
 
-  .table-card tbody tr:last-child {
+.page-user-dashboard .table-card tbody tr:last-child {
       border-bottom: none;
   }
 
-  .table-card tbody tr:hover {
+.page-user-dashboard .table-card tbody tr:hover {
       background: var(--gray-50);
   }
 
-  .table-card tbody td {
+.page-user-dashboard .table-card tbody td {
       padding: 14px 20px;
       font-size: 14px;
       color: var(--gray-800);
       vertical-align: middle;
   }
 
-  .doctor-cell {
+.page-user-dashboard .doctor-cell {
       display: flex;
       align-items: center;
       gap: 10px;
   }
 
-  .doc-avatar {
+.page-user-dashboard .doc-avatar {
       width: 34px;
       height: 34px;
       border-radius: 50%;
@@ -715,45 +703,45 @@
       flex-shrink: 0;
   }
 
-  .doc-avatar.a {
+.page-user-dashboard .doc-avatar.a {
       background: var(--teal-400);
   }
 
-  .doc-avatar.b {
+.page-user-dashboard .doc-avatar.b {
       background: var(--blue-400);
   }
 
-  .doc-avatar.c {
+.page-user-dashboard .doc-avatar.c {
       background: var(--coral-400);
   }
 
-  .doc-avatar.d {
+.page-user-dashboard .doc-avatar.d {
       background: var(--amber-400);
   }
 
-  .doc-name {
+.page-user-dashboard .doc-name {
       font-size: 14px;
       font-weight: 500;
       color: var(--gray-800);
   }
 
-  .doc-spec {
+.page-user-dashboard .doc-spec {
       font-size: 12px;
       color: var(--gray-400);
   }
 
-  .apt-date {
+.page-user-dashboard .apt-date {
       font-size: 13.5px;
       color: var(--gray-800);
   }
 
-  .apt-time {
+.page-user-dashboard .apt-time {
       font-size: 12px;
       color: var(--gray-400);
       margin-top: 2px;
   }
 
-  .status-pill {
+.page-user-dashboard .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -763,41 +751,41 @@
       font-weight: 500;
   }
 
-  .status-pill::before {
+.page-user-dashboard .status-pill::before {
       content: '';
       width: 6px;
       height: 6px;
       border-radius: 50%;
   }
 
-  .status-pill.confirmed {
+.page-user-dashboard .status-pill.confirmed {
       background: var(--teal-50);
       color: var(--teal-600);
   }
 
-  .status-pill.confirmed::before {
+.page-user-dashboard .status-pill.confirmed::before {
       background: var(--teal-400);
   }
 
-  .status-pill.pending {
+.page-user-dashboard .status-pill.pending {
       background: var(--amber-50);
       color: #855010;
   }
 
-  .status-pill.pending::before {
+.page-user-dashboard .status-pill.pending::before {
       background: var(--amber-400);
   }
 
-  .status-pill.cancelled {
+.page-user-dashboard .status-pill.cancelled {
       background: var(--coral-50);
       color: var(--coral-400);
   }
 
-  .status-pill.cancelled::before {
+.page-user-dashboard .status-pill.cancelled::before {
       background: var(--coral-400);
   }
 
-  .type-tag {
+.page-user-dashboard .type-tag {
       display: inline-block;
       padding: 3px 10px;
       border-radius: var(--radius-sm);
@@ -805,17 +793,17 @@
       font-weight: 500;
   }
 
-  .type-tag.in-person {
+.page-user-dashboard .type-tag.in-person {
       background: var(--blue-50);
       color: var(--blue-400);
   }
 
-  .type-tag.virtual {
+.page-user-dashboard .type-tag.virtual {
       background: var(--teal-50);
       color: var(--teal-600);
   }
 
-  .row-action {
+.page-user-dashboard .row-action {
       background: none;
       border: 1px solid var(--gray-100);
       border-radius: var(--radius-sm);
@@ -827,93 +815,90 @@
       transition: border-color var(--transition), background var(--transition);
   }
 
-  .row-action:hover {
+.page-user-dashboard .row-action:hover {
       border-color: var(--teal-400);
       color: var(--teal-600);
       background: var(--teal-50);
   }
 
-  /* Right column */
-  .right-col {
+.page-user-dashboard /* Right column */ .right-col {
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
   }
 
-  /* Health summary card */
-  .card {
+.page-user-dashboard /* Health summary card */ .card {
       background: var(--white);
       border: 1px solid var(--gray-100);
       border-radius: var(--radius);
       padding: 1.25rem 1.4rem;
   }
 
-  .health-items {
+.page-user-dashboard .health-items {
       display: flex;
       flex-direction: column;
       gap: 1rem;
   }
 
-  .health-item {
+.page-user-dashboard .health-item {
       display: flex;
       flex-direction: column;
       gap: 6px;
   }
 
-  .health-row {
+.page-user-dashboard .health-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
   }
 
-  .health-name {
+.page-user-dashboard .health-name {
       font-size: 13px;
       color: var(--gray-600);
   }
 
-  .health-val {
+.page-user-dashboard .health-val {
       font-size: 13px;
       font-weight: 500;
       color: var(--gray-800);
   }
 
-  .health-bar {
+.page-user-dashboard .health-bar {
       height: 5px;
       background: var(--gray-100);
       border-radius: 100px;
       overflow: hidden;
   }
 
-  .health-fill {
+.page-user-dashboard .health-fill {
       height: 100%;
       border-radius: 100px;
       transition: width 1s ease;
   }
 
-  .health-fill.green {
+.page-user-dashboard .health-fill.green {
       background: var(--teal-400);
   }
 
-  .health-fill.amber {
+.page-user-dashboard .health-fill.amber {
       background: var(--amber-400);
   }
 
-  .health-fill.coral {
+.page-user-dashboard .health-fill.coral {
       background: var(--coral-400);
   }
 
-  .health-fill.blue {
+.page-user-dashboard .health-fill.blue {
       background: var(--blue-400);
   }
 
-  /* Meds */
-  .med-list {
+.page-user-dashboard /* Meds */ .med-list {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
   }
 
-  .med-item {
+.page-user-dashboard .med-item {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -924,45 +909,45 @@
       transition: border-color var(--transition);
   }
 
-  .med-item:hover {
+.page-user-dashboard .med-item:hover {
       border-color: var(--gray-200);
   }
 
-  .med-dot {
+.page-user-dashboard .med-dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
       flex-shrink: 0;
   }
 
-  .med-dot.green {
+.page-user-dashboard .med-dot.green {
       background: var(--teal-400);
   }
 
-  .med-dot.coral {
+.page-user-dashboard .med-dot.coral {
       background: var(--coral-400);
   }
 
-  .med-dot.blue {
+.page-user-dashboard .med-dot.blue {
       background: var(--blue-400);
   }
 
-  .med-info {
+.page-user-dashboard .med-info {
       flex: 1;
   }
 
-  .med-name {
+.page-user-dashboard .med-name {
       font-size: 13.5px;
       font-weight: 500;
       color: var(--gray-800);
   }
 
-  .med-dose {
+.page-user-dashboard .med-dose {
       font-size: 11.5px;
       color: var(--gray-400);
   }
 
-  .med-time {
+.page-user-dashboard .med-time {
       font-size: 11.5px;
       color: var(--gray-600);
       background: var(--white);
@@ -971,21 +956,20 @@
       border-radius: 100px;
   }
 
-  /* Quick actions */
-  .quick-grid {
+.page-user-dashboard /* Quick actions */ .quick-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
   }
 
-  a {
+.page-user-dashboard a {
       text-decoration: none;
       margin: 0;
       padding: 0;
       display:contents;
   }
 
-  .quick-btn {
+.page-user-dashboard .quick-btn {
       background: var(--gray-50);
       border: 1px solid var(--gray-100);
       border-radius: var(--radius-sm);
@@ -999,21 +983,20 @@
       text-align: left;
   }
 
-
-  .quick-btn:hover {
+.page-user-dashboard .quick-btn:hover {
       border-color: var(--teal-400);
       background: var(--teal-50);
   }
 
-  .quick-btn:hover .quick-icon {
+.page-user-dashboard .quick-btn:hover .quick-icon {
       background: var(--teal-100);
   }
 
-  .quick-btn:hover .quick-icon svg {
+.page-user-dashboard .quick-btn:hover .quick-icon svg {
       stroke: var(--teal-800);
   }
 
-  .quick-icon {
+.page-user-dashboard .quick-icon {
       width: 32px;
       height: 32px;
       background: var(--gray-100);
@@ -1024,7 +1007,7 @@
       transition: background var(--transition);
   }
 
-  .quick-icon svg {
+.page-user-dashboard .quick-icon svg {
       width: 15px;
       height: 15px;
       stroke: var(--gray-600);
@@ -1034,7 +1017,7 @@
       transition: stroke var(--transition);
   }
 
-  .quick-btn span {
+.page-user-dashboard .quick-btn span {
       font-size: 12.5px;
       font-weight: 500;
       color: var(--gray-700);
@@ -1043,16 +1026,16 @@
 
   /* Responsive */
   @media (max-width: 1100px) {
-      .stats-grid {
+.page-user-dashboard .stats-grid {
           grid-template-columns: repeat(2, 1fr);
       }
 
-      .main-grid {
+.page-user-dashboard .main-grid {
           grid-template-columns: 1fr;
       }
   }
 
-  .hamburger-btn {
+.page-user-dashboard .hamburger-btn {
       display: none;
       background: none;
       border: none;
@@ -1064,7 +1047,7 @@
       justify-content: center;
   }
 
-  .hamburger-btn svg {
+.page-user-dashboard .hamburger-btn svg {
       width: 22px;
       height: 22px;
       stroke: var(--gray-800);
@@ -1073,30 +1056,30 @@
       stroke-linecap: round;
   }
 
-  .sidebar-overlay {
+.page-user-dashboard .sidebar-overlay {
       display: none;
   }
 
   @media (max-width: 768px) {
-      .sidebar {
+.page-user-dashboard .sidebar {
           transform: translateX(-100%);
           transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 300;
       }
 
-      .sidebar.open {
+.page-user-dashboard .sidebar.open {
           transform: translateX(0);
       }
 
-      .main {
+.page-user-dashboard .main {
           margin-left: 0;
       }
 
-      .hamburger-btn {
+.page-user-dashboard .hamburger-btn {
           display: flex;
       }
 
-      .sidebar-overlay {
+.page-user-dashboard .sidebar-overlay {
           display: block;
           position: fixed;
           inset: 0;
@@ -1107,16 +1090,16 @@
           transition: opacity 0.2s;
       }
 
-      .sidebar-overlay.open {
+.page-user-dashboard .sidebar-overlay.open {
           opacity: 1;
           pointer-events: auto;
       }
 
-      .welcome-actions {
+.page-user-dashboard .welcome-actions {
           display: none;
       }
 
-      .stats-grid {
+.page-user-dashboard .stats-grid {
           grid-template-columns: repeat(2, 1fr);
       }
   }

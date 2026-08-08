@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./doctor-management.style.css";
 import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const SPEC_CLASS: Record<string,string> = {
   Cardiology:"cardio",Dermatology:"derm",Neurology:"neuro",
@@ -138,22 +140,17 @@ export default function DoctorManagementPage() {
   return (
     <div className="app">
       {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot"><svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <span className="brand-text">MediBook</span>
-          <span className="admin-chip">Admin</span>
-        </div>
+      <Sidebar badge={<span className="admin-chip">Admin</span>}>
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
           <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span className="label">Dashboard</span></a>
-          <Link className="nav-item" href="/all-users"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span className="label">All Users</span></Link>
+          <Link prefetch={false} className="nav-item" href="/all-users"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span className="label">All Users</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Management</p>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span className="label">Appointments</span><span className="badge">5</span></a>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span className="label">Doctors</span><span className="badge">Soon</span></a>
-          <Link className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg><span className="label">Departments</span><span className="badge">Soon</span></Link>
+          <Link prefetch={false} className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg><span className="label">Departments</span><span className="badge">Soon</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">System</p>
@@ -166,19 +163,13 @@ export default function DoctorManagementPage() {
           <div className="admin-meta"><p className="name">{adminName}</p><p className="role">Super Administrator</p></div>
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
+            <HamburgerToggle />
             <div className="topbar-title">Doctors <span>Management</span></div>
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>

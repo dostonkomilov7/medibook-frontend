@@ -53,7 +53,7 @@ function toast(opts: ToastOptions): void {
   const toastStack = document.getElementById('toastStack');
   if (!toastStack) return;
 
-  const existing = toastStack.querySelectorAll('.toast');
+  const existing = toastStack.querySelectorAll('.ma-toast');
   if (existing.length >= MAX_TOASTS) {
     dismissToast(existing[0] as HTMLElement);
   }
@@ -62,18 +62,24 @@ function toast(opts: ToastOptions): void {
   const darkClass = theme === 'dark' ? ' dark-theme' : '';
   const el = document.createElement('div');
   el.id = id;
-  el.className = `toast toast-${type}${darkClass}`;
+  // Prefixed with `ma-` (MediAlert) — plain names like "toast" and
+  // "modal-overlay" collided with several pages' own bespoke
+  // toast/modal components (e.g. schedule's appointment modal,
+  // all-users' delete-confirmation toast) that happened to reuse the
+  // same class names, corrupting whichever page's stylesheet loaded
+  // last in the cascade.
+  el.className = `ma-toast ma-toast-${type}${darkClass}`;
   el.setAttribute('role', 'alert');
   el.innerHTML = `
-    <div class="toast-icon">${ICONS[type] || ICONS.info}</div>
-    <div class="toast-body">
-      <div class="toast-title">${escapeHtml(title)}</div>
-      ${message ? `<div class="toast-desc">${escapeHtml(message)}</div>` : ''}
+    <div class="ma-toast-icon">${ICONS[type] || ICONS.info}</div>
+    <div class="ma-toast-body">
+      <div class="ma-toast-title">${escapeHtml(title)}</div>
+      ${message ? `<div class="ma-toast-desc">${escapeHtml(message)}</div>` : ''}
     </div>
-    <button class="toast-close" aria-label="Dismiss" onclick="MediAlert._dismissById('${id}')">
+    <button class="ma-toast-close" aria-label="Dismiss" onclick="MediAlert._dismissById('${id}')">
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    <div class="ma-toast-progress" style="animation-duration:${duration}ms;"></div>
   `;
 
   toastStack.appendChild(el);
@@ -95,29 +101,34 @@ function modal(opts: ModalOptions): void {
   const footerEl = document.getElementById('mediModalFooter');
   if (!overlay || !box || !iconArea || !footerEl) return;
 
+  // Reset per-open state so type/theme classes from a previous call
+  // don't linger (e.g. an error modal followed by a success modal
+  // would otherwise keep the red icon ring).
+  box.className = 'ma-modal-box';
   if (theme === 'dark') box.classList.add('dark-theme');
+  box.classList.add(`ma-modal-${type}`);
 
   iconArea.innerHTML = `
-    <div class="modal-icon modal-icon-${type}">${ICONS[type]}</div>
-    <div class="modal-title">${escapeHtml(title)}</div>
-    <div class="modal-message">${escapeHtml(message)}</div>
+    <div class="ma-modal-icon ma-modal-icon-${type}">${ICONS[type]}</div>
+    <div class="ma-modal-title">${escapeHtml(title)}</div>
+    <div class="ma-modal-message">${escapeHtml(message)}</div>
   `;
 
-  if (detail && detailEl) {
-    detailEl.style.display = '';
-    detailEl.innerHTML = `<div class="modal-detail-inner">${escapeHtml(detail)}</div>`;
+  if (detailEl) {
+    detailEl.style.display = detail ? '' : 'none';
+    detailEl.innerHTML = detail ? `<div class="ma-modal-detail-inner">${escapeHtml(detail)}</div>` : '';
   }
 
   footerEl.innerHTML = '';
   if (cancelText) {
     const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'modal-btn modal-btn-cancel';
+    cancelBtn.className = 'ma-modal-btn ma-modal-btn-cancel';
     cancelBtn.textContent = cancelText;
     cancelBtn.onclick = () => { closeModal(); onCancel?.(); };
     footerEl.appendChild(cancelBtn);
   }
   const confirmBtn = document.createElement('button');
-  confirmBtn.className = `modal-btn modal-btn-${type}`;
+  confirmBtn.className = `ma-modal-btn ma-modal-btn-${type}`;
   confirmBtn.textContent = confirmText;
   confirmBtn.onclick = () => { closeModal(); onConfirm?.(); };
   footerEl.appendChild(confirmBtn);

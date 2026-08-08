@@ -3,8 +3,9 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./doctor-dashboard.style.css";
-import "../alert.style.css";
 import { getCookie, getUserData, strMonth, getAge, escapeHtml, apiUrl, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
 export default function DoctorDashboardPage() {
   const router = useRouter();
@@ -90,12 +91,7 @@ export default function DoctorDashboardPage() {
   return (
     <div className="app">
       {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot"><svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5" /><circle cx="12" cy="12" r="3" /></svg></div>
-          <span className="brand-text">MediBook</span>
-          <span className="brand-badge">MD</span>
-        </div>
+      <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{ padding: "0.75rem 0.75rem 0.25rem" }}>
           <div className="sidebar-doctor">
             <div className="doc-avatar-lg"></div>
@@ -106,9 +102,9 @@ export default function DoctorDashboardPage() {
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
           <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></a>
-          <Link className="nav-item" href="/schedule"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Schedule</span></Link>
-          <Link className="nav-item" href="/all-patients"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg><span>My Patients</span></Link>
-          <Link className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
+          <Link prefetch={false} className="nav-item" href="/schedule"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Schedule</span></Link>
+          <Link prefetch={false} className="nav-item" href="/all-patients"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg><span>My Patients</span></Link>
+          <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Clinical</p>
@@ -120,19 +116,13 @@ export default function DoctorDashboardPage() {
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07" /></svg><span>Settings</span><span className="badge">Soon</span></a>
           <a className="nav-item" style={{ cursor: "pointer" }} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg><span>Sign out</span></a>
         </nav>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
+            <HamburgerToggle />
             <div className="topbar-title">Doctor <span>Overview</span></div>
             <div className="topbar-sub"></div>
           </div>
@@ -226,14 +216,8 @@ export default function DoctorDashboardPage() {
         </div>
       </div>
 
-      <div className="modal-overlay" id="mediModalOverlay" onClick={(e) => (window as any).MediAlert?._handleOverlayClick(e)}>
-        <div className="modal-box" id="mediModalBox">
-          <div className="modal-icon-area" id="mediModalIconArea"></div>
-          <div className="modal-detail" id="mediModalDetail" style={{ display: "none" }}></div>
-          <div className="modal-footer" id="mediModalFooter"></div>
-        </div>
-      </div>
-      <div className="toast-stack" id="toastStack"></div>
+      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
+          mounted once from the root layout. */}
     </div>
   );
 }

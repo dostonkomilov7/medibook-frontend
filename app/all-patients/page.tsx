@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./all-patients.style.css";
 import { getCookie, getUserData, strMonth, getAge, apiUrl, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const PER_PAGE = 8;
 
@@ -120,15 +122,7 @@ export default function AllPatientsPage() {
   return (
     <div className="app">
       {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot">
-            <svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="3"/></svg>
-          </div>
-          <span className="brand-text">MediBook</span>
-          <span className="brand-badge">MD</span>
-        </div>
-
+      <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{padding:"0.75rem 0.75rem 0.25rem"}}>
           <div className="sidebar-doctor">
             <div className="doc-av-sm">{userData?.users?.[0]?.full_name?.[0]?.toUpperCase()}</div>
@@ -142,11 +136,11 @@ export default function AllPatientsPage() {
 
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
-          <Link className="nav-item" href="/doctor-dashboard">
+          <Link prefetch={false} className="nav-item" href="/doctor-dashboard">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             <span>Dashboard</span>
           </Link>
-          <Link className="nav-item" href="/schedule">
+          <Link prefetch={false} className="nav-item" href="/schedule">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span>Schedule</span>
           </Link>
@@ -154,7 +148,7 @@ export default function AllPatientsPage() {
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>My Patients</span>
           </a>
-          <Link className="nav-item" href="/chat">
+          <Link prefetch={false} className="nav-item" href="/chat">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             <span>Messages</span>
           </Link>
@@ -190,19 +184,13 @@ export default function AllPatientsPage() {
             <span>Sign out</span>
           </a>
         </nav>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
+            <HamburgerToggle />
             <div className="topbar-title">My <span>Patients</span></div>
             <div className="topbar-sub">{doctor ? `Dr ${userData?.users?.[0]?.full_name} • ${doctor.department} • ${fullDate}` : ""}</div>
           </div>

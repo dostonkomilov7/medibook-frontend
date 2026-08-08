@@ -1,17 +1,14 @@
-/* ── Schedule page additions (reuses dashboard tokens) ── */
-
-.icon-btn.sm {
+.page-schedule /* ── Schedule page additions (reuses dashboard tokens) ── */ .icon-btn.sm {
     width: 32px;
     height: 32px;
 }
 
-.icon-btn.sm svg {
+.page-schedule .icon-btn.sm svg {
     width: 14px;
     height: 14px;
 }
 
-/* Toolbar */
-.sched-toolbar {
+.page-schedule /* Toolbar */ .sched-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -20,37 +17,37 @@
     margin-bottom: 1.4rem;
 }
 
-.date-nav {
+.page-schedule .date-nav {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.date-display {
+.page-schedule .date-display {
     min-width: 150px;
     text-align: center;
 }
 
-.date-display .dow {
+.page-schedule .date-display .dow {
     font-family: var(--font-display);
     font-size: 17px;
     color: var(--gray-800);
 }
 
-.date-display .full {
+.page-schedule .date-display .full {
     font-size: 12px;
     color: var(--gray-400);
     margin-top: 1px;
 }
 
-.toolbar-right {
+.page-schedule .toolbar-right {
     display: flex;
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
 }
 
-.filter-chips {
+.page-schedule .filter-chips {
     display: flex;
     gap: 6px;
     background: var(--gray-50);
@@ -59,7 +56,7 @@
     padding: 3px;
 }
 
-.chip {
+.page-schedule .chip {
     border: none;
     background: none;
     font-family: var(--font-body);
@@ -71,26 +68,25 @@
     transition: background var(--transition), color var(--transition);
 }
 
-.chip:hover {
+.page-schedule .chip:hover {
     color: var(--gray-800);
 }
 
-.chip.active {
+.page-schedule .chip.active {
     background: var(--white);
     color: var(--teal-600);
     font-weight: 500;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* Mini stats */
-.mini-stats {
+.page-schedule /* Mini stats */ .mini-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 1.4rem;
 }
 
-.mini-stat {
+.page-schedule .mini-stat {
     background: var(--white);
     border: 1px solid var(--gray-100);
     border-radius: var(--radius);
@@ -100,20 +96,19 @@
     gap: 4px;
 }
 
-.m-num {
+.page-schedule .m-num {
     font-family: var(--font-display);
     font-size: 26px;
     color: var(--gray-800);
     line-height: 1;
 }
 
-.m-lbl {
+.page-schedule .m-lbl {
     font-size: 12px;
     color: var(--gray-400);
 }
 
-/* Empty state */
-.empty-state {
+.page-schedule /* Empty state */ .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -122,7 +117,7 @@
     text-align: center;
 }
 
-.empty-state svg {
+.page-schedule .empty-state svg {
     width: 34px;
     height: 34px;
     stroke: var(--gray-200);
@@ -131,27 +126,25 @@
     stroke-linecap: round;
 }
 
-.empty-state p {
+.page-schedule .empty-state p {
     font-size: 13.5px;
     color: var(--gray-400);
 }
 
-/* Schedule action variants */
-.schedule-action.edit:hover {
+.page-schedule /* Schedule action variants */ .schedule-action.edit:hover {
     border-color: var(--blue-400);
     color: var(--blue-600);
     background: var(--blue-50);
 }
 
-.schedule-actions-group {
+.page-schedule .schedule-actions-group {
     display: flex;
     gap: 6px;
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-/* ── MODAL ── */
-/* .modal-overlay {
+.page-schedule /* ── MODAL ── */ /* .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(44, 44, 42, 0.45);
@@ -161,9 +154,7 @@
     z-index: 200;
     padding: 1rem;
     backdrop-filter: blur(2px);
-} */
-
-.modal-overlay {
+} */ .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(44, 44, 42, 0.45);
@@ -175,12 +166,11 @@
   backdrop-filter: blur(2px);
 }
 
-/* add this — overrides display:flex when hidden */
-.modal-overlay[hidden] {
+.page-schedule /* add this — overrides display:flex when hidden */ .modal-overlay[hidden] {
   display: none;
 }
 
-.modal-card {
+.page-schedule .modal-card {
     background: var(--white);
     border-radius: var(--radius);
     width: 100%;
@@ -202,7 +192,7 @@
     }
 }
 
-.modal-head {
+.page-schedule .modal-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -210,27 +200,27 @@
     border-bottom: 1px solid var(--gray-100);
 }
 
-.modal-head h3 {
+.page-schedule .modal-head h3 {
     font-family: var(--font-display);
     font-size: 18px;
     color: var(--gray-800);
 }
 
-.modal-body {
+.page-schedule .modal-body {
     padding: 1.4rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.field {
+.page-schedule .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
     flex: 1;
 }
 
-.field span {
+.page-schedule .field span {
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.05em;
@@ -238,8 +228,8 @@
     color: var(--gray-400);
 }
 
-.field input,
-.field select {
+.page-schedule .field input,
+.page-schedule .field select {
     font-family: var(--font-body);
     font-size: 13.5px;
     color: var(--gray-800);
@@ -251,19 +241,19 @@
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.field input:focus,
-.field select:focus {
+.page-schedule .field input:focus,
+.page-schedule .field select:focus {
     border-color: var(--teal-400);
     box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
     background: var(--white);
 }
 
-.field-row {
+.page-schedule .field-row {
     display: flex;
     gap: 1rem;
 }
 
-.modal-foot {
+.page-schedule .modal-foot {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -273,7 +263,7 @@
 }
 
 @media (max-width: 1100px) {
-    .mini-stats {
+.page-schedule .mini-stats {
         grid-template-columns: repeat(2, 1fr);
     }
 }
@@ -284,7 +274,7 @@
    used to carry its own stale duplicate of all three, which is what
    made it necessary for a while. */
 @media (max-width: 768px) {
-    .field-row {
+.page-schedule .field-row {
         flex-direction: column;
     }
 }

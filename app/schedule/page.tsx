@@ -197,7 +197,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="app">
+    <div className="app doctor-shell page-schedule">
       <Sidebar badge={<span className="brand-badge">MD</span>}>
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>

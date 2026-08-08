@@ -309,7 +309,7 @@ function ThirdPageContent() {
   });
 
   return (
-    <>
+    <div className="page-third">
       <div className="top-bar"><div className="top-bar-fill" id="topBarFill"></div></div>
       <header className="nav-header">
         <Link href="/register" className="nav-brand">
@@ -506,7 +506,7 @@ function ThirdPageContent() {
       </div>
 
       <div className="toast" id="toast"></div>
-    </>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./doctor-management.style.css";
 import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -52,9 +52,7 @@ export default function DoctorManagementPage() {
   useEffect(()=>{
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
-      // router.back() risks bouncing right back to a page that
-      // redirects here again; send the user somewhere safe instead.
-      showToast("Access Denied","error"); router.push("/"); return;
+      notFound();
     }
     init();
   },[router]);
@@ -138,6 +136,7 @@ export default function DoctorManagementPage() {
   const fullDate = new Date().toDateString();
 
   return (
+    <div className="page-doctor-management">
     <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
@@ -418,6 +417,7 @@ export default function DoctorManagementPage() {
       )}
 
       {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
+    </div>
     </div>
   );
 }

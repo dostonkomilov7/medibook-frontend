@@ -104,6 +104,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
+    <div className="page-forgot-password">
     <div className="auth-layout">
       {/* Left Panel */}
       <div className="auth-panel">
@@ -207,8 +208,7 @@ export default function ForgotPasswordPage() {
         <div className="deco-grid"></div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
+    </div>
     </div>
   );
 }

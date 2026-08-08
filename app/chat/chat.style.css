@@ -3,12 +3,12 @@
    On a phone-width viewport that left barely 80-90px for the actual
    conversation. These overrides stack the layout vertically instead. */
 @media (max-width: 700px) {
-  .chat-card {
+.chat-outer .chat-card {
     flex-direction: column !important;
     height: 92vh !important;
   }
 
-  .chat-sidebar {
+.chat-outer .chat-sidebar {
     width: 100% !important;
     max-height: 160px;
     border-right: none !important;
@@ -17,11 +17,11 @@
 }
 
 @media (max-width: 480px) {
-  .chat-outer {
+.chat-outer {
     padding: 0 !important;
   }
 
-  .chat-card {
+.chat-outer .chat-card {
     border-radius: 0 !important;
     height: 100vh !important;
   }

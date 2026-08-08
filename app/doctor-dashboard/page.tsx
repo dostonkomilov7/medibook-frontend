@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import "./doctor-dashboard.style.css";
 import { getCookie, getUserData, strMonth, getAge, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
@@ -14,13 +14,7 @@ export default function DoctorDashboardPage() {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
-      // router.back() could bounce the user right back to a page that
-      // redirects here again (e.g. login), causing a loop. Send them
-      // somewhere safe instead, and use MediAlert instead of a
-      // blocking native alert().
-      (window as any).MediAlert?.toast({ type: "error", title: "Access Denied", message: "You do not have permission to view this page." });
-      router.push("/");
-      return;
+      notFound();
     }
     init();
   }, [router]);
@@ -89,7 +83,8 @@ export default function DoctorDashboardPage() {
   };
 
   return (
-    <div className="app doctor-shell">
+    <div className="doctor-shell">
+    <div className="app">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{ padding: "0.75rem 0.75rem 0.25rem" }}>
@@ -216,8 +211,7 @@ export default function DoctorDashboardPage() {
         </div>
       </div>
 
-      {/* Modal & Toast markup now lives in components/MediAlertWidget.tsx,
-          mounted once from the root layout. */}
+    </div>
     </div>
   );
 }

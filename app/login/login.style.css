@@ -1,12 +1,12 @@
-    *,
-    *::before,
-    *::after {
+*,
+*::before,
+*::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
     }
 
-    :root {
+:root {
         --teal-50: #E1F5EE;
         --teal-100: #9FE1CB;
         --teal-400: #1D9E75;
@@ -28,22 +28,25 @@
         --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    html,
-    body {
+html,
+body {
         min-height: 100%;
         font-family: var(--font-body);
         background: var(--gray-50);
         color: var(--gray-800);
     }
 
-    body {
+/* Previously this lived on the bare `body` selector — global, so
+       this page's 2-column layout could collide with (or get
+       overridden by) whatever other page's stylesheet happened to
+       still be attached to the document at the same time. Scoped to
+       the wrapper div added around this page's own JSX. */ .page-login {
         display: grid;
         grid-template-columns: 1fr 1fr;
         min-height: 100vh;
     }
 
-    /* LEFT PANEL */
-    .panel-left {
+.page-login /* LEFT PANEL */ .panel-left {
         background: var(--teal-600);
         position: relative;
         display: flex;
@@ -53,7 +56,7 @@
         overflow: hidden;
     }
 
-    .panel-left::before {
+.page-login .panel-left::before {
         content: '';
         position: absolute;
         top: -120px;
@@ -64,7 +67,7 @@
         border: 80px solid rgba(255, 255, 255, 0.06);
     }
 
-    .panel-left::after {
+.page-login .panel-left::after {
         content: '';
         position: absolute;
         bottom: -60px;
@@ -75,7 +78,7 @@
         border: 60px solid rgba(255, 255, 255, 0.06);
     }
 
-    .brand {
+.page-login .brand {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -83,7 +86,7 @@
         z-index: 1;
     }
 
-    .brand-icon {
+.page-login .brand-icon {
         width: 38px;
         height: 38px;
         background: rgba(255, 255, 255, 0.18);
@@ -93,7 +96,7 @@
         justify-content: center;
     }
 
-    .brand-icon svg {
+.page-login .brand-icon svg {
         width: 20px;
         height: 20px;
         fill: none;
@@ -102,19 +105,19 @@
         stroke-linecap: round;
     }
 
-    .brand-name {
+.page-login .brand-name {
         font-family: var(--font-display);
         font-size: 22px;
         color: #fff;
         letter-spacing: 0.01em;
     }
 
-    .panel-copy {
+.page-login .panel-copy {
         position: relative;
         z-index: 1;
     }
 
-    .panel-copy h1 {
+.page-login .panel-copy h1 {
         font-family: var(--font-display);
         font-size: 46px;
         line-height: 1.15;
@@ -122,57 +125,55 @@
         margin-bottom: 1.25rem;
     }
 
-    .panel-copy h1 em {
+.page-login .panel-copy h1 em {
         font-style: italic;
         color: var(--teal-100);
     }
 
-    .panel-copy p {
+.page-login .panel-copy p {
         font-size: 16px;
         line-height: 1.65;
         color: rgba(255, 255, 255, 0.72);
         max-width: 340px;
     }
 
-    .stats-row {
+.page-login .stats-row {
         display: flex;
         gap: 2rem;
         position: relative;
         z-index: 1;
     }
 
-    .stat {
+.page-login .stat {
         display: flex;
         flex-direction: column;
         gap: 2px;
     }
 
-    .stat-num {
+.page-login .stat-num {
         font-family: var(--font-display);
         font-size: 28px;
         color: #fff;
     }
 
-    .stat-label {
+.page-login .stat-label {
         font-size: 12px;
         color: rgba(255, 255, 255, 0.6);
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
 
-    .stat-divider {
+.page-login .stat-divider {
         width: 1px;
         background: rgba(255, 255, 255, 0.2);
         align-self: stretch;
     }
 
-    /* RIGHT PANEL */
-    /* `align-items:center` inside a fixed-height grid row with no
+.page-login /* RIGHT PANEL */ /* `align-items:center` inside a fixed-height grid row with no
        overflow handling clipped the bottom of the form (e.g. the
        submit button) whenever the viewport was shorter than the
        form's natural height. Let this panel grow to at least one
-       viewport tall and scroll internally instead of clipping. */
-    .panel-right {
+       viewport tall and scroll internally instead of clipping. */ .panel-right {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -182,42 +183,42 @@
         overflow-y: auto;
     }
 
-    .form-card {
+.page-login .form-card {
         width: 100%;
         max-width: 420px;
     }
 
-    .form-header {
+.page-login .form-header {
         margin-bottom: 2.5rem;
     }
 
-    .form-header h2 {
+.page-login .form-header h2 {
         font-family: var(--font-display);
         font-size: 32px;
         color: var(--gray-800);
         margin-bottom: 0.4rem;
     }
 
-    .form-header p {
+.page-login .form-header p {
         font-size: 15px;
         color: var(--gray-600);
     }
 
-    .form-header p a {
+.page-login .form-header p a {
         color: var(--teal-600);
         text-decoration: none;
         font-weight: 500;
     }
 
-    .form-header p a:hover {
+.page-login .form-header p a:hover {
         text-decoration: underline;
     }
 
-    .field {
+.page-login .field {
         margin-bottom: 1.25rem;
     }
 
-    .field label {
+.page-login .field label {
         display: block;
         font-size: 13px;
         font-weight: 500;
@@ -226,11 +227,11 @@
         letter-spacing: 0.02em;
     }
 
-    .input-wrap {
+.page-login .input-wrap {
         position: relative;
     }
 
-    .input-wrap svg {
+.page-login .input-wrap svg {
         position: absolute;
         left: 14px;
         top: 50%;
@@ -245,7 +246,7 @@
         transition: stroke var(--transition);
     }
 
-    .input-wrap input {
+.page-login .input-wrap input {
         width: 100%;
         height: 48px;
         padding: 0 44px 0 42px;
@@ -259,21 +260,21 @@
         transition: border-color var(--transition), box-shadow var(--transition);
     }
 
-    .input-wrap input::placeholder {
+.page-login .input-wrap input::placeholder {
         color: var(--gray-400);
     }
 
-    .input-wrap input:focus {
+.page-login .input-wrap input:focus {
         border-color: var(--teal-400);
         box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.12);
     }
 
-    .input-wrap input:focus+svg,
-    .input-wrap:focus-within svg {
+.page-login .input-wrap input:focus+svg,
+.page-login .input-wrap:focus-within svg {
         stroke: var(--teal-400);
     }
 
-    .toggle-pw {
+.page-login .toggle-pw {
         position: absolute;
         right: 14px;
         top: 50%;
@@ -286,7 +287,7 @@
         align-items: center;
     }
 
-    .toggle-pw svg {
+.page-login .toggle-pw svg {
         position: static;
         transform: none;
         width: 17px;
@@ -298,18 +299,18 @@
         transition: stroke var(--transition);
     }
 
-    .toggle-pw:hover svg {
+.page-login .toggle-pw:hover svg {
         stroke: var(--teal-600);
     }
 
-    .field-row {
+.page-login .field-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.75rem;
     }
 
-    .checkbox-label {
+.page-login .checkbox-label {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -319,25 +320,25 @@
         user-select: none;
     }
 
-    .checkbox-label input[type=checkbox] {
+.page-login .checkbox-label input[type=checkbox] {
         width: 17px;
         height: 17px;
         accent-color: var(--teal-600);
         cursor: pointer;
     }
 
-    .forgot-link {
+.page-login .forgot-link {
         font-size: 14px;
         color: var(--teal-600);
         text-decoration: none;
         font-weight: 500;
     }
 
-    .forgot-link:hover {
+.page-login .forgot-link:hover {
         text-decoration: underline;
     }
 
-    .btn-primary {
+.page-login .btn-primary {
         width: 100%;
         height: 50px;
         background: var(--teal-600);
@@ -359,7 +360,7 @@
         overflow: hidden;
     }
 
-    .btn-primary::after {
+.page-login .btn-primary::after {
         content: '';
         position: absolute;
         inset: 0;
@@ -367,11 +368,11 @@
         transition: background var(--transition);
     }
 
-    .btn-primary.loading {
+.page-login .btn-primary.loading {
         pointer-events: none;
     }
 
-    .btn-primary .spinner {
+.page-login .btn-primary .spinner {
         width: 18px;
         height: 18px;
         border: 2px solid rgba(245, 240, 232, .3);
@@ -381,11 +382,11 @@
         display: none;
     }
 
-    .btn-primary.loading .spinner {
+.page-login .btn-primary.loading .spinner {
         display: block;
     }
 
-    .btn-primary.loading .btn-label {
+.page-login .btn-primary.loading .btn-label {
         opacity: .5;
     }
 
@@ -395,35 +396,35 @@
         }
     }
 
-    .btn-primary:hover {
+.page-login .btn-primary:hover {
         background: var(--teal-800);
     }
 
-    .btn-primary:active {
+.page-login .btn-primary:active {
         transform: scale(0.99);
     }
 
-    .divider {
+.page-login .divider {
         display: flex;
         align-items: center;
         gap: 12px;
         margin-bottom: 1.25rem;
     }
 
-    .divider span {
+.page-login .divider span {
         font-size: 12px;
         color: var(--gray-400);
         letter-spacing: 0.04em;
         white-space: nowrap;
     }
 
-    .divider-line {
+.page-login .divider-line {
         flex: 1;
         height: 1px;
         background: var(--gray-100);
     }
 
-    .btn-social {
+.page-login .btn-social {
         width: 100%;
         height: 46px;
         background: var(--white);
@@ -442,18 +443,17 @@
         margin-bottom: 0.85rem;
     }
 
-    .btn-social:hover {
+.page-login .btn-social:hover {
         border-color: var(--gray-400);
         background: var(--gray-50);
     }
 
-    .btn-social svg {
+.page-login .btn-social svg {
         width: 18px;
         height: 18px;
     }
 
-    /* Alert */
-    .alert {
+.page-login /* Alert */ .alert {
         background: #FEF2F2;
         border: 1px solid #FECACA;
         border-radius: var(--radius-sm);
@@ -466,34 +466,34 @@
 
     /* Responsive */
     @media (max-width: 800px) {
-        body {
+.page-login {
             grid-template-columns: 1fr;
         }
 
-        .panel-left {
+.page-login .panel-left {
             display: none;
         }
 
-        .panel-right {
+.page-login .panel-right {
             padding: 2.5rem 1.5rem;
         }
     }
 
     @media (max-height: 750px) {
-        .panel-right {
+.page-login .panel-right {
             padding-top: 1.5rem;
             padding-bottom: 1.5rem;
         }
 
-        .brand {
+.page-login .brand {
             margin-bottom: 1.25rem;
         }
 
-        .form-header {
+.page-login .form-header {
             margin-bottom: 1.25rem;
         }
 
-        .field {
+.page-login .field {
             margin-bottom: 0.85rem;
         }
     }

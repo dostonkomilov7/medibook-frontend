@@ -1,5 +1,6 @@
-/* ── Reset & Base ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Reset & Base ── */ *,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --teal:        #0d9488;
@@ -30,7 +31,8 @@
   --shadow-md:   0 4px 6px rgba(0,0,0,.07), 0 10px 30px rgba(0,0,0,.1);
 }
 
-html, body { min-height: 100%; }
+html,
+body { min-height: 100%; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -40,19 +42,17 @@ body {
   line-height: 1.5;
 }
 
-/* ── Layout ── */
-.auth-layout {
+.page-forgot-password /* ── Layout ── */ .auth-layout {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
-/* ── Left: Form panel ──
+.page-forgot-password /* ── Left: Form panel ──
    `align-items:center` here, combined with a fixed-height row and no
    overflow handling, clipped the bottom of the form (submit button,
    resend link, etc.) on any viewport shorter than the content. Let it
-   grow to at least one viewport tall and scroll internally instead. */
-.auth-panel {
+   grow to at least one viewport tall and scroll internally instead. */ .auth-panel {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@ body {
   overflow-y: auto;
 }
 
-.panel-inner {
+.page-forgot-password .panel-inner {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -79,83 +79,78 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Brand */
-.brand {
+.page-forgot-password /* Brand */ .brand {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.brand-dot {
+.page-forgot-password .brand-dot {
   width: 34px; height: 34px;
   background: var(--teal);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.brand-dot svg {
+.page-forgot-password .brand-dot svg {
   width: 17px; height: 17px;
   stroke: white; fill: none;
   stroke-width: 2; stroke-linecap: round;
 }
-.brand span {
+.page-forgot-password .brand span {
   font-family: 'DM Serif Display', serif;
   font-size: 20px;
   color: var(--gray-900);
 }
 
-/* ── Form states ── */
-.form-state { display: none; flex-direction: column; gap: 28px; }
-.form-state.active { display: flex; animation: stateFadeIn .3s ease both; }
+.page-forgot-password /* ── Form states ── */ .form-state { display: none; flex-direction: column; gap: 28px; }
+.page-forgot-password .form-state.active { display: flex; animation: stateFadeIn .3s ease both; }
 @keyframes stateFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Form header */
-.form-header { display: flex; flex-direction: column; gap: 10px; }
+.page-forgot-password /* Form header */ .form-header { display: flex; flex-direction: column; gap: 10px; }
 
-.form-icon {
+.page-forgot-password .form-icon {
   width: 52px; height: 52px;
   border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 4px;
 }
-.form-icon svg {
+.page-forgot-password .form-icon svg {
   width: 24px; height: 24px;
   stroke: currentColor; fill: none;
   stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
 }
-.form-icon.teal    { background: var(--teal-light);  color: var(--teal);  }
-.form-icon.amber   { background: var(--amber-light); color: var(--amber); }
-.form-icon.coral   { background: var(--coral-light); color: var(--coral); }
-.form-icon.success { background: var(--green-light); color: var(--green); }
+.page-forgot-password .form-icon.teal { background: var(--teal-light);  color: var(--teal);  }
+.page-forgot-password .form-icon.amber { background: var(--amber-light); color: var(--amber); }
+.page-forgot-password .form-icon.coral { background: var(--coral-light); color: var(--coral); }
+.page-forgot-password .form-icon.success { background: var(--green-light); color: var(--green); }
 
-.form-header h1 {
+.page-forgot-password .form-header h1 {
   font-family: 'DM Serif Display', serif;
   font-size: 26px;
   color: var(--gray-900);
   line-height: 1.2;
 }
-.form-header p {
+.page-forgot-password .form-header p {
   font-size: 14px;
   color: var(--gray-500);
   line-height: 1.6;
 }
-.form-header p strong { color: var(--gray-700); }
+.page-forgot-password .form-header p strong { color: var(--gray-700); }
 
-/* Form body */
-.form-body { display: flex; flex-direction: column; gap: 16px; }
+.page-forgot-password /* Form body */ .form-body { display: flex; flex-direction: column; gap: 16px; }
 
-/* Field group */
-.field-group { display: flex; flex-direction: column; gap: 6px; }
+.page-forgot-password /* Field group */ .field-group { display: flex; flex-direction: column; gap: 6px; }
 
-label {
+.page-forgot-password label {
   font-size: 13px;
   font-weight: 600;
   color: var(--gray-700);
 }
 
-.field-wrap {
+.page-forgot-password .field-wrap {
   display: flex;
   align-items: center;
   position: relative;
@@ -165,23 +160,23 @@ label {
   transition: border-color .15s, box-shadow .15s;
   overflow: hidden;
 }
-.field-wrap:focus-within {
+.page-forgot-password .field-wrap:focus-within {
   border-color: var(--teal);
   box-shadow: 0 0 0 3px rgba(13,148,136,.1);
 }
-.field-wrap.error {
+.page-forgot-password .field-wrap.error {
   border-color: var(--coral);
   box-shadow: 0 0 0 3px rgba(244,63,94,.08);
 }
 
-.field-icon {
+.page-forgot-password .field-icon {
   width: 16px; height: 16px;
   stroke: var(--gray-400); fill: none;
   stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   position: absolute; left: 13px; flex-shrink: 0; pointer-events: none;
 }
 
-.field-wrap input {
+.page-forgot-password .field-wrap input {
   flex: 1;
   border: none; outline: none;
   background: transparent;
@@ -190,10 +185,9 @@ label {
   color: var(--gray-800);
   padding: 11px 12px 11px 38px;
 }
-.field-wrap input::placeholder { color: var(--gray-400); }
+.page-forgot-password .field-wrap input::placeholder { color: var(--gray-400); }
 
-/* Password toggle */
-.toggle-pw {
+.page-forgot-password /* Password toggle */ .toggle-pw {
   width: 36px; height: 100%;
   border: none; background: transparent;
   cursor: pointer;
@@ -202,60 +196,57 @@ label {
   flex-shrink: 0;
   padding: 0;
 }
-.toggle-pw svg {
+.page-forgot-password .toggle-pw svg {
   width: 16px; height: 16px;
   stroke: currentColor; fill: none;
   stroke-width: 1.8; stroke-linecap: round;
 }
-.toggle-pw:hover { color: var(--gray-600); }
+.page-forgot-password .toggle-pw:hover { color: var(--gray-600); }
 
-/* Field error */
-.field-error {
+.page-forgot-password /* Field error */ .field-error {
   font-size: 12px;
   color: var(--coral);
   min-height: 16px;
   display: block;
 }
 
-/* ── Password strength ── */
-.strength-wrap {
+.page-forgot-password /* ── Password strength ── */ .strength-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
   opacity: 0;
   transition: opacity .2s;
 }
-.strength-wrap.visible { opacity: 1; }
-.strength-bars {
+.page-forgot-password .strength-wrap.visible { opacity: 1; }
+.page-forgot-password .strength-bars {
   display: flex; gap: 4px; flex: 1;
 }
-.strength-bar {
+.page-forgot-password .strength-bar {
   flex: 1; height: 4px;
   background: var(--gray-200);
   border-radius: 99px;
   transition: background .25s;
 }
-.strength-bar.weak   { background: var(--coral); }
-.strength-bar.fair   { background: var(--amber); }
-.strength-bar.good   { background: var(--teal-mid); }
-.strength-bar.strong { background: var(--green); }
+.page-forgot-password .strength-bar.weak { background: var(--coral); }
+.page-forgot-password .strength-bar.fair { background: var(--amber); }
+.page-forgot-password .strength-bar.good { background: var(--teal-mid); }
+.page-forgot-password .strength-bar.strong { background: var(--green); }
 
-.strength-label {
+.page-forgot-password .strength-label {
   font-size: 12px; font-weight: 600;
   color: var(--gray-500); white-space: nowrap;
 }
-.strength-label.weak   { color: var(--coral); }
-.strength-label.fair   { color: var(--amber); }
-.strength-label.good   { color: var(--teal); }
-.strength-label.strong { color: var(--green); }
+.page-forgot-password .strength-label.weak { color: var(--coral); }
+.page-forgot-password .strength-label.fair { color: var(--amber); }
+.page-forgot-password .strength-label.good { color: var(--teal); }
+.page-forgot-password .strength-label.strong { color: var(--green); }
 
-/* Password rules */
-.strength-rules {
+.page-forgot-password /* Password rules */ .strength-rules {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
-.rule {
+.page-forgot-password .rule {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -263,8 +254,8 @@ label {
   color: var(--gray-400);
   transition: color .2s;
 }
-.rule.met { color: var(--gray-700); }
-.rule-icon {
+.page-forgot-password .rule.met { color: var(--gray-700); }
+.page-forgot-password .rule-icon {
   width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--gray-200);
@@ -272,10 +263,10 @@ label {
   transition: background .2s;
   display: flex; align-items: center; justify-content: center;
 }
-.rule.met .rule-icon {
+.page-forgot-password .rule.met .rule-icon {
   background: var(--green);
 }
-.rule.met .rule-icon::after {
+.page-forgot-password .rule.met .rule-icon::after {
   content: '';
   display: block;
   width: 4px; height: 7px;
@@ -284,8 +275,7 @@ label {
   transform: rotate(45deg) translate(-1px, -1px);
 }
 
-/* ── Primary button ── */
-.btn-primary {
+.page-forgot-password /* ── Primary button ── */ .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -302,24 +292,23 @@ label {
   transition: background .15s, transform .1s, box-shadow .15s;
   text-decoration: none;
 }
-.btn-primary.full { width: 100%; }
-.btn-primary svg {
+.page-forgot-password .btn-primary.full { width: 100%; }
+.page-forgot-password .btn-primary svg {
   width: 16px; height: 16px;
   stroke: white; fill: none;
   stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
   flex-shrink: 0;
 }
-.btn-primary:hover:not(:disabled) {
+.page-forgot-password .btn-primary:hover:not(:disabled) {
   background: #0b8078;
   box-shadow: 0 4px 14px rgba(13,148,136,.35);
   transform: translateY(-1px);
 }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
-.btn-primary.no-underline { text-decoration: none; }
+.page-forgot-password .btn-primary:active { transform: translateY(0); }
+.page-forgot-password .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.page-forgot-password .btn-primary.no-underline { text-decoration: none; }
 
-/* Loading spinner inside button */
-.btn-primary .spinner {
+.page-forgot-password /* Loading spinner inside button */ .btn-primary .spinner {
   width: 16px; height: 16px;
   border: 2px solid rgba(255,255,255,.35);
   border-top-color: white;
@@ -328,8 +317,7 @@ label {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Back link ── */
-.back-link {
+.page-forgot-password /* ── Back link ── */ .back-link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -341,42 +329,39 @@ label {
   transition: color .15s;
   padding: 4px 0;
 }
-.back-link svg {
+.page-forgot-password .back-link svg {
   width: 14px; height: 14px;
   stroke: currentColor; fill: none;
   stroke-width: 2; stroke-linecap: round;
 }
-.back-link:hover { color: var(--teal); }
+.page-forgot-password .back-link:hover { color: var(--teal); }
 
-/* ── Inbox tips (forgot-password sent state) ── */
-.inbox-tips {
+.page-forgot-password /* ── Inbox tips (forgot-password sent state) ── */ .inbox-tips {
   background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   display: flex; flex-direction: column; gap: 10px;
 }
-.tip-row {
+.page-forgot-password .tip-row {
   display: flex; align-items: center; gap: 10px;
   font-size: 13px; color: var(--gray-600);
 }
-.tip-dot {
+.page-forgot-password .tip-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
-.tip-dot.teal  { background: var(--teal); }
-.tip-dot.amber { background: var(--amber); }
-.tip-dot.blue  { background: var(--blue); }
+.page-forgot-password .tip-dot.teal { background: var(--teal); }
+.page-forgot-password .tip-dot.amber { background: var(--amber); }
+.page-forgot-password .tip-dot.blue { background: var(--blue); }
 
-/* Resend timer */
-.resend-timer {
+.page-forgot-password /* Resend timer */ .resend-timer {
   font-size: 12px;
   color: var(--gray-400);
   text-align: center;
 }
-.resend-timer strong { color: var(--gray-600); }
+.page-forgot-password .resend-timer strong { color: var(--gray-600); }
 
-/* ── Success note ── */
-.success-note {
+.page-forgot-password /* ── Success note ── */ .success-note {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -386,14 +371,13 @@ label {
   font-size: 13px;
   color: #166534;
 }
-.success-note svg {
+.page-forgot-password .success-note svg {
   width: 16px; height: 16px;
   fill: #166534; stroke: none;
   flex-shrink: 0; margin-top: 1px;
 }
 
-/* ── Right: Decorative panel ── */
-.auth-deco {
+.page-forgot-password /* ── Right: Decorative panel ── */ .auth-deco {
   background: var(--gray-900);
   position: relative;
   overflow: hidden;
@@ -403,27 +387,25 @@ label {
   padding: 48px 40px;
 }
 
-/* Background orbs */
-.deco-bg-orb {
+.page-forgot-password /* Background orbs */ .deco-bg-orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
   opacity: .18;
   pointer-events: none;
 }
-.orb1 {
+.page-forgot-password .orb1 {
   width: 400px; height: 400px;
   background: var(--teal);
   top: -80px; right: -80px;
 }
-.orb2 {
+.page-forgot-password .orb2 {
   width: 300px; height: 300px;
   background: #6366f1;
   bottom: -60px; left: -60px;
 }
 
-/* Grid overlay */
-.deco-grid {
+.page-forgot-password /* Grid overlay */ .deco-grid {
   position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
@@ -432,7 +414,7 @@ label {
   pointer-events: none;
 }
 
-.deco-content {
+.page-forgot-password .deco-content {
   position: relative; z-index: 1;
   display: flex; flex-direction: column; gap: 28px;
   width: 100%; max-width: 360px;
@@ -443,39 +425,37 @@ label {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Deco feature card */
-.deco-card {
+.page-forgot-password /* Deco feature card */ .deco-card {
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.1);
   border-radius: var(--radius);
   padding: 24px;
   backdrop-filter: blur(10px);
 }
-.deco-card-icon {
+.page-forgot-password .deco-card-icon {
   width: 44px; height: 44px;
   background: var(--teal-light);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 14px;
 }
-.deco-card-icon svg {
+.page-forgot-password .deco-card-icon svg {
   width: 22px; height: 22px;
   fill: var(--teal); stroke: none;
 }
-.deco-card h3 {
+.page-forgot-password .deco-card h3 {
   font-family: 'DM Serif Display', serif;
   font-size: 18px;
   color: white;
   margin-bottom: 8px;
 }
-.deco-card p {
+.page-forgot-password .deco-card p {
   font-size: 13px;
   color: rgba(255,255,255,.55);
   line-height: 1.6;
 }
 
-/* Deco stats row */
-.deco-stats {
+.page-forgot-password /* Deco stats row */ .deco-stats {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -484,71 +464,69 @@ label {
   border-radius: var(--radius-sm);
   padding: 16px 20px;
 }
-.deco-stat { text-align: center; }
-.deco-stat-val {
+.page-forgot-password .deco-stat { text-align: center; }
+.page-forgot-password .deco-stat-val {
   display: block;
   font-family: 'DM Serif Display', serif;
   font-size: 18px;
   color: white;
 }
-.deco-stat-label {
+.page-forgot-password .deco-stat-label {
   display: block;
   font-size: 11px;
   color: rgba(255,255,255,.4);
   margin-top: 2px;
 }
-.deco-stat-div {
+.page-forgot-password .deco-stat-div {
   width: 1px; height: 36px;
   background: rgba(255,255,255,.1);
 }
 
-/* Deco quote */
-.deco-quote {
+.page-forgot-password /* Deco quote */ .deco-quote {
   padding: 20px;
   background: rgba(255,255,255,.04);
   border-left: 3px solid var(--teal);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
-.deco-quote > svg {
+.page-forgot-password .deco-quote > svg {
   width: 24px; height: 24px;
   fill: var(--teal); stroke: none;
   opacity: .6;
   margin-bottom: 10px;
 }
-.deco-quote p {
+.page-forgot-password .deco-quote p {
   font-size: 13px;
   color: rgba(255,255,255,.65);
   line-height: 1.7;
   font-style: italic;
   margin-bottom: 14px;
 }
-.deco-quote-author {
+.page-forgot-password .deco-quote-author {
   display: flex; align-items: center; gap: 10px;
 }
-.deco-avatar {
+.page-forgot-password .deco-avatar {
   width: 34px; height: 34px; border-radius: 50%;
   background: var(--teal);
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
 }
-.deco-quote-author strong {
+.page-forgot-password .deco-quote-author strong {
   display: block;
   font-size: 13px; font-weight: 600; color: white;
 }
-.deco-quote-author span {
+.page-forgot-password .deco-quote-author span {
   font-size: 11px; color: rgba(255,255,255,.4);
 }
 
-/* Deco tips (reset-password panel) */
-.deco-tips { display: flex; flex-direction: column; gap: 16px; }
-.deco-tip {
+.page-forgot-password /* Deco tips (reset-password panel) */ .deco-tips { display: flex; flex-direction: column; gap: 16px; }
+.page-forgot-password .deco-tip {
   display: flex; align-items: flex-start; gap: 14px;
   padding: 16px;
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: var(--radius-sm);
 }
-.deco-tip-num {
+.page-forgot-password .deco-tip-num {
   font-family: 'DM Serif Display', serif;
   font-size: 22px;
   color: rgba(255,255,255,.15);
@@ -556,12 +534,12 @@ label {
   flex-shrink: 0;
   min-width: 28px;
 }
-.deco-tip strong {
+.page-forgot-password .deco-tip strong {
   display: block;
   font-size: 13px; font-weight: 600;
   color: white; margin-bottom: 4px;
 }
-.deco-tip p {
+.page-forgot-password .deco-tip p {
   font-size: 12px;
   color: rgba(255,255,255,.45);
   line-height: 1.5;
@@ -569,14 +547,14 @@ label {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .auth-layout { grid-template-columns: 1fr; }
-  .auth-deco { display: none; }
-  .auth-panel { padding: 36px 24px; }
+.page-forgot-password .auth-layout { grid-template-columns: 1fr; }
+.page-forgot-password .auth-deco { display: none; }
+.page-forgot-password .auth-panel { padding: 36px 24px; }
 }
 
 @media (max-height: 750px) {
-  .auth-panel { padding-top: 24px; padding-bottom: 24px; }
-  .brand { margin-bottom: 20px; }
-  .form-header { margin-bottom: 20px; }
-  .field-group { margin-bottom: 6px; }
+.page-forgot-password .auth-panel { padding-top: 24px; padding-bottom: 24px; }
+.page-forgot-password .brand { margin-bottom: 20px; }
+.page-forgot-password .form-header { margin-bottom: 20px; }
+.page-forgot-password .field-group { margin-bottom: 6px; }
 }

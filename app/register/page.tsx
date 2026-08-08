@@ -9,13 +9,34 @@ export default function RegisterPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (getCookie("accessToken")) {
-      const role = getCookie("role");
-      if (role === "Doctor") router.push("/doctor-dashboard");
-      else if (role === "User") router.push("/user-dashboard");
-      else if (role === "Admin") router.push("/doctor-management");
-      else router.push("/");
-    }
+    // window.location.href (not router.push) for the dashboard
+    // redirects: those pages' CSS is unscoped global stylesheets, and
+    // a client-side transition could paint before it's loaded. A full
+    // page nav always waits for CSS first — see app/login/page.tsx.
+    const redirectIfAuth = () => {
+      if (getCookie("accessToken")) {
+        const role = getCookie("role");
+        if (role === "Doctor") window.location.href = "/doctor-dashboard";
+        else if (role === "User") window.location.href = "/user-dashboard";
+        else if (role === "Admin") window.location.href = "/doctor-management";
+        else router.push("/");
+      }
+    };
+
+    redirectIfAuth();
+
+    // Swiping/navigating "back" to this page can restore it from the
+    // browser's bfcache instead of remounting it, which skips the
+    // effect above — and this page's CSS is a large unscoped
+    // stylesheet, so the restored snapshot can also come back visibly
+    // broken. A real reload fixes both the same way a manual refresh
+    // does, and still ends up redirecting once the page loads fresh.
+    // See app/login/page.tsx for the full explanation.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, [router]);
 
   const togglePw = () => {
@@ -148,7 +169,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
+    <div className="page-register">
       {/* LEFT: FORM */}
       <div className="panel-left">
         <div className="form-card">
@@ -294,6 +315,6 @@ export default function RegisterPage() {
           <span>340 doctors available now</span>
         </div>
       </div>
-    </>
+    </div>
   );
 }

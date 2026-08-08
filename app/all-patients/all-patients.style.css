@@ -1,12 +1,12 @@
- *,
- *::before,
- *::after {
+*,
+*::before,
+*::after {
      box-sizing: border-box;
      margin: 0;
      padding: 0;
  }
 
- :root {
+:root {
      --teal-50: #E1F5EE;
      --teal-100: #9FE1CB;
      --teal-400: #1D9E75;
@@ -41,21 +41,20 @@
      --tr: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
  }
 
- html,
- body {
+html,
+body {
      height: 100%;
      font-family: var(--font-body);
      background: var(--gray-50);
      color: var(--gray-800);
  }
 
- .app {
+.page-all-patients .app {
      display: flex;
      min-height: 100vh;
  }
 
- /* ── SIDEBAR ── */
- .sidebar {
+.page-all-patients /* ── SIDEBAR ── */ .sidebar {
      width: var(--sidebar-w);
      background: var(--gray-800);
      display: flex;
@@ -68,7 +67,7 @@
      overflow: hidden;
  }
 
- .sidebar::before {
+.page-all-patients .sidebar::before {
      content: '';
      position: absolute;
      top: -100px;
@@ -80,7 +79,7 @@
      pointer-events: none;
  }
 
- .sidebar::after {
+.page-all-patients .sidebar::after {
      content: '';
      position: absolute;
      bottom: -60px;
@@ -92,7 +91,7 @@
      pointer-events: none;
  }
 
- .sidebar-brand {
+.page-all-patients .sidebar-brand {
      padding: 1.6rem 1.5rem 1.25rem;
      display: flex;
      align-items: center;
@@ -101,7 +100,7 @@
      margin-bottom: 0.5rem;
  }
 
- .brand-dot {
+.page-all-patients .brand-dot {
      width: 32px;
      height: 32px;
      background: var(--teal-600);
@@ -111,7 +110,7 @@
      justify-content: center;
  }
 
- .brand-dot svg {
+.page-all-patients .brand-dot svg {
      width: 16px;
      height: 16px;
      stroke: #fff;
@@ -120,31 +119,30 @@
      stroke-linecap: round;
  }
 
- .brand-text {
+.page-all-patients .brand-text {
      font-family: var(--font-display);
      font-size: 18px;
      color: #fff;
  }
 
- .brand-badge {
+.page-all-patients .brand-badge {
      margin-left: auto;
      font-size: 9px;
      font-weight: 600;
      letter-spacing: 0.08em;
      text-transform: uppercase;
-     background: var(--teal-glow);
-     color: var(--teal-400);
-     border: 1px solid rgba(29, 158, 117, 0.3);
-     padding: 3px 8px;
+     background: var(--teal-600);
+     color: #fff;
+     padding: 3px 7px;
      border-radius: 4px;
  }
 
- .nav-section {
+.page-all-patients .nav-section {
      padding: 0 0.75rem;
      margin-bottom: 0.25rem;
  }
 
- .nav-label {
+.page-all-patients .nav-label {
      font-size: 9.5px;
      letter-spacing: 0.1em;
      text-transform: uppercase;
@@ -152,20 +150,20 @@
      padding: 0.7rem 0.75rem 0.35rem;
  }
 
- .nav-item {
+.page-all-patients .nav-item {
      display: flex;
      align-items: center;
      gap: 10px;
-     padding: 9px 12px;
+     padding: 10px 12px;
      border-radius: var(--radius-sm);
      cursor: pointer;
      transition: background var(--tr);
      text-decoration: none;
-     margin-bottom: 1px;
+     margin-bottom: 2px;
      position: relative;
  }
 
- .nav-item svg {
+.page-all-patients .nav-item svg {
      width: 16px;
      height: 16px;
      stroke: rgba(255, 255, 255, 0.4);
@@ -176,7 +174,7 @@
      transition: stroke var(--tr);
  }
 
- .nav-item span {
+.page-all-patients .nav-item span {
      font-size: 13.5px;
      color: rgba(255, 255, 255, 0.55);
      font-weight: 400;
@@ -184,7 +182,9 @@
      flex: 1;
  }
 
- .nav-item .bdg {
+.page-all-patients /* Renamed .bdg -> .badge (unused/dead otherwise) to match the
+    class name the JSX actually renders now, and doctor-dashboard's
+    own naming, so the two sidebars' "Soon" pills look identical. */ .nav-item .badge {
      background: var(--coral-400);
      color: #fff;
      font-size: 10px;
@@ -193,41 +193,41 @@
      border-radius: 100px;
  }
 
- .nav-item .bdg.g {
-     background: var(--teal-400);
+.page-all-patients .nav-item .badge.blue {
+     background: var(--blue-400);
  }
 
- .nav-item .bdg.a {
+.page-all-patients .nav-item .badge.amber {
      background: var(--amber-400);
      color: var(--gray-800);
  }
 
- .nav-item:hover {
+.page-all-patients .nav-item:hover {
      background: rgba(255, 255, 255, 0.06);
  }
 
- .nav-item:hover svg {
+.page-all-patients .nav-item:hover svg {
      stroke: rgba(255, 255, 255, 0.8);
  }
 
- .nav-item:hover span {
+.page-all-patients .nav-item:hover span {
      color: rgba(255, 255, 255, 0.8);
  }
 
- .nav-item.active {
+.page-all-patients .nav-item.active {
      background: rgba(29, 158, 117, 0.15);
  }
 
- .nav-item.active svg {
+.page-all-patients .nav-item.active svg {
      stroke: var(--teal-100);
  }
 
- .nav-item.active span {
+.page-all-patients .nav-item.active span {
      color: #fff;
      font-weight: 500;
  }
 
- .nav-item.active::before {
+.page-all-patients .nav-item.active::before {
      content: '';
      position: absolute;
      left: 0;
@@ -238,8 +238,13 @@
      border-radius: 0 3px 3px 0;
  }
 
- .sidebar-doctor {
-     margin: 0 0.75rem 0.75rem;
+.page-all-patients /* Previously this page's own JSX used .doc-av-sm/.doc-info-sm/.nm/.sp
+    while the actual markup was switched to match doctor-dashboard's
+    class names (.doc-avatar-lg/.doc-info/.name/.spec) — so none of
+    these rules matched anything anymore and the profile card rendered
+    unstyled. Renamed to match, values kept identical to
+    doctor-dashboard.style.css so the two look the same. */ .sidebar-doctor {
+     margin: 0 0.75rem 1rem;
      padding: 1rem;
      background: rgba(255, 255, 255, 0.05);
      border: 1px solid rgba(255, 255, 255, 0.08);
@@ -249,7 +254,7 @@
      gap: 10px;
  }
 
- .doc-av-sm {
+.page-all-patients .doc-avatar-lg {
      width: 38px;
      height: 38px;
      border-radius: 50%;
@@ -264,12 +269,12 @@
      border: 2px solid var(--teal-400);
  }
 
- .doc-info-sm {
+.page-all-patients .doc-info {
      flex: 1;
      min-width: 0;
  }
 
- .doc-info-sm .nm {
+.page-all-patients .doc-info .name {
      font-size: 13px;
      font-weight: 500;
      color: #fff;
@@ -278,12 +283,12 @@
      text-overflow: ellipsis;
  }
 
- .doc-info-sm .sp {
+.page-all-patients .doc-info .spec {
      font-size: 11px;
      color: rgba(255, 255, 255, 0.45);
  }
 
- .online-dot {
+.page-all-patients .online-dot {
      width: 8px;
      height: 8px;
      background: var(--teal-400);
@@ -304,8 +309,7 @@
      }
  }
 
- /* ── MAIN ── */
- .main {
+.page-all-patients /* ── MAIN ── */ .main {
      margin-left: var(--sidebar-w);
      flex: 1;
      display: flex;
@@ -313,7 +317,7 @@
      min-height: 100vh;
  }
 
- .topbar {
+.page-all-patients .topbar {
      height: 64px;
      background: var(--white);
      border-bottom: 1px solid var(--gray-100);
@@ -326,28 +330,28 @@
      z-index: 50;
  }
 
- .topbar-left {
+.page-all-patients .topbar-left {
      flex: 1;
  }
 
- .topbar-title {
+.page-all-patients .topbar-title {
      font-family: var(--font-display);
      font-size: 19px;
      color: var(--gray-800);
  }
 
- .topbar-title span {
+.page-all-patients .topbar-title span {
      font-style: italic;
      color: var(--teal-600);
  }
 
- .topbar-sub {
+.page-all-patients .topbar-sub {
      font-size: 12px;
      color: var(--gray-400);
      margin-top: 1px;
  }
 
- .search-box {
+.page-all-patients .search-box {
      display: flex;
      align-items: center;
      gap: 8px;
@@ -360,12 +364,12 @@
      transition: border-color var(--tr), box-shadow var(--tr);
  }
 
- .search-box:focus-within {
+.page-all-patients .search-box:focus-within {
      border-color: var(--teal-400);
      box-shadow: 0 0 0 3px var(--teal-glow);
  }
 
- .search-box svg {
+.page-all-patients .search-box svg {
      width: 14px;
      height: 14px;
      stroke: var(--gray-400);
@@ -375,7 +379,7 @@
      flex-shrink: 0;
  }
 
- .search-box input {
+.page-all-patients .search-box input {
      border: none;
      background: none;
      outline: none;
@@ -385,17 +389,17 @@
      width: 100%;
  }
 
- .search-box input::placeholder {
+.page-all-patients .search-box input::placeholder {
      color: var(--gray-400);
  }
 
- .topbar-right {
+.page-all-patients .topbar-right {
      display: flex;
      align-items: center;
      gap: 8px;
  }
 
- .icon-btn {
+.page-all-patients .icon-btn {
      width: 37px;
      height: 37px;
      border-radius: 50%;
@@ -409,12 +413,12 @@
      transition: background var(--tr), border-color var(--tr);
  }
 
- .icon-btn:hover {
+.page-all-patients .icon-btn:hover {
      background: var(--gray-50);
      border-color: var(--gray-200);
  }
 
- .icon-btn svg {
+.page-all-patients .icon-btn svg {
      width: 16px;
      height: 16px;
      stroke: var(--gray-600);
@@ -423,7 +427,7 @@
      stroke-linecap: round;
  }
 
- .notif-dot {
+.page-all-patients .notif-dot {
      position: absolute;
      top: 7px;
      right: 7px;
@@ -434,7 +438,7 @@
      border: 1.5px solid #fff;
  }
 
- .avatar-btn {
+.page-all-patients .avatar-btn {
      width: 36px;
      height: 36px;
      border-radius: 50%;
@@ -449,13 +453,12 @@
      border: 2px solid var(--teal-100);
  }
 
- /* ── CONTENT ── */
- .content {
+.page-all-patients /* ── CONTENT ── */ .content {
      padding: 1.75rem 2rem;
      flex: 1;
  }
 
- .page-header {
+.page-all-patients .page-header {
      display: flex;
      align-items: flex-start;
      justify-content: space-between;
@@ -463,7 +466,7 @@
      gap: 1rem;
  }
 
- .page-header-left h1 {
+.page-all-patients .page-header-left h1 {
      font-family: var(--font-display);
      font-size: 28px;
      color: var(--gray-800);
@@ -471,17 +474,17 @@
      margin-bottom: 4px;
  }
 
- .page-header-left h1 em {
+.page-all-patients .page-header-left h1 em {
      font-style: italic;
      color: var(--teal-600);
  }
 
- .page-header-left p {
+.page-all-patients .page-header-left p {
      font-size: 13.5px;
      color: var(--gray-400);
  }
 
- .btn-primary {
+.page-all-patients .btn-primary {
      display: flex;
      align-items: center;
      gap: 8px;
@@ -498,11 +501,11 @@
      white-space: nowrap;
  }
 
- .btn-primary:hover {
+.page-all-patients .btn-primary:hover {
      background: var(--teal-800);
  }
 
- .btn-primary svg {
+.page-all-patients .btn-primary svg {
      width: 15px;
      height: 15px;
      stroke: #fff;
@@ -511,15 +514,14 @@
      stroke-linecap: round;
  }
 
- /* ── STATS STRIP ── */
- .stats-strip {
+.page-all-patients /* ── STATS STRIP ── */ .stats-strip {
      display: grid;
      grid-template-columns: repeat(5, 1fr);
      gap: 1rem;
      margin-bottom: 1.75rem;
  }
 
- .stat-card {
+.page-all-patients .stat-card {
      background: var(--white);
      border: 1px solid var(--gray-100);
      border-radius: var(--radius);
@@ -530,11 +532,11 @@
      transition: box-shadow var(--tr);
  }
 
- .stat-card:hover {
+.page-all-patients .stat-card:hover {
      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
  }
 
- .stat-icon {
+.page-all-patients .stat-icon {
      width: 38px;
      height: 38px;
      border-radius: 10px;
@@ -544,7 +546,7 @@
      flex-shrink: 0;
  }
 
- .stat-icon svg {
+.page-all-patients .stat-icon svg {
      width: 17px;
      height: 17px;
      fill: none;
@@ -552,61 +554,60 @@
      stroke-linecap: round;
  }
 
- .stat-icon.teal {
+.page-all-patients .stat-icon.teal {
      background: var(--teal-50);
  }
 
- .stat-icon.teal svg {
+.page-all-patients .stat-icon.teal svg {
      stroke: var(--teal-600);
  }
 
- .stat-icon.coral {
+.page-all-patients .stat-icon.coral {
      background: var(--coral-50);
  }
 
- .stat-icon.coral svg {
+.page-all-patients .stat-icon.coral svg {
      stroke: var(--coral-400);
  }
 
- .stat-icon.amber {
+.page-all-patients .stat-icon.amber {
      background: var(--amber-50);
  }
 
- .stat-icon.amber svg {
+.page-all-patients .stat-icon.amber svg {
      stroke: var(--amber-400);
  }
 
- .stat-icon.blue {
+.page-all-patients .stat-icon.blue {
      background: var(--blue-50);
  }
 
- .stat-icon.blue svg {
+.page-all-patients .stat-icon.blue svg {
      stroke: var(--blue-400);
  }
 
- .stat-icon.green {
+.page-all-patients .stat-icon.green {
      background: var(--green-50);
  }
 
- .stat-icon.green svg {
+.page-all-patients .stat-icon.green svg {
      stroke: var(--green-400);
  }
 
- .stat-text .val {
+.page-all-patients .stat-text .val {
      font-family: var(--font-display);
      font-size: 24px;
      color: var(--gray-800);
      line-height: 1;
  }
 
- .stat-text .lbl {
+.page-all-patients .stat-text .lbl {
      font-size: 11.5px;
      color: var(--gray-400);
      margin-top: 3px;
  }
 
- /* ── TOOLBAR ── */
- .toolbar {
+.page-all-patients /* ── TOOLBAR ── */ .toolbar {
      display: flex;
      align-items: center;
      gap: 10px;
@@ -614,7 +615,7 @@
      flex-wrap: wrap;
  }
 
- .filter-select {
+.page-all-patients .filter-select {
      height: 38px;
      border: 1px solid var(--gray-100);
      border-radius: var(--radius-sm);
@@ -632,18 +633,18 @@
      transition: border-color var(--tr);
  }
 
- .filter-select:focus {
+.page-all-patients .filter-select:focus {
      border-color: var(--teal-400);
  }
 
- .toolbar-right {
+.page-all-patients .toolbar-right {
      margin-left: auto;
      display: flex;
      gap: 8px;
      align-items: center;
  }
 
- .view-toggle {
+.page-all-patients .view-toggle {
      display: flex;
      border: 1px solid var(--gray-100);
      border-radius: var(--radius-sm);
@@ -651,7 +652,7 @@
      background: var(--white);
  }
 
- .view-btn {
+.page-all-patients .view-btn {
      width: 36px;
      height: 36px;
      border: none;
@@ -663,7 +664,7 @@
      transition: background var(--tr);
  }
 
- .view-btn svg {
+.page-all-patients .view-btn svg {
      width: 14px;
      height: 14px;
      stroke: var(--gray-400);
@@ -672,20 +673,19 @@
      stroke-linecap: round;
  }
 
- .view-btn.active {
+.page-all-patients .view-btn.active {
      background: var(--teal-glow);
  }
 
- .view-btn.active svg {
+.page-all-patients .view-btn.active svg {
      stroke: var(--teal-600);
  }
 
- .view-btn:hover:not(.active) {
+.page-all-patients .view-btn:hover:not(.active) {
      background: var(--gray-50);
  }
 
- /* ── TABLE ── */
- .table-wrap {
+.page-all-patients /* ── TABLE ── */ .table-wrap {
      background: var(--white);
      border: 1px solid var(--gray-100);
      border-radius: var(--radius);
@@ -694,12 +694,12 @@
      overflow-x: auto;
  }
 
- table {
+.page-all-patients table {
      width: 100%;
      border-collapse: collapse;
  }
 
- thead th {
+.page-all-patients thead th {
      font-size: 10.5px;
      font-weight: 500;
      letter-spacing: 0.07em;
@@ -715,40 +715,40 @@
      transition: color var(--tr);
  }
 
- thead th:hover {
+.page-all-patients thead th:hover {
      color: var(--gray-600);
  }
 
- thead th.sorted {
+.page-all-patients thead th.sorted {
      color: var(--teal-600);
  }
 
- .sort-ic {
+.page-all-patients .sort-ic {
      margin-left: 4px;
      opacity: 0.35;
      font-size: 9px;
  }
 
- thead th.sorted .sort-ic {
+.page-all-patients thead th.sorted .sort-ic {
      opacity: 1;
  }
 
- tbody tr {
+.page-all-patients tbody tr {
      border-bottom: 1px solid var(--gray-100);
      transition: background var(--tr);
      cursor: pointer;
      animation: rowIn 0.3s ease both;
  }
 
- tbody tr:last-child {
+.page-all-patients tbody tr:last-child {
      border-bottom: none;
  }
 
- tbody tr:hover {
+.page-all-patients tbody tr:hover {
      background: var(--gray-50);
  }
 
- tbody tr.selected-row {
+.page-all-patients tbody tr.selected-row {
      background: var(--teal-50);
  }
 
@@ -764,21 +764,20 @@
      }
  }
 
- tbody td {
+.page-all-patients tbody td {
      padding: 14px 18px;
      font-size: 13.5px;
      color: var(--gray-800);
      vertical-align: middle;
  }
 
- /* Patient cell */
- .pt-cell {
+.page-all-patients /* Patient cell */ .pt-cell {
      display: flex;
      align-items: center;
      gap: 11px;
  }
 
- .pt-av {
+.page-all-patients .pt-av {
      width: 36px;
      height: 36px;
      border-radius: 50%;
@@ -791,20 +790,19 @@
      flex-shrink: 0;
  }
 
- .pt-name {
+.page-all-patients .pt-name {
      font-size: 13.5px;
      font-weight: 500;
      color: var(--gray-800);
  }
 
- .pt-id {
+.page-all-patients .pt-id {
      font-size: 11px;
      color: var(--gray-400);
      margin-top: 1px;
  }
 
- /* Risk pill */
- .risk-pill {
+.page-all-patients /* Risk pill */ .risk-pill {
      font-size: 11.5px;
      font-weight: 500;
      padding: 3px 10px;
@@ -812,28 +810,27 @@
      display: inline-block;
  }
 
- .risk-pill.high {
+.page-all-patients .risk-pill.high {
      background: var(--coral-50);
      color: var(--coral-400);
  }
 
- .risk-pill.medium {
+.page-all-patients .risk-pill.medium {
      background: var(--amber-50);
      color: #7A4A08;
  }
 
- .risk-pill.low {
+.page-all-patients .risk-pill.low {
      background: var(--green-50);
      color: var(--green-400);
  }
 
- .risk-pill.stable {
+.page-all-patients .risk-pill.stable {
      background: var(--gray-100);
      color: var(--gray-600);
  }
 
- /* Status pill */
- .status-pill {
+.page-all-patients /* Status pill */ .status-pill {
      display: inline-flex;
      align-items: center;
      gap: 5px;
@@ -843,85 +840,84 @@
      font-weight: 500;
  }
 
- .status-pill::before {
+.page-all-patients .status-pill::before {
      content: '';
      width: 5px;
      height: 5px;
      border-radius: 50%;
  }
 
- .status-pill.active {
+.page-all-patients .status-pill.active {
      background: var(--green-50);
      color: var(--green-400);
  }
 
- .status-pill.active::before {
+.page-all-patients .status-pill.active::before {
      background: var(--green-400);
  }
 
- .status-pill.inactive {
+.page-all-patients .status-pill.inactive {
      background: var(--gray-100);
      color: var(--gray-600);
  }
 
- .status-pill.inactive::before {
+.page-all-patients .status-pill.inactive::before {
      background: var(--gray-400);
  }
 
- .status-pill.critical {
+.page-all-patients .status-pill.critical {
      background: var(--coral-50);
      color: var(--coral-400);
  }
 
- .status-pill.critical::before {
+.page-all-patients .status-pill.critical::before {
      background: var(--coral-400);
      animation: blink 1.2s infinite;
  }
 
- .status-pill.confirmed {
+.page-all-patients .status-pill.confirmed {
      background: var(--teal-50);
      color: var(--teal-600);
  }
 
- .status-pill.confirmed::before {
+.page-all-patients .status-pill.confirmed::before {
      background: var(--teal-400);
  }
 
- .status-pill.pending {
+.page-all-patients .status-pill.pending {
      background: var(--amber-50);
      color: #7A4A08;
  }
 
- .status-pill.pending::before {
+.page-all-patients .status-pill.pending::before {
      background: var(--amber-400);
  }
 
- .status-pill.cancelled {
+.page-all-patients .status-pill.cancelled {
      background: var(--coral-50);
      color: var(--coral-400);
  }
 
- .status-pill.cancelled::before {
+.page-all-patients .status-pill.cancelled::before {
      background: var(--coral-400);
  }
 
- .status-pill.completed {
+.page-all-patients .status-pill.completed {
      background: var(--gray-100);
      color: var(--gray-600);
  }
 
- .status-pill.completed::before {
+.page-all-patients .status-pill.completed::before {
      background: var(--gray-400);
  }
 
- /* Progress bar for visits */
- .visits-cell {
+.page-all-patients /* Progress bar for visits */ .visits-cell {
      display: flex;
      align-items: center;
      gap: 8px;
  }
 
- .vis-bar {
+.page-all-patients .vis-bar {
      width: 50px;
      height: 4px;
      background: var(--gray-100);
@@ -929,20 +925,19 @@
      overflow: hidden;
  }
 
- .vis-fill {
+.page-all-patients .vis-fill {
      height: 100%;
      border-radius: 100px;
      background: var(--teal-400);
  }
 
- /* Row actions */
- .row-actions {
+.page-all-patients /* Row actions */ .row-actions {
      display: flex;
      gap: 5px;
      justify-content: flex-end;
  }
 
- .row-btn {
+.page-all-patients .row-btn {
      width: 30px;
      height: 30px;
      border-radius: 7px;
@@ -955,7 +950,7 @@
      transition: border-color var(--tr), background var(--tr);
  }
 
- .row-btn svg {
+.page-all-patients .row-btn svg {
      width: 13px;
      height: 13px;
      fill: none;
@@ -963,35 +958,34 @@
      stroke-linecap: round;
  }
 
- .row-btn.view svg {
+.page-all-patients .row-btn.view svg {
      stroke: var(--blue-400);
  }
 
- .row-btn.view:hover {
+.page-all-patients .row-btn.view:hover {
      border-color: var(--blue-400);
      background: var(--blue-50);
  }
 
- .row-btn.cancel svg {
+.page-all-patients .row-btn.cancel svg {
      stroke: var(--pink-400);
  }
 
- .row-btn.cancel:hover {
+.page-all-patients .row-btn.cancel:hover {
      border-color: var(--pink-400);
      background: var(--teal-50);
  }
 
- .row-btn.edit svg {
+.page-all-patients .row-btn.edit svg {
      stroke: var(--purple-400);
  }
 
- .row-btn.edit:hover {
+.page-all-patients .row-btn.edit:hover {
      border-color: var(--purple-400);
      background: var(--purple-50);
  }
 
- /* Table footer */
- .table-footer {
+.page-all-patients /* Table footer */ .table-footer {
      display: flex;
      align-items: center;
      justify-content: space-between;
@@ -1000,22 +994,22 @@
      background: var(--gray-50);
  }
 
- .tf-info {
+.page-all-patients .tf-info {
      font-size: 12.5px;
      color: var(--gray-400);
  }
 
- .tf-info span {
+.page-all-patients .tf-info span {
      color: var(--gray-600);
      font-weight: 500;
  }
 
- .pagination {
+.page-all-patients .pagination {
      display: flex;
      gap: 5px;
  }
 
- .pg-btn {
+.page-all-patients .pg-btn {
      min-width: 32px;
      height: 32px;
      padding: 0 8px;
@@ -1032,24 +1026,24 @@
      transition: border-color var(--tr), background var(--tr), color var(--tr);
  }
 
- .pg-btn:hover {
+.page-all-patients .pg-btn:hover {
      border-color: var(--gray-200);
      color: var(--gray-800);
  }
 
- .pg-btn.active {
+.page-all-patients .pg-btn.active {
      background: var(--teal-600);
      border-color: var(--teal-600);
      color: #fff;
      font-weight: 500;
  }
 
- .pg-btn:disabled {
+.page-all-patients .pg-btn:disabled {
      opacity: 0.35;
      cursor: not-allowed;
  }
 
- .pg-btn svg {
+.page-all-patients .pg-btn svg {
      width: 14px;
      height: 14px;
      stroke: currentColor;
@@ -1058,14 +1052,13 @@
      stroke-linecap: round;
  }
 
- /* ── CARD GRID VIEW ── */
- .patients-grid {
+.page-all-patients /* ── CARD GRID VIEW ── */ .patients-grid {
      display: none;
      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
      gap: 1rem;
  }
 
- .patient-card {
+.page-all-patients .patient-card {
      background: var(--white);
      border: 1px solid var(--gray-100);
      border-radius: var(--radius);
@@ -1075,19 +1068,19 @@
      animation: rowIn 0.3s ease both;
  }
 
- .patient-card:hover {
+.page-all-patients .patient-card:hover {
      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
      transform: translateY(-2px);
  }
 
- .pc-top {
+.page-all-patients .pc-top {
      display: flex;
      align-items: flex-start;
      justify-content: space-between;
      margin-bottom: 1rem;
  }
 
- .pc-av {
+.page-all-patients .pc-av {
      width: 46px;
      height: 46px;
      border-radius: 50%;
@@ -1100,7 +1093,7 @@
      flex-shrink: 0;
  }
 
- .pc-name {
+.page-all-patients .pc-name {
      font-family: var(--font-display);
      font-size: 16px;
      color: var(--gray-800);
@@ -1108,25 +1101,25 @@
      margin-bottom: 2px;
  }
 
- .pc-id {
+.page-all-patients .pc-id {
      font-size: 11.5px;
      color: var(--gray-400);
  }
 
- .pc-divider {
+.page-all-patients .pc-divider {
      height: 1px;
      background: var(--gray-100);
      margin: 0.9rem 0;
  }
 
- .pc-meta {
+.page-all-patients .pc-meta {
      display: grid;
      grid-template-columns: 1fr 1fr;
      gap: 8px;
      margin-bottom: 1rem;
  }
 
- .pc-meta-item .pm-lbl {
+.page-all-patients .pc-meta-item .pm-lbl {
      font-size: 10.5px;
      color: var(--gray-400);
      letter-spacing: 0.04em;
@@ -1134,18 +1127,18 @@
      margin-bottom: 2px;
  }
 
- .pc-meta-item .pm-val {
+.page-all-patients .pc-meta-item .pm-val {
      font-size: 13px;
      font-weight: 500;
      color: var(--gray-800);
  }
 
- .pc-actions {
+.page-all-patients .pc-actions {
      display: flex;
      gap: 6px;
  }
 
- .pc-btn {
+.page-all-patients .pc-btn {
      flex: 1;
      height: 34px;
      border-radius: var(--radius-sm);
@@ -1159,25 +1152,24 @@
      transition: border-color var(--tr), background var(--tr), color var(--tr);
  }
 
- .pc-btn:hover {
+.page-all-patients .pc-btn:hover {
      border-color: var(--teal-400);
      color: var(--teal-600);
      background: var(--teal-50);
  }
 
- .pc-btn.primary {
+.page-all-patients .pc-btn.primary {
      background: var(--teal-600);
      color: #fff;
      border-color: var(--teal-600);
  }
 
- .pc-btn.primary:hover {
+.page-all-patients .pc-btn.primary:hover {
      background: var(--teal-800);
      border-color: var(--teal-800);
  }
 
- /* ── DRAWER ── */
- .drawer-overlay {
+.page-all-patients /* ── DRAWER ── */ .drawer-overlay {
      position: fixed;
      inset: 0;
      background: rgba(0, 0, 0, 0.4);
@@ -1187,12 +1179,12 @@
      transition: opacity var(--tr);
  }
 
- .drawer-overlay.open {
+.page-all-patients .drawer-overlay.open {
      opacity: 1;
      pointer-events: all;
  }
 
- .drawer {
+.page-all-patients .drawer {
      position: fixed;
      top: 0;
      right: 0;
@@ -1207,11 +1199,11 @@
      z-index: 201;
  }
 
- .drawer-overlay.open .drawer {
+.page-all-patients .drawer-overlay.open .drawer {
      transform: translateX(0);
  }
 
- .drawer-header {
+.page-all-patients .drawer-header {
      padding: 1.5rem 1.75rem 1.25rem;
      border-bottom: 1px solid var(--gray-100);
      display: flex;
@@ -1220,19 +1212,19 @@
      flex-shrink: 0;
  }
 
- .drawer-header h2 {
+.page-all-patients .drawer-header h2 {
      font-family: var(--font-display);
      font-size: 22px;
      color: var(--gray-800);
      margin-bottom: 3px;
  }
 
- .drawer-header p {
+.page-all-patients .drawer-header p {
      font-size: 13px;
      color: var(--gray-400);
  }
 
- .drawer-close {
+.page-all-patients .drawer-close {
      width: 32px;
      height: 32px;
      border-radius: 50%;
@@ -1246,11 +1238,11 @@
      flex-shrink: 0;
  }
 
- .drawer-close:hover {
+.page-all-patients .drawer-close:hover {
      background: var(--gray-50);
  }
 
- .drawer-close svg {
+.page-all-patients .drawer-close svg {
      width: 13px;
      height: 13px;
      stroke: var(--gray-600);
@@ -1259,23 +1251,22 @@
      stroke-linecap: round;
  }
 
- .drawer-body {
+.page-all-patients .drawer-body {
      flex: 1;
      overflow-y: auto;
      padding: 1.5rem 1.75rem;
  }
 
- .drawer-body::-webkit-scrollbar {
+.page-all-patients .drawer-body::-webkit-scrollbar {
      width: 5px;
  }
 
- .drawer-body::-webkit-scrollbar-thumb {
+.page-all-patients .drawer-body::-webkit-scrollbar-thumb {
      background: var(--gray-200);
      border-radius: 100px;
  }
 
- /* Patient hero in drawer */
- .pt-hero {
+.page-all-patients /* Patient hero in drawer */ .pt-hero {
      display: flex;
      align-items: center;
      gap: 16px;
@@ -1286,7 +1277,7 @@
      margin-bottom: 1.5rem;
  }
 
- .pt-hero-av {
+.page-all-patients .pt-hero-av {
      width: 58px;
      height: 58px;
      border-radius: 50%;
@@ -1302,34 +1293,33 @@
      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
  }
 
- .pt-hero-name {
+.page-all-patients .pt-hero-name {
      font-family: var(--font-display);
      font-size: 20px;
      color: var(--gray-800);
      margin-bottom: 3px;
  }
 
- .pt-hero-sub {
+.page-all-patients .pt-hero-sub {
      font-size: 12.5px;
      color: var(--gray-400);
      margin-bottom: 8px;
  }
 
- .pt-hero-tags {
+.page-all-patients .pt-hero-tags {
      display: flex;
      gap: 6px;
      flex-wrap: wrap;
  }
 
- /* KPI row */
- .kpi-row {
+.page-all-patients /* KPI row */ .kpi-row {
      display: grid;
      grid-template-columns: repeat(3, 1fr);
      gap: 8px;
      margin-bottom: 1.5rem;
  }
 
- .kpi-box {
+.page-all-patients .kpi-box {
      background: var(--gray-50);
      border: 1px solid var(--gray-100);
      border-radius: var(--radius-sm);
@@ -1337,14 +1327,14 @@
      text-align: center;
  }
 
- .kpi-box .kv {
+.page-all-patients .kpi-box .kv {
      font-family: var(--font-display);
      font-size: 22px;
      color: var(--gray-800);
      line-height: 1;
  }
 
- .kpi-box .kl {
+.page-all-patients .kpi-box .kl {
      font-size: 10.5px;
      color: var(--gray-400);
      margin-top: 3px;
@@ -1352,12 +1342,11 @@
      letter-spacing: 0.04em;
  }
 
- /* Info sections */
- .info-section {
+.page-all-patients /* Info sections */ .info-section {
      margin-bottom: 1.5rem;
  }
 
- .info-section h4 {
+.page-all-patients .info-section h4 {
      font-size: 10.5px;
      font-weight: 500;
      letter-spacing: 0.07em;
@@ -1368,20 +1357,20 @@
      padding-bottom: 8px;
  }
 
- .info-grid {
+.page-all-patients .info-grid {
      display: grid;
      grid-template-columns: 1fr 1fr;
      gap: 8px;
  }
 
- .info-box {
+.page-all-patients .info-box {
      background: var(--gray-50);
      border: 1px solid var(--gray-100);
      border-radius: var(--radius-sm);
      padding: 10px 12px;
  }
 
- .info-box .ib-lbl {
+.page-all-patients .info-box .ib-lbl {
      font-size: 10px;
      color: var(--gray-400);
      letter-spacing: 0.06em;
@@ -1389,24 +1378,23 @@
      margin-bottom: 3px;
  }
 
- .info-box .ib-val {
+.page-all-patients .info-box .ib-val {
      font-size: 13.5px;
      color: var(--gray-800);
      font-weight: 500;
  }
 
- .info-box.full {
+.page-all-patients .info-box.full {
      grid-column: 1/-1;
  }
 
- /* Visit timeline */
- .visit-list {
+.page-all-patients /* Visit timeline */ .visit-list {
      display: flex;
      flex-direction: column;
      gap: 6px;
  }
 
- .visit-item {
+.page-all-patients .visit-item {
      display: flex;
      align-items: flex-start;
      gap: 12px;
@@ -1417,11 +1405,11 @@
      transition: border-color var(--tr);
  }
 
- .visit-item:hover {
+.page-all-patients .visit-item:hover {
      border-color: var(--gray-200);
  }
 
- .visit-dot {
+.page-all-patients .visit-dot {
      width: 8px;
      height: 8px;
      border-radius: 50%;
@@ -1429,26 +1417,26 @@
      margin-top: 4px;
  }
 
- .visit-date {
+.page-all-patients .visit-date {
      font-size: 12px;
      font-weight: 500;
      color: var(--gray-800);
  }
 
- .visit-type {
+.page-all-patients .visit-type {
      font-size: 11px;
      color: var(--gray-400);
      margin-top: 1px;
  }
 
- .visit-note {
+.page-all-patients .visit-note {
      font-size: 12px;
      color: var(--gray-600);
      margin-top: 4px;
      line-height: 1.5;
  }
 
- .visit-tag {
+.page-all-patients .visit-tag {
      margin-left: auto;
      font-size: 11px;
      font-weight: 500;
@@ -1457,17 +1445,17 @@
      flex-shrink: 0;
  }
 
- .visit-tag.done {
+.page-all-patients .visit-tag.done {
      background: var(--green-50);
      color: var(--green-400);
  }
 
- .visit-tag.upcoming {
+.page-all-patients .visit-tag.upcoming {
      background: var(--blue-50);
      color: var(--blue-400);
  }
 
- .drawer-footer {
+.page-all-patients .drawer-footer {
      padding: 1rem 1.75rem 1.25rem;
      border-top: 1px solid var(--gray-100);
      display: flex;
@@ -1475,7 +1463,7 @@
      flex-shrink: 0;
  }
 
- .btn-df-ghost {
+.page-all-patients .btn-df-ghost {
      flex: 1;
      height: 40px;
      border: 1px solid var(--gray-100);
@@ -1488,11 +1476,11 @@
      transition: background var(--tr);
  }
 
- .btn-df-ghost:hover {
+.page-all-patients .btn-df-ghost:hover {
      background: var(--gray-50);
  }
 
- .btn-df-primary {
+.page-all-patients .btn-df-primary {
      flex: 2;
      height: 40px;
      background: var(--teal-600);
@@ -1506,18 +1494,17 @@
      transition: background var(--tr);
  }
 
- .btn-df-primary:hover {
+.page-all-patients .btn-df-primary:hover {
      background: var(--teal-800);
  }
 
- /* ── EMPTY STATE ── */
- .empty-state {
+.page-all-patients /* ── EMPTY STATE ── */ .empty-state {
      text-align: center;
      padding: 4rem 2rem;
      display: none;
  }
 
- .empty-icon {
+.page-all-patients .empty-icon {
      width: 60px;
      height: 60px;
      background: var(--gray-100);
@@ -1528,7 +1515,7 @@
      margin: 0 auto 1rem;
  }
 
- .empty-icon svg {
+.page-all-patients .empty-icon svg {
      width: 26px;
      height: 26px;
      stroke: var(--gray-400);
@@ -1537,20 +1524,19 @@
      stroke-linecap: round;
  }
 
- .empty-state h3 {
+.page-all-patients .empty-state h3 {
      font-family: var(--font-display);
      font-size: 20px;
      color: var(--gray-800);
      margin-bottom: 6px;
  }
 
- .empty-state p {
+.page-all-patients .empty-state p {
      font-size: 13.5px;
      color: var(--gray-400);
  }
 
- /* ── TOAST ── */
- .toast {
+.page-all-patients /* ── TOAST ── */ .toast {
      position: fixed;
      bottom: 2rem;
      right: 2rem;
@@ -1567,34 +1553,34 @@
      pointer-events: none;
  }
 
- .toast.show {
+.page-all-patients .toast.show {
      opacity: 1;
      transform: translateY(0);
  }
 
- .toast.success {
+.page-all-patients .toast.success {
      background: var(--teal-600);
      color: #fff;
  }
 
- .toast.info {
+.page-all-patients .toast.info {
      background: var(--blue-400);
      color: #fff;
  }
 
  @media (max-width: 1100px) {
-     .stats-strip {
+.page-all-patients .stats-strip {
          grid-template-columns: repeat(3, 1fr);
      }
  }
 
  @media (max-width: 900px) {
-     .drawer {
+.page-all-patients .drawer {
          width: 100%;
      }
  }
 
- .hamburger-btn {
+.page-all-patients .hamburger-btn {
      display: none;
      background: none;
      border: none;
@@ -1606,7 +1592,7 @@
      justify-content: center;
  }
 
- .hamburger-btn svg {
+.page-all-patients .hamburger-btn svg {
      width: 22px;
      height: 22px;
      stroke: var(--gray-800);
@@ -1615,30 +1601,30 @@
      stroke-linecap: round;
  }
 
- .sidebar-overlay {
+.page-all-patients .sidebar-overlay {
      display: none;
  }
 
  @media (max-width: 768px) {
-     .sidebar {
+.page-all-patients .sidebar {
          transform: translateX(-100%);
          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
          z-index: 300;
      }
 
-     .sidebar.open {
+.page-all-patients .sidebar.open {
          transform: translateX(0);
      }
 
-     .main {
+.page-all-patients .main {
          margin-left: 0;
      }
 
-     .hamburger-btn {
+.page-all-patients .hamburger-btn {
          display: flex;
      }
 
-     .sidebar-overlay {
+.page-all-patients .sidebar-overlay {
          display: block;
          position: fixed;
          inset: 0;
@@ -1649,7 +1635,7 @@
          transition: opacity 0.2s;
      }
 
-     .sidebar-overlay.open {
+.page-all-patients .sidebar-overlay.open {
          opacity: 1;
          pointer-events: auto;
      }

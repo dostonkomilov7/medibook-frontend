@@ -25,6 +25,10 @@ export default function SchedulePage() {
   const stateRef = useRef({ currentDate: todayISO(), activeFilter: "all" as Filter, searchTerm: "", editingId: null as string | null });
   const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Previously this page had no sidebar profile card at all, unlike
+  // doctor-dashboard/all-patients which both show one — same data
+  // this page already fetches for the appointment list.
+  const [doctor, setDoctor] = useState<any>(null);
 
   const showToast = (msg: string, type = "info") => {
     setToast({ msg, type });
@@ -53,6 +57,7 @@ export default function SchedulePage() {
       const res = await fetch(`${apiUrl}/doctors/${userId}`);
       if (!res.ok) { render(); return; }
       const data = await res.json();
+      setDoctor(data.doctors?.[0] ?? null);
       const list = data.doctors?.[0]?.appointments ?? [];
       apptsRef.current = list.map((a: any): Appointment => ({
         id: String(a.id),
@@ -206,6 +211,16 @@ export default function SchedulePage() {
     <div className="doctor-shell">
     <div className="app page-schedule">
       <Sidebar badge={<span className="brand-badge">MD</span>}>
+        <div style={{ padding: "0.75rem 0.75rem 0.25rem" }}>
+          <div className="sidebar-doctor">
+            <div className="doc-av-sm">{doctor?.user?.full_name?.[0]?.toUpperCase()}</div>
+            <div className="doc-info-sm">
+              <p className="nm">{doctor?.user?.full_name}</p>
+              <p className="sp">{doctor?.specialization} • Room: {doctor?.room_number}</p>
+            </div>
+            <div className="online-dot"></div>
+          </div>
+        </div>
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
           <Link prefetch={false} className="nav-item" href="/doctor-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></Link>
@@ -213,7 +228,19 @@ export default function SchedulePage() {
           <Link prefetch={false} className="nav-item" href="/all-patients"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My Patients</span></Link>
           <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Messages</span></Link>
         </nav>
+        {/* Previously missing here — doctor-dashboard and all-patients
+            both have this "Clinical" group and "Settings" below, so
+            the sidebar looked genuinely different depending on which
+            page you were on instead of just highlighting a different
+            active item. Matched verbatim for consistency. */}
+        <nav className="nav-section">
+          <p className="nav-label">Clinical</p>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Records & Notes</span><span className="badge">Soon</span></a>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg><span>Prescriptions</span><span className="badge">Soon</span></a>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Lab Results</span><span className="badge">Soon</span></a>
+        </nav>
         <nav className="nav-section" style={{marginTop:"auto"}}>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg><span>Settings</span><span className="badge">Soon</span></a>
           <a className="nav-item" style={{cursor:"pointer"}} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></a>
         </nav>
       </Sidebar>

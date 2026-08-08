@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./all-patients.style.css";
 import { getCookie, getUserData, strMonth, getAge, apiUrl, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const PER_PAGE = 8;
 
@@ -120,15 +122,7 @@ export default function AllPatientsPage() {
   return (
     <div className="app">
       {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot">
-            <svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="3"/></svg>
-          </div>
-          <span className="brand-text">MediBook</span>
-          <span className="brand-badge">MD</span>
-        </div>
-
+      <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{padding:"0.75rem 0.75rem 0.25rem"}}>
           <div className="sidebar-doctor">
             <div className="doc-av-sm">{userData?.users?.[0]?.full_name?.[0]?.toUpperCase()}</div>
@@ -190,19 +184,13 @@ export default function AllPatientsPage() {
             <span>Sign out</span>
           </a>
         </nav>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       {/* MAIN */}
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
+            <HamburgerToggle />
             <div className="topbar-title">My <span>Patients</span></div>
             <div className="topbar-sub">{doctor ? `Dr ${userData?.users?.[0]?.full_name} • ${doctor.department} • ${fullDate}` : ""}</div>
           </div>

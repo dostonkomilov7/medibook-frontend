@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import "./doctor-dashboard.style.css";
 import "./schedule.style.css";
 import { getCookie, apiUrl, escapeHtml, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
 type ApptType = "in-person" | "virtual";
 type ApptTag = "" | "followup" | "new-pt" | "urgent";
@@ -196,11 +198,7 @@ export default function SchedulePage() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot"><svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <span className="brand-text">MediBook</span><span className="brand-badge">MD</span>
-        </div>
+      <Sidebar badge={<span className="brand-badge">MD</span>}>
         <nav className="nav-section">
           <p className="nav-label">Clinic</p>
           <Link prefetch={false} className="nav-item" href="/doctor-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></Link>
@@ -211,18 +209,12 @@ export default function SchedulePage() {
         <nav className="nav-section" style={{marginTop:"auto"}}>
           <a className="nav-item" style={{cursor:"pointer"}} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></a>
         </nav>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       <div className="main">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
+            <HamburgerToggle />
             <div className="topbar-title">Manage <span>Schedule</span></div>
             <div className="topbar-sub">Plan, edit and track your appointments</div>
           </div>

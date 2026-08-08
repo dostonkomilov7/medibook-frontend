@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./my-appointments.style.css";
 import { getCookie, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
+import Sidebar from "../../components/sidebar/Sidebar";
+import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
 export default function MyAppointmentsPage() {
   const router = useRouter();
@@ -153,11 +155,7 @@ export default function MyAppointmentsPage() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-dot"><svg viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <span className="brand-text">MediBook</span>
-        </div>
+      <Sidebar>
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
           <Link prefetch={false} className="nav-item" href="/user-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></Link>
@@ -172,17 +170,11 @@ export default function MyAppointmentsPage() {
           <div className="user-avatar">U</div>
           <div className="user-meta"><p className="name">User</p><p className="role">User</p></div>
         </div>
-      </aside>
-      {/* Below 768px .sidebar slides off-screen (see CSS); without this
-          overlay + button there was no way to bring it back, so all
-          navigation (including Sign out) became unreachable on mobile. */}
-      <div className="sidebar-overlay" onClick={() => { document.querySelector(".sidebar")?.classList.remove("open"); document.querySelector(".sidebar-overlay")?.classList.remove("open"); }}></div>
+      </Sidebar>
 
       <div className="main">
         <header className="topbar">
-          <button className="hamburger-btn" aria-label="Toggle menu" onClick={() => { document.querySelector(".sidebar")?.classList.toggle("open"); document.querySelector(".sidebar-overlay")?.classList.toggle("open"); }}>
-            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-          </button>
+          <HamburgerToggle />
           <h1 className="topbar-title">My <span>Appointments</span></h1>
           <div className="search-box">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

@@ -89,7 +89,7 @@ export default function DoctorDashboardPage() {
   };
 
   return (
-    <div className="app">
+    <div className="app doctor-shell">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="brand-badge">MD</span>}>
         <div style={{ padding: "0.75rem 0.75rem 0.25rem" }}>

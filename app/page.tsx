@@ -208,7 +208,7 @@ export default function HomePage() {
 
 
   return (
-    <>
+    <div className="page-home">
       {/* Custom Cursor */}
       <div className="cursor-dot" id="cursorDot"></div>
       <div className="cursor-ring" id="cursorRing"></div>
@@ -500,6 +500,6 @@ export default function HomePage() {
           </div>
         </div>
       </div >
-    </>
+    </div>
   );
 }

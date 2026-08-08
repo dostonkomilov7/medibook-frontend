@@ -1,12 +1,12 @@
-    *,
-    *::before,
-    *::after {
+*,
+*::before,
+*::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
     }
 
-    :root {
+:root {
         --teal-50: #E1F5EE;
         --teal-100: #9FE1CB;
         --teal-400: #1D9E75;
@@ -27,29 +27,32 @@
         --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    html,
-    body {
+html,
+body {
         min-height: 100%;
         font-family: var(--font-body);
         background: var(--gray-50);
         color: var(--gray-800);
     }
 
-    body {
+/* Previously this lived on the bare `body` selector — global, so
+       this page's 2-column layout could collide with (or get
+       overridden by) whatever other page's stylesheet happened to
+       still be attached to the document at the same time. Scoped to
+       the wrapper div added around this page's own JSX. */ .page-register {
         display: grid;
         grid-template-columns: 1fr 1fr;
         min-height: 100vh;
     }
 
-    /* LEFT PANEL
+.page-register /* LEFT PANEL
        Was `height:100%` on html/body + `align-items:center` here with
        no overflow handling — on any viewport shorter than the form's
        natural height (most laptops, and every phone), the centered
        content overflowed the fixed-height box and the bottom of the
        form (role selector, terms, the Register button) ended up
        clipped with no reliable way to scroll to it. Giving this panel
-       its own min-height + scroll makes it grow instead of clip. */
-    .panel-left {
+       its own min-height + scroll makes it grow instead of clip. */ .panel-left {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -60,19 +63,19 @@
         overflow-y: auto;
     }
 
-    .form-card {
+.page-register .form-card {
         width: 100%;
         max-width: 460px;
     }
 
-    .brand {
+.page-register .brand {
         display: flex;
         align-items: center;
         gap: 10px;
         margin-bottom: 2.5rem;
     }
 
-    .brand-icon {
+.page-register .brand-icon {
         width: 36px;
         height: 36px;
         background: var(--teal-50);
@@ -82,7 +85,7 @@
         justify-content: center;
     }
 
-    .brand-icon svg {
+.page-register .brand-icon svg {
         width: 18px;
         height: 18px;
         fill: none;
@@ -91,47 +94,46 @@
         stroke-linecap: round;
     }
 
-    .brand-name {
+.page-register .brand-name {
         font-family: var(--font-display);
         font-size: 20px;
         color: var(--gray-800);
     }
 
-    .form-header {
+.page-register .form-header {
         margin-bottom: 2rem;
     }
 
-    .form-header h2 {
+.page-register .form-header h2 {
         font-family: var(--font-display);
         font-size: 30px;
         color: var(--gray-800);
         margin-bottom: 0.35rem;
     }
 
-    .form-header p {
+.page-register .form-header p {
         font-size: 15px;
         color: var(--gray-600);
     }
 
-    .form-header p a {
+.page-register .form-header p a {
         color: var(--teal-600);
         text-decoration: none;
         font-weight: 500;
     }
 
-    .form-header p a:hover {
+.page-register .form-header p a:hover {
         text-decoration: underline;
     }
 
-    /* Steps */
-    .steps {
+.page-register /* Steps */ .steps {
         display: flex;
         gap: 6px;
         margin-bottom: 2rem;
         align-items: center;
     }
 
-    .step-dot {
+.page-register .step-dot {
         width: 28px;
         height: 4px;
         border-radius: 100px;
@@ -139,33 +141,32 @@
         transition: background var(--transition);
     }
 
-    .step-dot.active {
+.page-register .step-dot.active {
         background: var(--teal-600);
     }
 
-    .step-dot.done {
+.page-register .step-dot.done {
         background: var(--teal-100);
     }
 
-    .step-label {
+.page-register .step-label {
         font-size: 12px;
         color: var(--gray-400);
         letter-spacing: 0.04em;
         margin-left: 6px;
     }
 
-    /* Form fields */
-    .field {
+.page-register /* Form fields */ .field {
         margin-bottom: 1.1rem;
     }
 
-    .fields-row {
+.page-register .fields-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 14px;
     }
 
-    .field label {
+.page-register .field label {
         display: block;
         font-size: 13px;
         font-weight: 500;
@@ -174,11 +175,11 @@
         letter-spacing: 0.02em;
     }
 
-    .input-wrap {
+.page-register .input-wrap {
         position: relative;
     }
 
-    .input-wrap svg.field-icon {
+.page-register .input-wrap svg.field-icon {
         position: absolute;
         left: 13px;
         top: 50%;
@@ -193,8 +194,8 @@
         transition: stroke var(--transition);
     }
 
-    .input-wrap input,
-    .input-wrap select {
+.page-register .input-wrap input,
+.page-register .input-wrap select {
         width: 100%;
         height: 46px;
         padding: 0 14px 0 40px;
@@ -209,21 +210,21 @@
         appearance: none;
     }
 
-    .input-wrap input::placeholder {
+.page-register .input-wrap input::placeholder {
         color: var(--gray-400);
     }
 
-    .input-wrap input:focus,
-    .input-wrap select:focus {
+.page-register .input-wrap input:focus,
+.page-register .input-wrap select:focus {
         border-color: var(--teal-400);
         box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.12);
     }
 
-    .input-wrap:focus-within svg.field-icon {
+.page-register .input-wrap:focus-within svg.field-icon {
         stroke: var(--teal-400);
     }
 
-    .toggle-pw {
+.page-register .toggle-pw {
         position: absolute;
         right: 12px;
         top: 50%;
@@ -236,7 +237,7 @@
         align-items: center;
     }
 
-    .toggle-pw svg {
+.page-register .toggle-pw svg {
         width: 16px;
         height: 16px;
         stroke: var(--gray-400);
@@ -246,19 +247,18 @@
         transition: stroke var(--transition);
     }
 
-    .toggle-pw:hover svg {
+.page-register .toggle-pw:hover svg {
         stroke: var(--teal-600);
     }
 
-    /* Password strength */
-    .pw-strength {
+.page-register /* Password strength */ .pw-strength {
         display: flex;
         gap: 4px;
         margin-top: 8px;
         align-items: center;
     }
 
-    .strength-bar {
+.page-register .strength-bar {
         flex: 1;
         height: 3px;
         border-radius: 100px;
@@ -266,7 +266,7 @@
         transition: background 0.3s;
     }
 
-    .strength-text {
+.page-register .strength-text {
         font-size: 11px;
         color: var(--gray-400);
         margin-left: 6px;
@@ -275,26 +275,25 @@
         transition: color 0.3s;
     }
 
-    /* Role selector */
-    .role-selector {
+.page-register /* Role selector */ .role-selector {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
         margin-bottom: 1.1rem;
     }
 
-    .role-option {
+.page-register .role-option {
         position: relative;
     }
 
-    .role-option input[type=radio] {
+.page-register .role-option input[type=radio] {
         position: absolute;
         opacity: 0;
         width: 0;
         height: 0;
     }
 
-    .role-label {
+.page-register .role-label {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -307,7 +306,7 @@
         text-align: center;
     }
 
-    .role-label svg {
+.page-register .role-label svg {
         width: 22px;
         height: 22px;
         stroke: var(--gray-400);
@@ -317,50 +316,49 @@
         transition: stroke var(--transition);
     }
 
-    .role-label span {
+.page-register .role-label span {
         font-size: 13px;
         font-weight: 500;
         color: var(--gray-600);
         transition: color var(--transition);
     }
 
-    .role-label small {
+.page-register .role-label small {
         font-size: 11px;
         color: var(--gray-400);
         transition: color var(--transition);
     }
 
-    .role-option input:checked+.role-label {
+.page-register .role-option input:checked+.role-label {
         border-color: var(--teal-400);
         background: var(--teal-50);
     }
 
-    .role-option input:checked+.role-label svg {
+.page-register .role-option input:checked+.role-label svg {
         stroke: var(--teal-600);
     }
 
-    .role-option input:checked+.role-label span {
+.page-register .role-option input:checked+.role-label span {
         color: var(--teal-800);
     }
 
-    .role-option input:checked+.role-label small {
+.page-register .role-option input:checked+.role-label small {
         color: var(--teal-600);
     }
 
-    .role-label:hover {
+.page-register .role-label:hover {
         border-color: var(--gray-400);
         background: var(--gray-50);
     }
 
-    /* Terms */
-    .terms-row {
+.page-register /* Terms */ .terms-row {
         display: flex;
         align-items: flex-start;
         gap: 10px;
         margin-bottom: 1.5rem;
     }
 
-    .terms-row input[type=checkbox] {
+.page-register .terms-row input[type=checkbox] {
         width: 16px;
         height: 16px;
         accent-color: var(--teal-600);
@@ -369,24 +367,23 @@
         flex-shrink: 0;
     }
 
-    .terms-row p {
+.page-register .terms-row p {
         font-size: 13px;
         color: var(--gray-600);
         line-height: 1.55;
     }
 
-    .terms-row a {
+.page-register .terms-row a {
         color: var(--teal-600);
         text-decoration: none;
         font-weight: 500;
     }
 
-    .terms-row a:hover {
+.page-register .terms-row a:hover {
         text-decoration: underline;
     }
 
-    /* Buttons */
-    .btn-primary {
+.page-register /* Buttons */ .btn-primary {
         width: 100%;
         height: 50px;
         background: var(--teal-600);
@@ -406,11 +403,11 @@
         margin-bottom: 1rem;
     }
 
-    .btn-primary.loading {
+.page-register .btn-primary.loading {
         pointer-events: none;
     }
 
-    .btn-primary .spinner {
+.page-register .btn-primary .spinner {
         width: 18px;
         height: 18px;
         border: 2px solid rgba(245, 240, 232, .3);
@@ -420,11 +417,11 @@
         display: none;
     }
 
-    .btn-primary.loading .spinner {
+.page-register .btn-primary.loading .spinner {
         display: block;
     }
 
-    .btn-primary.loading .btn-label {
+.page-register .btn-primary.loading .btn-label {
         opacity: .5;
     }
 
@@ -434,23 +431,22 @@
         }
     }
 
-    .btn-primary:hover {
+.page-register .btn-primary:hover {
         background: var(--teal-800);
     }
 
-    .btn-primary:active {
+.page-register .btn-primary:active {
         transform: scale(0.99);
     }
 
-    .btn-primary:disabled {
+.page-register .btn-primary:disabled {
         background: var(--gray-100);
         color: var(--gray-400);
         cursor: not-allowed;
         transform: none;
     }
 
-    /* Alert */
-    .alert {
+.page-register /* Alert */ .alert {
         background: #FEF2F2;
         border: 1px solid #FECACA;
         border-radius: var(--radius-sm);
@@ -461,8 +457,7 @@
         display: none;
     }
 
-    /* RIGHT PANEL */
-    .panel-right {
+.page-register /* RIGHT PANEL */ .panel-right {
         background: var(--teal-600);
         position: relative;
         display: flex;
@@ -473,7 +468,7 @@
         overflow: hidden;
     }
 
-    .panel-right::before {
+.page-register .panel-right::before {
         content: '';
         position: absolute;
         top: -100px;
@@ -484,7 +479,7 @@
         border: 70px solid rgba(255, 255, 255, 0.06);
     }
 
-    .panel-right::after {
+.page-register .panel-right::after {
         content: '';
         position: absolute;
         bottom: -80px;
@@ -495,7 +490,7 @@
         border: 60px solid rgba(255, 255, 255, 0.06);
     }
 
-    .benefits-title {
+.page-register .benefits-title {
         font-family: var(--font-display);
         font-size: 36px;
         color: #fff;
@@ -505,12 +500,12 @@
         z-index: 1;
     }
 
-    .benefits-title em {
+.page-register .benefits-title em {
         font-style: italic;
         color: var(--teal-100);
     }
 
-    .benefit-list {
+.page-register .benefit-list {
         list-style: none;
         display: flex;
         flex-direction: column;
@@ -520,13 +515,13 @@
         width: 100%;
     }
 
-    .benefit-item {
+.page-register .benefit-item {
         display: flex;
         align-items: flex-start;
         gap: 14px;
     }
 
-    .benefit-icon {
+.page-register .benefit-icon {
         width: 40px;
         height: 40px;
         background: rgba(255, 255, 255, 0.14);
@@ -537,7 +532,7 @@
         flex-shrink: 0;
     }
 
-    .benefit-icon svg {
+.page-register .benefit-icon svg {
         width: 18px;
         height: 18px;
         stroke: #fff;
@@ -546,20 +541,20 @@
         stroke-linecap: round;
     }
 
-    .benefit-text h4 {
+.page-register .benefit-text h4 {
         font-size: 15px;
         font-weight: 500;
         color: #fff;
         margin-bottom: 3px;
     }
 
-    .benefit-text p {
+.page-register .benefit-text p {
         font-size: 13px;
         color: rgba(255, 255, 255, 0.64);
         line-height: 1.55;
     }
 
-    .panel-bottom-tag {
+.page-register .panel-bottom-tag {
         margin-top: 3rem;
         position: relative;
         z-index: 1;
@@ -572,7 +567,7 @@
         gap: 8px;
     }
 
-    .tag-dot {
+.page-register .tag-dot {
         width: 7px;
         height: 7px;
         border-radius: 50%;
@@ -592,22 +587,22 @@
         }
     }
 
-    .panel-bottom-tag span {
+.page-register .panel-bottom-tag span {
         font-size: 13px;
         color: rgba(255, 255, 255, 0.85);
     }
 
     /* Responsive */
     @media (max-width: 850px) {
-        body {
+.page-register {
             grid-template-columns: 1fr;
         }
 
-        .panel-right {
+.page-register .panel-right {
             display: none;
         }
 
-        .panel-left {
+.page-register .panel-left {
             padding: 2rem 1.25rem;
         }
     }
@@ -616,32 +611,32 @@
        vertical rhythm so the form is more likely to fit without
        scrolling, and the scroll that does happen covers less ground. */
     @media (max-height: 800px) {
-        .panel-left {
+.page-register .panel-left {
             padding-top: 1.5rem;
             padding-bottom: 1.5rem;
         }
 
-        .brand {
+.page-register .brand {
             margin-bottom: 1.25rem;
         }
 
-        .form-header {
+.page-register .form-header {
             margin-bottom: 1.25rem;
         }
 
-        .steps {
+.page-register .steps {
             margin-bottom: 1.25rem;
         }
 
-        .field {
+.page-register .field {
             margin-bottom: 0.85rem;
         }
 
-        .role-selector {
+.page-register .role-selector {
             margin-bottom: 0.85rem;
         }
 
-        .terms-row {
+.page-register .terms-row {
             margin-bottom: 1rem;
         }
     }

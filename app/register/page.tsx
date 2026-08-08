@@ -169,7 +169,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
+    <div className="page-register">
       {/* LEFT: FORM */}
       <div className="panel-left">
         <div className="form-card">
@@ -315,6 +315,6 @@ export default function RegisterPage() {
           <span>340 doctors available now</span>
         </div>
       </div>
-    </>
+    </div>
   );
 }

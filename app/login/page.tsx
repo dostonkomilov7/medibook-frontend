@@ -109,7 +109,7 @@ export default function LoginPage() {
   };
 
   return (
-    <>
+    <div className="page-login">
       {/* LEFT PANEL */}
       <div className="panel-left">
         <div className="brand">
@@ -211,6 +211,6 @@ export default function LoginPage() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

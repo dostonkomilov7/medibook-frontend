@@ -31,7 +31,7 @@ def sniff(text):
     return COMMENT_RE.sub("", text).strip()
 
 
-def prefix_selector_list(text, prefix):
+def prefix_selector_list(text, prefix, self_class):
     # Preserve blank-line separation between rules (readability), even
     # though we're about to strip the rest of the leading whitespace.
     stripped_left = text.lstrip()
@@ -55,10 +55,24 @@ def prefix_selector_list(text, prefix):
 
     protected = COMMENT_RE.sub(stash, body)
     parts = [p.strip() for p in protected.split(",")]
+    placeholder_re = re.compile(r"\x00\d+\x00")
     out = []
     for p in parts:
         collapsed = " ".join(p.split())  # normalize internal whitespace/newlines
-        if collapsed in RESERVED:
+        # Compare against the comment-free text — a stashed comment
+        # placeholder sitting in `collapsed` (e.g. a `/* section
+        # header */` right before this selector) would otherwise stop
+        # it ever equaling `self_class` and the check below would
+        # never fire.
+        bare = " ".join(placeholder_re.sub("", collapsed).split())
+        # `self_class` (the wrapper's own class, e.g. ".page-home") is
+        # itself a valid selector some rules legitimately need to
+        # target directly — a rule that moved off `body` onto the
+        # wrapper, say. Prefixing it would produce ".page-home
+        # .page-home", which only matches a nested copy of the
+        # wrapper inside itself. Leave it — and anything already
+        # starting with it, like ".page-home.some-modifier" — alone.
+        if bare in RESERVED or bare == self_class or bare.startswith(self_class + ".") or bare.startswith(self_class + ":"):
             out.append(collapsed)
         else:
             out.append(f"{prefix} {collapsed}")
@@ -76,6 +90,7 @@ def find_comment_end(css, i):
 
 
 def process(css, prefix):
+    self_class = prefix  # e.g. ".page-home" — the wrapper's own class
     out = []
     i = 0
     n = len(css)
@@ -119,7 +134,7 @@ def process(css, prefix):
                     emit(sel + "{")
                     stack.append(True)
                 else:
-                    emit(prefix_selector_list(sel, prefix) + " {")
+                    emit(prefix_selector_list(sel, prefix, self_class) + " {")
                     stack.append(False)
                 pending = []
                 i += 1

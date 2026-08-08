@@ -153,7 +153,7 @@ export default function AllUsersPage() {
   const fullDate = new Date().toDateString();
 
   return (
-    <div className="app">
+    <div className="app page-all-users">
       {/* SIDEBAR */}
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
         <nav className="nav-section">

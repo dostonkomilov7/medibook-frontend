@@ -27,8 +27,14 @@
     --gray-800: #1e293b;
     --gray-900: #0f172a;
     --teal-800: #085041;
+    /* Was referenced (var(--white)) in dozens of rules below — topbar,
+       cards, inputs, chips — but never actually defined, so every one
+       of those "white" backgrounds was silently computing as
+       transparent. Invisible against this page's near-white gray-50
+       body, but very obvious once something sits on a dark backdrop
+       (e.g. the booking success modal, over its dim overlay). */
+    --white: #ffffff;
 
-    --sidebar-w: 240px;
     --topbar-h: 68px;
     --radius: 14px;
     --radius-sm: 8px;
@@ -48,215 +54,6 @@ body {
     display: flex;
     height: 100vh;
     overflow: hidden;
-}
-
-.page-book-appointment /* ── Sidebar ── */ .sidebar {
-    width: var(--sidebar-w);
-    background: var(--teal-800);
-    border-right: 1px solid var(--gray-200);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    padding: 20px 0 0;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
-.page-book-appointment .sidebar::after {
-    content: '';
-    position: absolute;
-    bottom: -80px;
-    right: -80px;
-    width: 260px;
-    height: 260px;
-    border-radius: 50%;
-    border: 50px solid rgba(255, 255, 255, 0.04);
-    pointer-events: none;
-}
-
-.page-book-appointment .sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 20px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 0.6rem;
-}
-
-.page-book-appointment .brand-dot {
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.page-book-appointment .brand-dot svg {
-    width: 16px;
-    height: 16px;
-    stroke: white;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-}
-
-.page-book-appointment .brand-text {
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    color: white;
-}
-
-.page-book-appointment .nav-section {
-    padding: 0 12px 8px;
-}
-
-.page-book-appointment .nav-label {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--gray-400);
-    padding: 0 8px;
-    margin-bottom: 4px;
-}
-
-.page-book-appointment .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background var(--transition);
-    text-decoration: none;
-    margin-bottom: 2px;
-    position: relative;
-}
-
-.page-book-appointment .nav-item svg {
-    width: 17px;
-    height: 17px;
-    stroke: rgba(255, 255, 255, 0.5);
-    fill: none;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    flex-shrink: 0;
-    transition: stroke var(--transition);
-}
-
-.page-book-appointment .nav-item span {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 400;
-    transition: color var(--transition);
-}
-
-.page-book-appointment .nav-item .badge {
-    margin-left: auto;
-    background: var(--coral);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 100px;
-}
-
-.page-book-appointment .nav-item:hover {
-    background: rgba(255, 255, 255, 0.07);
-}
-
-.page-book-appointment .nav-item:hover svg {
-    stroke: rgba(255, 255, 255, 0.85);
-}
-
-.page-book-appointment .nav-item:hover span {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-.page-book-appointment .nav-item.active {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.page-book-appointment .nav-item.active svg {
-    stroke: #fff;
-}
-
-.page-book-appointment .nav-item.active span {
-    color: #fff;
-    font-weight: 500;
-}
-
-.page-book-appointment .nav-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 20%;
-    bottom: 20%;
-    width: 3px;
-    background: var(--teal-100);
-    border-radius: 0 3px 3px 0;
-}
-
-.page-book-appointment .badge {
-    margin-left: auto;
-    background: var(--teal);
-    color: white;
-    border-radius: 99px;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 6px;
-}
-
-.page-book-appointment /* User card at bottom */ .sidebar-user {
-    margin-top: auto;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.page-book-appointment .user-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--teal);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.page-book-appointment .user-meta {
-    flex: 1;
-    min-width: 0;
-}
-
-.page-book-appointment .user-meta .name {
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
-}
-
-.page-book-appointment .user-meta .role {
-    font-size: 11px;
-    color: var(--gray-400);
-}
-
-.page-book-appointment .sidebar-user>svg {
-    width: 14px;
-    height: 14px;
-    stroke: var(--gray-400);
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    flex-shrink: 0;
 }
 
 .page-book-appointment /* ── Main ── */ .main {
@@ -1614,69 +1411,77 @@ body {
     margin-top: 8px;
 }
 
-.page-book-appointment /* ── Responsive ──
-   This file previously had zero media queries: the 240px sidebar was
-   always in-flow (eating over half the width on a phone screen), and
-   .datetime-grid / .details-grid / .confirm-layout stayed 2-column,
-   squeezing every step of the booking wizard into unreadable slivers. */ .hamburger-btn {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    flex-shrink: 0;
+.page-book-appointment /* ── Booking confirmation modal ── */ .success-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 500;
+    display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
+    animation: modalFadeIn 0.2s ease;
 }
 
-.page-book-appointment .hamburger-btn svg {
-    width: 22px;
-    height: 22px;
-    stroke: var(--gray-800, #2C2C2A);
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.page-book-appointment .success-modal {
+    position: relative;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 420px;
+    animation: popIn .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.page-book-appointment .success-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-500);
+    transition: all .15s;
+}
+
+.page-book-appointment .success-modal-close:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.page-book-appointment .success-modal-close svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
     fill: none;
     stroke-width: 2;
     stroke-linecap: round;
 }
 
-.page-book-appointment .sidebar-overlay {
-    display: none;
+.page-book-appointment .success-modal .success-screen {
+    padding: 48px 28px 32px;
 }
 
+/* ── Responsive ──
+   This file previously had zero media queries: the 240px sidebar was
+   always in-flow (eating over half the width on a phone screen), and
+   .datetime-grid / .details-grid / .confirm-layout stayed 2-column,
+   squeezing every step of the booking wizard into unreadable slivers.
+   The sidebar itself (and its hamburger/overlay toggle) is gone now —
+   this page has no sidebar at all — but the rest of the responsive
+   layout fixes below are still needed. */
 @media (max-width: 768px) {
-.page-book-appointment .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 300;
-    }
-
-.page-book-appointment .sidebar.open {
-        transform: translateX(0);
-    }
-
-.page-book-appointment .hamburger-btn {
-        display: flex;
-    }
-
-.page-book-appointment .sidebar-overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: 250;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-    }
-
-.page-book-appointment .sidebar-overlay.open {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
 .page-book-appointment .topbar {
         padding: 0 16px;
         gap: 10px;
@@ -1703,4 +1508,43 @@ body {
 .page-book-appointment .confirm-layout {
         grid-template-columns: 1fr;
     }
+}
+
+.page-book-appointment /* ── Toast — this page had no error/success feedback of any
+   kind, e.g. a failed booking just silently re-enabled the Confirm
+   button with no explanation. ── */ .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    padding: 13px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+
+.page-book-appointment .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.page-book-appointment .toast.success {
+    background: var(--teal);
+    color: #fff;
+}
+
+.page-book-appointment .toast.error {
+    background: var(--coral);
+    color: #fff;
+}
+
+.page-book-appointment .toast.warning {
+    background: var(--amber);
+    color: #fff;
 }

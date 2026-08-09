@@ -1,14 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./user-dashboard.style.css";
-import { getCookie, getUserData, escapeHtml, apiUrl, signOut } from "../../lib/utils";
+import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
 export default function UserDashboardPage() {
   const router = useRouter();
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [detailAppt, setDetailAppt] = useState<any | null>(null);
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
@@ -48,42 +50,15 @@ export default function UserDashboardPage() {
     try {
       const res = await fetch(`${apiUrl}/appointments/${userId}`, { credentials: "include" });
       const data = await res.json();
-      const appointments = document.querySelector(".app-list");
+      const rows = data.appointments?.rows ?? [];
+      // Was built via raw innerHTML string concatenation and never kept
+      // around afterward, so there was no full appointment data left to
+      // show when "Details" was clicked — that button had no click
+      // handler at all. Keeping the rows as real state lets each row
+      // (and the Details button) open a modal with the full record.
+      setAppointments(rows);
       const totalAppointments = document.querySelector(".stat-value");
-      if (!appointments) return;
-
-      if (!data.appointments || data.appointments.count === 0) {
-        document.querySelector(".table-card")?.insertAdjacentHTML("beforeend",
-          `<h5 style="text-align:center;padding:20px 0;">Appointments not found</h5>`);
-        return;
-      }
-      if (totalAppointments) totalAppointments.textContent = data.appointments.count;
-
-      // Reset before appending — without this, re-running getAppointments
-      // (Strict Mode double-invoke in dev, or navigating back here)
-      // duplicated every row.
-      appointments.innerHTML = "";
-      data.appointments.rows.forEach((element: any) => {
-        appointments.innerHTML += `
-          <tr>
-            <td>
-              <div class="doctor-cell">
-                <div class="doc-avatar a">${escapeHtml(element.doctor.user.full_name[0])}</div>
-                <div>
-                  <div class="doc-name">Dr. ${escapeHtml(element.doctor.user.full_name)}</div>
-                  <div class="doc-spec">${escapeHtml(element.doctor.specialization)}</div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="apt-date">${escapeHtml(element.appointment_date)}</div>
-              <div class="apt-time">${escapeHtml(element.appointment_time)}</div>
-            </td>
-            <td><span class="type-tag in-person">In-person</span></td>
-            <td><span class="status-pill confirmed">${escapeHtml(element.status)}</span></td>
-            <td><button class="row-action">Details</button></td>
-          </tr>`;
-      });
+      if (totalAppointments) totalAppointments.textContent = String(data.appointments?.count ?? rows.length);
     } catch (error) {
       console.error(error);
     }
@@ -103,13 +78,12 @@ export default function UserDashboardPage() {
           <p className="nav-label">Overview</p>
           <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></a>
           <Link prefetch={false} className="nav-item" href="/my-appointments"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span><span className="badge">3</span></Link>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg><span>Medical Records</span><span className="badge">Soon</span></a>
           <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Health</p>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg><span>Medical Records</span><span className="badge">Soon</span></a>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg><span>Health Metrics</span><span className="badge">Soon</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" /></svg><span>Prescriptions</span><span className="badge">Soon</span></a>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Account</p>
@@ -191,13 +165,40 @@ export default function UserDashboardPage() {
               <div className="table-card">
                 <table>
                   <thead><tr><th>Doctor</th><th>Date & Time</th><th>Type</th><th>Status</th><th></th></tr></thead>
-                  <tbody className="app-list"></tbody>
+                  <tbody className="app-list">
+                    {appointments.length === 0 ? (
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px 0", color: "var(--gray-400)" }}>Appointments not found</td></tr>
+                    ) : appointments.map((a: any) => (
+                      <tr key={a.id} onClick={() => setDetailAppt(a)}>
+                        <td>
+                          <div className="doctor-cell">
+                            <div className="doc-avatar a">{a.doctor.user.full_name[0]}</div>
+                            <div>
+                              <div className="doc-name">Dr. {a.doctor.user.full_name}</div>
+                              <div className="doc-spec">{a.doctor.specialization}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="apt-date">{a.appointment_date}</div>
+                          <div className="apt-time">{a.appointment_time}</div>
+                        </td>
+                        <td><span className="type-tag in-person">In-person</span></td>
+                        {/* Was hardcoded to "confirmed" regardless of the
+                            real status, and there was no .completed style
+                            at all — every row looked Confirmed even when
+                            Pending or Completed. */}
+                        <td><span className={`status-pill ${a.status?.toLowerCase()}`}>{a.status}</span></td>
+                        <td><button className="row-action" onClick={(e) => { e.stopPropagation(); setDetailAppt(a); }}>Details</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
               </div>
               <div className="section-head"><h3>Quick Actions</h3></div>
               <div className="quick-grid">
                 <Link href="/book-appointment"><button className="quick-btn"><div className="quick-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></div><span>Book a new appointment</span></button></Link>
-                <button className="quick-btn"><div className="quick-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg></div><span>Message your doctor</span></button>
+                <Link href="/chat"><button className="quick-btn"><div className="quick-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg></div><span>Message your doctor</span></button></Link>
                 <button className="quick-btn"><div className="quick-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div><span>Download medical records</span></button>
                 <button className="quick-btn"><div className="quick-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div><span>Log health metrics</span></button>
               </div>
@@ -239,6 +240,42 @@ export default function UserDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* APPOINTMENT DETAILS MODAL */}
+      {detailAppt && (
+        <div className="modal-overlay" onClick={e => { if ((e.target as HTMLElement).classList.contains("modal-overlay")) setDetailAppt(null); }}>
+          <div className="modal">
+            <div className="modal-header">
+              <div>
+                <h2>Appointment Details</h2>
+                <p>Dr. {detailAppt.doctor?.user?.full_name} · {detailAppt.appointment_date}</p>
+              </div>
+              <button className="modal-close" onClick={() => setDetailAppt(null)}><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-doc-row">
+                <div className="detail-doc-avatar">{detailAppt.doctor?.user?.full_name?.[0]?.toUpperCase()}</div>
+                <div>
+                  <div className="detail-doc-name">Dr. {detailAppt.doctor?.user?.full_name}</div>
+                  <div className="detail-doc-spec">{detailAppt.doctor?.specialization}</div>
+                </div>
+                <span className={`status-pill ${detailAppt.status?.toLowerCase()}`} style={{ marginLeft: "auto" }}>{detailAppt.status}</span>
+              </div>
+              <div className="detail-grid">
+                <div className="detail-item"><div className="detail-label">Date</div><div className="detail-val">{detailAppt.appointment_date}</div></div>
+                <div className="detail-item"><div className="detail-label">Time</div><div className="detail-val">{detailAppt.appointment_time}</div></div>
+                <div className="detail-item"><div className="detail-label">Department</div><div className="detail-val">{detailAppt.doctor?.department ?? "—"}</div></div>
+                <div className="detail-item"><div className="detail-label">Room</div><div className="detail-val">{detailAppt.doctor?.room_number ?? "—"}</div></div>
+                <div className="detail-item full"><div className="detail-label">Reason for Visit</div><div className="detail-val">{detailAppt.reason || "Not specified"}</div></div>
+                <div className="detail-item full"><div className="detail-label">Notes</div><div className="detail-val">{detailAppt.notes || "—"}</div></div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setDetailAppt(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
     </div>

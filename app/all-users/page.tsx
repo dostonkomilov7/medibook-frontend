@@ -12,7 +12,7 @@ const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8"];
 const PER_PAGE = 15;
 
 type UserRole = "patient"|"doctor"|"admin";
-type UserStatus = "active"|"suspended"|"pending"|"inactive";
+type UserStatus = "active"|"pending"|"inactive";
 
 function fmtDate(d: Date) {
   return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
@@ -23,7 +23,7 @@ function rolePill(role: string) {
 }
 function statusPill(status: string) {
   const s = status.toLowerCase() as UserStatus;
-  const labels: Record<UserStatus,string> = {active:"Active",suspended:"Suspended",pending:"Pending",inactive:"Inactive"};
+  const labels: Record<UserStatus,string> = {active:"Active",pending:"Pending",inactive:"Inactive"};
   return <span className={`s-pill ${s}`}>{labels[s]??s}</span>;
 }
 
@@ -35,13 +35,14 @@ export default function AllUsersPage() {
   const [view, setView] = useState<"table"|"card">("table");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("");
-  const [verifiedFilter, setVerifiedFilter] = useState("");
   const [sort, setSort] = useState("newest");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [drawer, setDrawer] = useState<any>(null);
   const [delTarget, setDelTarget] = useState<string|null>(null);
+  const [statusTarget, setStatusTarget] = useState<string|null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [toast, setToast] = useState<{msg:string;type:string}|null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout>|null>(null);
 
@@ -72,7 +73,6 @@ export default function AllUsersPage() {
       const res = await fetch(`${apiUrl}/users`);
       if (!res.ok) { showToast("Failed to load users.", "error"); return; }
       const data = await res.json();
-      console.log(data, "AAA")
       const rows = (data.users?.rows ?? []).map((u: any) => ({...u, id: String(u.id)}));
       setAllUsers(rows);
       setStats({
@@ -94,7 +94,6 @@ export default function AllUsersPage() {
     if (search) { const q=search.toLowerCase(); list=list.filter(u=>u.full_name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)||String(u.id).includes(q)); }
     if (roleFilter !== "all") list = list.filter(u=>(u.role??"").toLowerCase()===(roleFilter==="patient"?"user":roleFilter));
     if (statusFilter) list = list.filter(u=>(u.status??"").toLowerCase()===statusFilter);
-    if (verifiedFilter) list = list.filter(u=>String(u.verified)===verifiedFilter);
     const getDate = (u: any) => new Date(u.created_at??u.createdAt??0).getTime();
     list.sort((a,b)=>{
       if (sort==="newest") return getDate(b)-getDate(a);
@@ -142,10 +141,35 @@ export default function AllUsersPage() {
     );
     setAllUsers(prev => prev.filter(u => !succeededIds.has(u.id)));
     setSelected(new Set());
+    setBulkDeleteConfirm(false);
     if (succeededIds.size === ids.length) {
       showToast(`${succeededIds.size} users deleted.`, "error");
     } else {
       showToast(`${succeededIds.size} of ${ids.length} users deleted; some failed.`, "warning");
+    }
+  };
+
+  const toggleStatus = async () => {
+    if (!statusTarget) return;
+    const u = allUsers.find(x=>x.id===statusTarget);
+    if (!u) { setStatusTarget(null); return; }
+    const newStatus = u.status === "Active" ? "Inactive" : "Active";
+    try {
+      const res = await fetch(`${apiUrl}/users/${statusTarget}`,{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
+        body: JSON.stringify({status:newStatus}),
+      });
+      const r = await res.json();
+      if (!res.ok || !r.success) { showToast("Could not update status.","error"); return; }
+      setAllUsers(prev=>prev.map(x=>x.id===statusTarget?{...x,status:newStatus}:x));
+      showToast(`${u.full_name} is now ${newStatus}.`,"success");
+    } catch (e) {
+      console.error("Failed to update status:", e);
+      showToast("Something went wrong.","error");
+    } finally {
+      setStatusTarget(null);
     }
   };
 
@@ -159,7 +183,7 @@ export default function AllUsersPage() {
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
-          <Link prefetch={false} className="nav-item" href="/doctor-management">
+          <Link prefetch={false} className="nav-item" href="/admin-dashboard">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             <span className="lbl">Dashboard</span>
           </Link>
@@ -170,14 +194,13 @@ export default function AllUsersPage() {
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Management</p>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span className="lbl">Appointments</span><span className="bdg r">5</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span className="lbl">Doctors</span><span className="bdg r">Soon</span></a>
-          <Link prefetch={false} className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span className="lbl">Departments</span><span className="bdg r">Soon</span></Link>
+          <Link prefetch={false} className="nav-item" href="/doctor-management"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span className="lbl">Doctors</span></Link>
+          <Link prefetch={false} className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span className="lbl">Departments</span></Link>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span className="lbl">Appointments</span><span className="bdg r">Soon</span></a>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">System</p>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span className="lbl">Analytics</span><span className="bdg r">Soon</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span className="lbl">Support Tickets</span><span className="bdg r">Soon</span></a>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 104.93 19.07M19.07 4.93l-7.07 7.07"/></svg><span className="lbl">Settings</span><span className="bdg r">Soon</span></a>
           <a className="nav-item" onClick={signOut} style={{cursor:"pointer"}}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="lbl">Sign out</span></a>
         </nav>
         <div className="sidebar-footer">
@@ -234,14 +257,8 @@ export default function AllUsersPage() {
             <select className="filter-select" value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setPage(1);}}>
               <option value="">All Status</option>
               <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
               <option value="pending">Pending</option>
               <option value="inactive">Inactive</option>
-            </select>
-            <select className="filter-select" value={verifiedFilter} onChange={e=>{setVerifiedFilter(e.target.value);setPage(1);}}>
-              <option value="">Verification</option>
-              <option value="true">Verified</option>
-              <option value="false">Unverified</option>
             </select>
             <select className="filter-select" value={sort} onChange={e=>{setSort(e.target.value);setPage(1);}}>
               <option value="newest">Newest First</option>
@@ -263,18 +280,17 @@ export default function AllUsersPage() {
             <div className="bulk-bar visible">
               <span>{selected.size} selected</span>
               <div className="bulk-actions">
-                {/* Verify/Suspend are disabled: the backend's UpdateUserDto
-                    has no `status`/`verified` fields yet, so there is no
-                    real endpoint to call. Previously these buttons edited
-                    only local React state, which silently reverted on
-                    refresh and looked like a working feature. */}
-                <button className="bulk-btn teal" disabled title="Not supported by the backend yet" onClick={()=>showToast("Verifying users isn't supported by the server yet.","warning")}>
+                {/* Verify is disabled: the backend has no `verified` field
+                    on users, so there is no real endpoint to call. It used
+                    to edit only local React state, which silently reverted
+                    on refresh and looked like a working feature.
+                    "Suspend" was removed outright — a user's status is only
+                    ever Active or Inactive on the backend, there is no
+                    Suspended state to set it to. */}
+                {/* <button className="bulk-btn teal" disabled title="Not supported by the backend yet" onClick={()=>showToast("Verifying users isn't supported by the server yet.","warning")}>
                   <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verify
-                </button>
-                <button className="bulk-btn amber" disabled title="Not supported by the backend yet" onClick={()=>showToast("Suspending users isn't supported by the server yet.","warning")}>
-                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suspend
-                </button>
-                <button className="bulk-btn coral" onClick={bulkDelete}>
+                </button> */}
+                <button className="bulk-btn coral" onClick={()=>setBulkDeleteConfirm(true)}>
                   <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Delete
                 </button>
                 <button className="bulk-btn ghost" onClick={()=>setSelected(new Set())}>Cancel</button>
@@ -320,6 +336,9 @@ export default function AllUsersPage() {
                       <td style={{fontSize:"13px"}}>0 appointments</td>
                       <td onClick={e=>e.stopPropagation()}>
                         <div className="tbl-actions" style={{justifyContent:"center"}}>
+                          <button className="tbl-btn edit" title="Edit status" onClick={()=>setStatusTarget(u.id)}>
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
                           <button className="tbl-btn del" title="Delete" onClick={()=>setDelTarget(u.id)}>
                             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                           </button>
@@ -334,7 +353,7 @@ export default function AllUsersPage() {
 
           {/* Card view */}
           {view === "card" && filtered.length > 0 && (
-            <div className="users-card-grid">
+            <div className="users-card-grid visible">
               {pageList.map((u: any, i: number) => {
                 const topColor = u.role==="Doctor"?"var(--purple-400)":u.role==="Admin"?"var(--teal-400)":"var(--blue-400)";
                 return (
@@ -360,6 +379,7 @@ export default function AllUsersPage() {
                       </div>
                       <div className="uc-footer">
                         <div className="uc-actions" onClick={e=>e.stopPropagation()}>
+                          <button className="tbl-btn edit" title="Edit status" onClick={()=>setStatusTarget(u.id)}><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                           <button className="tbl-btn del" onClick={()=>setDelTarget(u.id)}><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
                         </div>
                       </div>
@@ -450,6 +470,44 @@ export default function AllUsersPage() {
           </div>
         </div>
       )}
+
+      {/* BULK DELETE MODAL */}
+      {bulkDeleteConfirm && (
+        <div className="modal-overlay open" onClick={e=>{if((e.target as HTMLElement).classList.contains("modal-overlay"))setBulkDeleteConfirm(false);}}>
+          <div className="modal">
+            <div className="modal-inner">
+              <div className="modal-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
+              <h3>Delete {selected.size} Users</h3>
+              <p>This will permanently remove <strong>{selected.size} selected user{selected.size===1?"":"s"}</strong> and all associated data.</p>
+            </div>
+            <div className="modal-footer-btns">
+              <button className="btn-mcancel" onClick={()=>setBulkDeleteConfirm(false)}>Cancel</button>
+              <button className="btn-mdelete" onClick={bulkDelete}>Delete {selected.size} Users</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STATUS MODAL */}
+      {statusTarget && (() => {
+        const u = allUsers.find(x=>x.id===statusTarget);
+        const newStatus = u?.status === "Active" ? "Inactive" : "Active";
+        return (
+          <div className="modal-overlay open" onClick={e=>{if((e.target as HTMLElement).classList.contains("modal-overlay"))setStatusTarget(null);}}>
+            <div className="modal">
+              <div className="modal-inner">
+                <div className="modal-icon status"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                <h3>Change Status</h3>
+                <p>Set <strong>{u?.full_name??"this user"}</strong>&rsquo;s status to <strong>{newStatus}</strong>?</p>
+              </div>
+              <div className="modal-footer-btns">
+                <button className="btn-mcancel" onClick={()=>setStatusTarget(null)}>Cancel</button>
+                <button className="btn-mconfirm" onClick={toggleStatus}>Set to {newStatus}</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
     </div>

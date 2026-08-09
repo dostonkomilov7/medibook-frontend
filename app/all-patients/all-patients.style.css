@@ -100,6 +100,13 @@ body {
      margin-bottom: 0.5rem;
  }
 
+.page-all-patients .brand-link {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     text-decoration: none;
+ }
+
 .page-all-patients .brand-dot {
      width: 32px;
      height: 32px;

@@ -39,7 +39,9 @@ export default function DoctorManagementPage() {
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [drawerDoc, setDrawerDoc] = useState<any>(null);
   const [delTarget, setDelTarget] = useState<string|null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [addForm, setAddForm] = useState({fname:"",lname:"",email:"",phone:"",pass:"",spec:"",dept:"",type:"Full-time",room:"",experience:"No experience",bio:"",days:[] as string[]});
+  const [editForm, setEditForm] = useState({spec:"",dept:"",type:"Full-time",room:"",experience:"No experience",bio:""});
   const [toast, setToast] = useState<{msg:string;type:string}|null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout>|null>(null);
 
@@ -107,6 +109,25 @@ export default function DoctorManagementPage() {
     }
   };
 
+  const bulkDelete = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    const results = await Promise.allSettled(
+      ids.map((id) => fetch(`${apiUrl}/doctors/${id}`, { method: "DELETE" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
+    );
+    const succeededIds = new Set(
+      results.filter((r): r is PromiseFulfilledResult<{ id: string; ok: boolean }> => r.status === "fulfilled" && r.value.ok).map((r) => r.value.id)
+    );
+    setDoctors(prev => prev.filter(d => !succeededIds.has(d.id)));
+    setSelected(new Set());
+    setBulkDeleteConfirm(false);
+    if (succeededIds.size === ids.length) {
+      showToast(`${succeededIds.size} doctors deleted.`, "error");
+    } else {
+      showToast(`${succeededIds.size} of ${ids.length} doctors deleted; some failed.`, "warning");
+    }
+  };
+
   const saveAdd = async () => {
     const {fname,lname,email,phone,pass,spec,dept,type,room,experience,bio} = addForm;
     if (!pass||pass.length<8) { showToast("Password must be at least 8 characters.","error"); return; }
@@ -127,6 +148,41 @@ export default function DoctorManagementPage() {
     }
   };
 
+  const openEdit = (d: any) => {
+    setDrawerDoc(d);
+    setEditForm({
+      spec: d.specialization ?? "",
+      dept: d.department ?? "",
+      type: d.type ?? "Full-time",
+      room: d.room_number != null ? String(d.room_number) : "",
+      experience: d.experience ?? "No experience",
+      bio: d.bio ?? "",
+    });
+    setDrawerMode("edit");
+  };
+
+  const saveEdit = async () => {
+    if (!drawerDoc) return;
+    const {spec,dept,type,room,experience,bio} = editForm;
+    if (!spec||!dept||!type||!room||!bio) { showToast("Please fill in all required fields.","error"); return; }
+    try {
+      const res = await fetch(`${apiUrl}/doctors/${drawerDoc.id}`,{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
+        body:JSON.stringify({specialization:spec,department:dept,experience,bio,type,room_number:Number(room)}),
+      });
+      const r = await res.json();
+      if (!res.ok || !r.success) { showToast(r.message ?? "Could not update the doctor.","error"); return; }
+      showToast(`Dr. ${drawerDoc.user?.full_name}'s profile updated.`,"success");
+      setDrawerMode(null);
+      init();
+    } catch (e) {
+      console.error("Failed to update doctor:", e);
+      showToast("Something went wrong.","error");
+    }
+  };
+
   const accessTelegram = async () => {
     const userId = getCookie("userId");
     if (userId) window.location.href = `https://t.me/medibook_clinic_bot?start=${userId}`;
@@ -142,19 +198,18 @@ export default function DoctorManagementPage() {
       <Sidebar badge={<span className="admin-chip">Admin</span>}>
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
-          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span className="label">Dashboard</span></a>
+          <Link prefetch={false} className="nav-item" href="/admin-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span className="label">Dashboard</span></Link>
           <Link prefetch={false} className="nav-item" href="/all-users"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span className="label">All Users</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Management</p>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span className="label">Appointments</span><span className="badge">5</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span className="label">Doctors</span><span className="badge">Soon</span></a>
-          <Link prefetch={false} className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg><span className="label">Departments</span><span className="badge">Soon</span></Link>
+          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span className="label">Doctors</span></a>
+          <Link prefetch={false} className="nav-item" href="/department-management"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg><span className="label">Departments</span></Link>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span className="label">Appointments</span><span className="badge">Soon</span></a>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">System</p>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span className="label">Analytics</span><span className="badge">Soon</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span className="label">Support Tickets</span><span className="badge">Soon</span></a>
+          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 104.93 19.07M19.07 4.93l-7.07 7.07"/></svg><span className="label">Settings</span><span className="badge">Soon</span></a>
           <a className="nav-item" onClick={signOut} style={{cursor:"pointer"}}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="label">Sign out</span></a>
         </nav>
         <div className="sidebar-footer">
@@ -194,7 +249,6 @@ export default function DoctorManagementPage() {
             <div className="stat-card"><div className="stat-icon teal"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div className="stat-text"><div className="val total-dc">{stats.total}</div><div className="lbl">Total Doctors</div></div></div>
             <div className="stat-card"><div className="stat-icon teal"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div className="stat-text"><div className="val">{stats.active}</div><div className="lbl">Active</div></div></div>
             <div className="stat-card"><div className="stat-icon amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div className="stat-text"><div className="val">{stats.inactive}</div><div className="lbl">Inactive</div></div></div>
-            <div className="stat-card"><div className="stat-icon coral"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div className="stat-text"><div className="val">0</div><div className="lbl">Suspended</div></div></div>
             <div className="stat-card"><div className="stat-icon blue"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div className="stat-text"><div className="val">{stats.appointments}</div><div className="lbl">Total Appointments</div></div></div>
           </div>
 
@@ -212,7 +266,6 @@ export default function DoctorManagementPage() {
               <option value="">All Status</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-              <option value="Suspended">Suspended</option>
             </select>
             <select className="filter-select" value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}>
               <option value="">All Types</option>
@@ -222,15 +275,31 @@ export default function DoctorManagementPage() {
             </select>
           </div>
 
+          {/* Bulk bar */}
+          {selected.size > 0 && (
+            <div className="bulk-bar visible">
+              <span>{selected.size} selected</span>
+              <div className="bulk-actions">
+                <button className="bulk-btn coral" onClick={()=>setBulkDeleteConfirm(true)}>
+                  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Delete
+                </button>
+                <button className="bulk-btn ghost" onClick={()=>setSelected(new Set())}>Cancel</button>
+              </div>
+            </div>
+          )}
+
           {/* Table */}
           <div className="table-wrap">
             <table id="doctors-table">
               <thead>
                 <tr>
-                  <th style={{width:"44px"}}>
-                    <input type="checkbox" style={{width:"16px",height:"16px",accentColor:"var(--teal-400)",cursor:"pointer"}}
-                      checked={pageSlice.length>0&&pageSlice.every(d=>selected.has(d.id))}
-                      onChange={e=>{const n=new Set(selected);pageSlice.forEach(d=>e.target.checked?n.add(d.id):n.delete(d.id));setSelected(n);}}/>
+                  <th className="th-check">
+                    <label className="cb-wrap">
+                      <input type="checkbox"
+                        checked={pageSlice.length>0&&pageSlice.every(d=>selected.has(d.id))}
+                        onChange={e=>{const n=new Set(selected);pageSlice.forEach(d=>e.target.checked?n.add(d.id):n.delete(d.id));setSelected(n);}}/>
+                      <span className="cb-custom"></span>
+                    </label>
                   </th>
                   <th>Doctor</th>
                   <th>Specialty</th>
@@ -251,7 +320,12 @@ export default function DoctorManagementPage() {
                   const isSelected = selected.has(d.id);
                   return (
                     <tr key={d.id} className={isSelected?"selected":""} onClick={()=>{setDrawerDoc(d);setDrawerMode("view");}}>
-                      <td><input type="checkbox" checked={isSelected} onClick={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const n=new Set(selected);e.target.checked?n.add(d.id):n.delete(d.id);setSelected(n);}} style={{width:"16px",height:"16px",accentColor:"var(--teal-400)",cursor:"pointer"}}/></td>
+                      <td onClick={e=>e.stopPropagation()}>
+                        <label className="cb-wrap">
+                          <input type="checkbox" checked={isSelected} onChange={e=>{const n=new Set(selected);e.target.checked?n.add(d.id):n.delete(d.id);setSelected(n);}}/>
+                          <span className="cb-custom"></span>
+                        </label>
+                      </td>
                       <td>
                         <div className="doc-cell">
                           {/* Was Math.random() — picked a new color on every
@@ -269,6 +343,9 @@ export default function DoctorManagementPage() {
                       <td><span className={`status-pill ${sClass}`}>{d.user?.status}</span></td>
                       <td>
                         <div className="row-actions" style={{justifyContent:"flex-end"}}>
+                          <button className="row-btn edit" title="Edit" onClick={e=>{e.stopPropagation();openEdit(d);}}>
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
                           <button className="row-btn del" title="Delete" onClick={e=>{e.stopPropagation();setDelTarget(d.id);}}>
                             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                           </button>
@@ -380,20 +457,50 @@ export default function DoctorManagementPage() {
                 </div>
               </div>
             )}
+
+            {/* EDIT */}
+            {drawerMode === "edit" && drawerDoc && (
+              <div>
+                <div className="form-field"><label>Department</label>
+                  <select className="form-input" value={editForm.dept} onChange={e=>setEditForm(f=>({...f,dept:e.target.value}))}>
+                    <option value="">Select department</option>
+                    {DEPARTMENTS.map(s=><option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="form-fields-row">
+                  <div className="form-field"><label>Specialty</label>
+                    <select className="form-input" value={editForm.spec} onChange={e=>setEditForm(f=>({...f,spec:e.target.value}))}>
+                      <option value="">Select specialty</option>
+                      {SPECIALTIES.map(s=><option key={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-field"><label>Employment Type</label>
+                    <select className="form-input" value={editForm.type} onChange={e=>setEditForm(f=>({...f,type:e.target.value}))}>
+                      <option>Full-time</option><option>Part-time</option><option>Consultant</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-fields-row">
+                  <div className="form-field"><label>Room / Office</label><input className="form-input" placeholder="e.g. 204" value={editForm.room} onChange={e=>setEditForm(f=>({...f,room:e.target.value}))}/></div>
+                  <div className="form-field"><label>Experience</label>
+                    <select className="form-input" value={editForm.experience} onChange={e=>setEditForm(f=>({...f,experience:e.target.value}))}>
+                      <option>No experience</option><option>2-6 months</option><option>6-12 months</option><option>1-4 year</option><option>5-10 year</option><option>10+ year</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-field"><label>Biography</label><textarea className="form-textarea" placeholder="Brief professional summary…" value={editForm.bio} onChange={e=>setEditForm(f=>({...f,bio:e.target.value}))}/></div>
+              </div>
+            )}
           </div>
 
           <div className="drawer-footer">
             <button className="btn-ghost" onClick={()=>setDrawerMode(null)}>Cancel</button>
-            {/*
-              Clicking "Edit Doctor" used to switch drawerMode to "edit",
-              but no edit form exists for that mode — the drawer body
-              rendered nothing, and "Save Changes" just popped a
-              "Doctor updated." toast without changing any real data.
-              Until a real edit form is built, be honest about it
-              instead of pretending the edit succeeded.
-            */}
-            <button className="btn-save" onClick={()=>{if(drawerMode==="add")saveAdd();else showToast("Editing doctor profiles isn't available yet.","warning");}}>
-              {drawerMode==="add"?"Add Doctor":"Edit Doctor"}
+            <button className="btn-save" onClick={()=>{
+              if (drawerMode==="add") saveAdd();
+              else if (drawerMode==="edit") saveEdit();
+              else if (drawerMode==="view" && drawerDoc) openEdit(drawerDoc);
+            }}>
+              {drawerMode==="add"?"Add Doctor":drawerMode==="edit"?"Save Changes":"Edit Doctor"}
             </button>
           </div>
         </div>
@@ -411,6 +518,23 @@ export default function DoctorManagementPage() {
             <div className="modal-footer-inner">
               <button className="btn-del-cancel" onClick={()=>setDelTarget(null)}>Keep Doctor</button>
               <button className="btn-del-confirm" onClick={deleteDoctor}>Yes, Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BULK DELETE MODAL */}
+      {bulkDeleteConfirm && (
+        <div className="modal-overlay open" onClick={e=>{if((e.target as HTMLElement).classList.contains("modal-overlay"))setBulkDeleteConfirm(false);}}>
+          <div className="modal">
+            <div className="modal-body-inner">
+              <div className="modal-del-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              <h3>Delete {selected.size} Doctors</h3>
+              <p>Are you sure you want to remove <strong>{selected.size} selected doctor{selected.size===1?"":"s"}</strong>? This action is permanent.</p>
+            </div>
+            <div className="modal-footer-inner">
+              <button className="btn-del-cancel" onClick={()=>setBulkDeleteConfirm(false)}>Cancel</button>
+              <button className="btn-del-confirm" onClick={bulkDelete}>Yes, Delete</button>
             </div>
           </div>
         </div>

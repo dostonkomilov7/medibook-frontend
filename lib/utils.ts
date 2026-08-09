@@ -53,7 +53,7 @@ export const redirectIfAuth = async (router: { push: (path: string) => void }) =
     } else if (role === 'User') {
       router.push('/user-dashboard');
     } else if (role === 'Admin') {
-      router.push('/doctor-management');
+      router.push('/admin-dashboard');
     } else {
       router.push('/');
     }

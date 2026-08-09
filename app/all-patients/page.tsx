@@ -65,6 +65,7 @@ export default function AllPatientsPage() {
     try {
       const userData = await getUserData();
       if (!userData) return;
+      setUserData(userData);
       const user = userData.users[0];
       const doctor = user.doctors?.[0];
 
@@ -78,8 +79,7 @@ export default function AllPatientsPage() {
       setEl(".avatar-btn", user.full_name[0].toUpperCase());
       setEl(".doc-avatar-lg", user.full_name[0].toUpperCase());
       setEl(".spec", `${doctor?.specialization} • ${doctor?.room_number}`);
-      setEl(".topbar-sub", doctor?.department || "");
-      setEl(".date", String(new Date().toDateString()).split(" ").join(", "));
+      setEl(".topbar-sub", doctor ? `Dr ${userData?.users?.[0]?.full_name} • ${doctor.department} • ${fullDate}` : "");
 
       const userId = getCookie("userId");
       if (!userId) return;
@@ -173,7 +173,6 @@ export default function AllPatientsPage() {
         <nav className="nav-section">
           <p className="nav-label">Clinical</p>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg><span>Records & Notes</span><span className="badge">Soon</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" /></svg><span>Prescriptions</span><span className="badge">Soon</span></a>
           <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg><span>Lab Results</span><span className="badge">Soon</span></a>
         </nav>
         <nav className="nav-section" style={{ marginTop: "auto" }}>
@@ -188,7 +187,7 @@ export default function AllPatientsPage() {
           <div className="topbar-left">
             <HamburgerToggle />
             <div className="topbar-title">My <span>Patients</span></div>
-            <div className="topbar-sub">{doctor ? `Dr ${userData?.users?.[0]?.full_name} • ${doctor.department} • ${fullDate}` : ""}</div>
+            <div className="topbar-sub"></div>
           </div>
           <div className="search-box">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
@@ -301,7 +300,7 @@ export default function AllPatientsPage() {
                         </div>
                       </td>
                       <td style={{ color: "var(--gray-600)", fontSize: "13px" }}>{getAge(p.user?.age)}</td>
-                      <td style={{ fontSize: "13px", color: "var(--gray-600)" }}>Problem related to {doctor?.department}</td>
+                      <td style={{ fontSize: "13px", color: "var(--gray-600)" }}>Problem related to {doctor?.department }</td>
                       <td style={{ fontSize: "13px", color: "var(--gray-600)" }}>{strMonth(p.appointment_date)} {p.appointment_date?.split("-").at(2)}</td>
                       <td><span className={`risk-pill ${riskClass("Medium")}`}>Medium</span></td>
                       <td><span className={`status-pill ${statusClass(p.user?.status)}`}>{p.user?.status}</span></td>

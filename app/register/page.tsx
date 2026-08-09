@@ -18,7 +18,7 @@ export default function RegisterPage() {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";
-        else if (role === "Admin") window.location.href = "/doctor-management";
+        else if (role === "Admin") window.location.href = "/admin-dashboard";
         else router.push("/");
       }
     };

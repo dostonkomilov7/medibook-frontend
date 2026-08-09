@@ -14,7 +14,7 @@
       --teal-800: #085041;
       --coral-50: #FAECE7;
       --coral-100: #F5C4B3;
-      --coral-400: #D85A30;
+      --coral-400: #f43f5e;
       --amber-50: #FAEEDA;
       --amber-100: #FAC775;
       --amber-400: #EF9F27;
@@ -82,6 +82,13 @@ body {
       gap: 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       margin-bottom: 0.5rem;
+  }
+
+.page-my-appointments .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
   }
 
 .page-my-appointments .brand-dot {
@@ -1434,6 +1441,74 @@ body {
 
 .page-my-appointments .modal-body {
       padding: 1.5rem 1.75rem;
+  }
+
+.page-my-appointments /* Appointment details modal content — the .modal-* shell
+   above was already here (for a "new booking" modal that's never actually
+   wired up in the JSX) but nothing used it; reused for the read-only
+   appointment detail view opened by clicking a card. */ .detail-doc-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 1.1rem;
+      margin-bottom: 1.1rem;
+      border-bottom: 1px solid var(--gray-100);
+  }
+
+.page-my-appointments .detail-doc-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--teal-400);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 600;
+      flex-shrink: 0;
+  }
+
+.page-my-appointments .detail-doc-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+  }
+
+.page-my-appointments .detail-doc-spec {
+      font-size: 12.5px;
+      color: var(--gray-400);
+      margin-top: 2px;
+  }
+
+.page-my-appointments .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+  }
+
+.page-my-appointments .detail-item {
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+  }
+
+.page-my-appointments .detail-item.full {
+      grid-column: 1 / -1;
+  }
+
+.page-my-appointments .detail-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-400);
+      margin-bottom: 3px;
+  }
+
+.page-my-appointments .detail-val {
+      font-size: 13.5px;
+      color: var(--gray-800);
+      font-weight: 500;
   }
 
 .page-my-appointments .modal-field {

@@ -72,6 +72,13 @@ body {
       margin-bottom: 0.5rem;
   }
 
+.page-doctor-management .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+  }
+
 .page-doctor-management .brand-dot {
       width: 32px;
       height: 32px;
@@ -446,7 +453,7 @@ body {
 
 .page-doctor-management /* ─── STATS STRIP ─── */ .stats-strip {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 1.75rem;
   }
@@ -620,49 +627,108 @@ body {
       align-items: center;
   }
 
-.page-doctor-management .bulk-actions {
+.page-doctor-management /* ─── BULK BAR — same pattern as all-users' users-table ─── */ .bulk-bar {
       display: none;
       align-items: center;
-      gap: 8px;
-      background: var(--teal-glow);
-      border: 1px solid rgba(29, 158, 117, 0.3);
+      gap: 14px;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
       border-radius: var(--radius-sm);
-      padding: 6px 14px;
-      font-size: 13px;
-      color: var(--teal-400);
+      padding: 10px 16px;
+      margin-bottom: 1.25rem;
+      animation: bulkSlideDown 0.2s ease;
   }
 
-.page-doctor-management .bulk-actions.visible {
+.page-doctor-management .bulk-bar.visible {
       display: flex;
   }
 
-.page-doctor-management .bulk-actions span {
-      font-weight: 500;
+  @keyframes bulkSlideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+
+.page-doctor-management .bulk-bar>span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--teal-400);
+  }
+
+.page-doctor-management .bulk-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
   }
 
 .page-doctor-management .bulk-btn {
-      background: none;
-      border: 1px solid rgba(29, 158, 117, 0.3);
-      border-radius: 6px;
-      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
       font-family: var(--font-body);
-      font-size: 12px;
-      color: var(--teal-400);
+      font-size: 12.5px;
+      font-weight: 500;
       cursor: pointer;
-      transition: background var(--tr);
+      transition: all var(--tr);
   }
 
-.page-doctor-management .bulk-btn:hover {
-      background: rgba(29, 158, 117, 0.15);
+.page-doctor-management .bulk-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
   }
 
-.page-doctor-management .bulk-btn.danger {
-      border-color: rgba(216, 90, 48, 0.3);
-      color: var(--coral-400);
+.page-doctor-management .bulk-btn.teal {
+      background: var(--teal-glow);
+      color: var(--teal-400);
+      border-color: rgba(29, 158, 117, 0.3);
   }
 
-.page-doctor-management .bulk-btn.danger:hover {
+.page-doctor-management .bulk-btn.teal svg {
+      stroke: var(--teal-400);
+  }
+
+.page-doctor-management .bulk-btn.teal:hover {
+      background: var(--teal-400);
+      color: #fff;
+  }
+
+.page-doctor-management .bulk-btn.teal:hover svg {
+      stroke: #fff;
+  }
+
+.page-doctor-management .bulk-btn.coral {
       background: var(--coral-50);
+      color: var(--coral-400);
+      border-color: rgba(216, 90, 48, 0.3);
+  }
+
+.page-doctor-management .bulk-btn.coral svg {
+      stroke: var(--coral-400);
+  }
+
+.page-doctor-management .bulk-btn.coral:hover {
+      background: var(--coral-400);
+      color: #fff;
+  }
+
+.page-doctor-management .bulk-btn.coral:hover svg {
+      stroke: #fff;
+  }
+
+.page-doctor-management .bulk-btn.ghost {
+      background: var(--bg-3);
+      color: var(--text-2);
+      border-color: var(--border-2);
+  }
+
+.page-doctor-management .bulk-btn.ghost:hover {
+      background: var(--bg-2);
+      color: var(--text-1);
   }
 
 .page-doctor-management /* ─── TABLE ─── */ .table-wrap {
@@ -739,17 +805,48 @@ body {
       vertical-align: middle;
   }
 
-.page-doctor-management /* Checkbox */ .cb-wrap {
+.page-doctor-management .th-check {
+      width: 44px;
+      padding: 13px 16px;
+  }
+
+.page-doctor-management /* Custom checkbox — matches all-users' users-table */ .cb-wrap {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+  }
+
+.page-doctor-management .cb-wrap input {
+      display: none;
+  }
+
+.page-doctor-management .cb-custom {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-2);
+      background: var(--bg-3);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all var(--tr);
+      flex-shrink: 0;
   }
 
-.page-doctor-management .cb-wrap input[type=checkbox] {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--teal-400);
-      cursor: pointer;
+.page-doctor-management .cb-wrap input:checked+.cb-custom {
+      background: var(--teal-400);
+      border-color: var(--teal-400);
+  }
+
+.page-doctor-management .cb-wrap input:checked+.cb-custom::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 7px;
+      border: 1.5px solid #fff;
+      border-left: 0;
+      border-top: 0;
+      transform: rotate(45deg) translate(-1px, -1px);
   }
 
 .page-doctor-management /* Doctor cell */ .doc-cell {

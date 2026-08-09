@@ -21,7 +21,7 @@ export default function LoginPage() {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";
-        else if (role === "Admin") window.location.href = "/doctor-management";
+        else if (role === "Admin") window.location.href = "/admin-dashboard";
         else router.push("/");
       }
     };
@@ -97,7 +97,7 @@ export default function LoginPage() {
       // Full-page nav, not router.push() — see comment above.
       if (response?.role === "Doctor") window.location.href = "/doctor-dashboard";
       else if (response?.role === "User") window.location.href = "/user-dashboard";
-      else window.location.href = "/doctor-management";
+      else window.location.href = "/admin-dashboard";
     } catch (error) {
       console.error(error);
       alertEl.textContent = "Something went wrong. Please check your connection and try again.";

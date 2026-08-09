@@ -79,6 +79,13 @@ body {
       margin-bottom: 0.5rem;
   }
 
+.page-department-management .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+  }
+
 .page-department-management .brand-dot {
       width: 32px;
       height: 32px;
@@ -960,7 +967,10 @@ body {
       /* Was `overflow: hidden` — on narrow screens that clipped the
          right side of the table instead of letting it scroll into view. */
       overflow-x: auto;
-      display: none;
+      /* Was `display: none` with no `.visible` counterpart ever added
+         anywhere — since this element is only rendered at all when
+         viewMode === "list" (via React conditional rendering), the
+         hardcoded `none` meant switching to List view showed nothing. */
   }
 
 .page-department-management table {

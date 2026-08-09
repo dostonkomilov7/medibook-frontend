@@ -3,19 +3,58 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import "./book-appointment.style.css";
-import { getCookie, escapeHtml, apiUrl, signOut } from "../../lib/utils";
-import Sidebar from "../../components/sidebar/Sidebar";
-import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
+import { getCookie, escapeHtml, apiUrl } from "../../lib/utils";
 
 interface DoctorData { id: string; full_name: string; specialization: string; department: string; }
+
+function formatDate(dateStr: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+}
 
 export default function BookAppointmentPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const stateRef = useRef({ doctor: null as DoctorData | null, date: null as string | null, time: null as string | null, visitType: "In-Person", reason: "For some reasons", notes: "" });
+  const stateRef = useRef({ doctor: null as DoctorData | null, date: null as string | null, time: null as string | null, visitType: "In-Person", reason: "", notes: "" });
   const doctorsRef = useRef<DoctorData[]>([]);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [activeSpecialty, setActiveSpecialty] = useState("all");
+  // These three drive the step "Continue"/"Confirm" buttons' disabled
+  // state. They used to be toggled imperatively via
+  // `document.getElementById(...).disabled = false`, but the JSX had
+  // a static, unconditional `disabled` attribute on those buttons —
+  // React keeps its own copy of that prop (always `true`) separate
+  // from the live DOM property, and its synthetic event system
+  // refuses to dispatch onClick to an element it believes is
+  // disabled, regardless of the real DOM state. So the buttons looked
+  // enabled (not greyed out) but were permanently unclickable — no
+  // amount of imperative DOM mutation can fix that, only driving
+  // `disabled` from real state can.
+  const [doctorSelected, setDoctorSelected] = useState(false);
+  const [timeSelected, setTimeSelected] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [bookingResult, setBookingResult] = useState<{ ref: string } | null>(null);
+
+  const closeBookingModal = () => window.location.reload();
+
+  // Auto-close the confirmation modal after 5s, same as clicking its
+  // close button — start the whole wizard fresh via reload either way.
+  useEffect(() => {
+    if (!bookingResult) return;
+    const t = setTimeout(closeBookingModal, 5000);
+    return () => clearTimeout(t);
+  }, [bookingResult]);
+  const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+  const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (msg: string, type = "error") => {
+    setToast({ msg, type });
+    if (toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(() => setToast(null), 3200);
+  };
 
   const allSlots = ["8:00 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 
@@ -31,8 +70,21 @@ export default function BookAppointmentPage() {
   const fetchDoctors = async () => {
     const res = await fetch(`${apiUrl}/doctors`);
     const data = await res.json();
-    doctorsRef.current = data.doctors || [];
-    renderDoctors(data.doctors || []);
+    const doctors = data.doctors || [];
+    doctorsRef.current = doctors;
+    renderDoctors(doctors);
+    // Specialty chips used to be a single static "All Specialties"
+    // button — there was no way to actually filter the doctor grid by
+    // specialty at all. Derive the real chip list from whatever
+    // departments the fetched doctors actually belong to.
+    setSpecialties(Array.from(new Set(doctors.map((d: any) => d.department).filter(Boolean))) as string[]);
+  };
+
+  const filterBySpecialty = (spec: string) => {
+    setActiveSpecialty(spec);
+    document.querySelectorAll<HTMLElement>(".doctor-card").forEach((c) => {
+      c.style.display = spec === "all" || c.dataset.specialty === spec ? "" : "none";
+    });
   };
 
   const renderDoctors = (doctors: any[]) => {
@@ -62,7 +114,7 @@ export default function BookAppointmentPage() {
       document.querySelectorAll(".doctor-card").forEach((c) => c.classList.remove("selected"));
       btn.closest(".doctor-card")?.classList.add("selected");
       stateRef.current.doctor = { id: btn.dataset.id!, full_name: `Dr. ${btn.dataset.name}`, specialization: btn.dataset.spec!, department: btn.dataset.dept! };
-      (document.getElementById("step1Next") as HTMLButtonElement).disabled = false;
+      setDoctorSelected(true);
     };
   };
 
@@ -119,7 +171,7 @@ export default function BookAppointmentPage() {
     document.querySelectorAll(".cal-day").forEach((c) => c.classList.remove("selected"));
     el.classList.add("selected");
     stateRef.current.date = dateStr; stateRef.current.time = null;
-    (document.getElementById("step2Next") as HTMLButtonElement).disabled = true;
+    setTimeSelected(false);
     const d = new Date(dateStr + "T00:00:00");
     const label = document.getElementById("selectedDateLabel");
     if (label) label.textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -138,7 +190,7 @@ export default function BookAppointmentPage() {
         document.querySelectorAll(".time-slot").forEach((s) => s.classList.remove("selected"));
         btn.classList.add("selected");
         stateRef.current.time = slot.time;
-        (document.getElementById("step2Next") as HTMLButtonElement).disabled = false;
+        setTimeSelected(true);
       });
       grid.appendChild(btn);
     });
@@ -148,7 +200,6 @@ export default function BookAppointmentPage() {
 
   const goTo = (n: number) => {
     document.getElementById(`step-${step}`)?.classList.remove("active");
-    if (n > 4) { document.getElementById("step-success")?.classList.add("active"); updateStepBar(5); return; }
     setStep(n);
     document.getElementById(`step-${n}`)?.classList.add("active");
     updateStepBar(n);
@@ -166,47 +217,43 @@ export default function BookAppointmentPage() {
   };
 
   const submitBooking = async () => {
-    const btn = document.getElementById("confirmBtn") as HTMLButtonElement;
-    btn.disabled = true;
+    setSubmitting(true);
     const userId = getCookie("userId");
     try {
       const res = await fetch(`${apiUrl}/appointments`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ doctor_id: stateRef.current.doctor?.id, patient_id: userId, appointment_date: stateRef.current.date, appointment_time: stateRef.current.time }),
+        body: JSON.stringify({
+          doctor_id: stateRef.current.doctor?.id,
+          patient_id: userId,
+          appointment_date: stateRef.current.date,
+          appointment_time: stateRef.current.time,
+          reason: stateRef.current.reason || undefined,
+          notes: stateRef.current.notes || undefined,
+        }),
       });
       const response = await res.json();
-      if (!res.ok || !response.success) { btn.disabled = false; return; }
+      if (!res.ok || !response.success) {
+        showToast(response.message ?? "Could not book the appointment.", "error");
+        setSubmitting(false);
+        return;
+      }
       // Use the id the backend assigned to this appointment as the
       // booking reference instead of a client-generated random number,
       // which could collide and never matched the real record.
       const ref = response.appointment?.id ? `MB-${response.appointment.id}` : `MB-${Date.now()}`;
-      const refEl = document.getElementById("bookingRef");
-      if (refEl) refEl.textContent = ref;
-      goTo(5);
+      setBookingResult({ ref });
     } catch (e) {
       console.error("Failed to submit booking:", e);
-      btn.disabled = false;
+      showToast("Something went wrong.", "error");
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="page-book-appointment">
     <div className="app">
-      <Sidebar>
-        <nav className="nav-section">
-          <p className="nav-label">Overview</p>
-          <Link prefetch={false} className="nav-item" href="/user-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></Link>
-          <Link prefetch={false} className="nav-item" href="/my-appointments"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span></Link>
-        </nav>
-        <nav className="nav-section"><p className="nav-label">Account</p>
-          <a className="nav-item" style={{ cursor: "pointer" }} onClick={signOut}><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg><span>Sign out</span></a>
-        </nav>
-        <div className="sidebar-user"><div className="user-avatar">U</div><div className="user-meta"><p className="name">User</p><p className="role">Patient</p></div></div>
-      </Sidebar>
-
       <div className="main">
         <header className="topbar">
-          <HamburgerToggle />
           <div className="topbar-left">
             <Link className="back-btn" href="/user-dashboard"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg></Link>
             <h1 className="topbar-title">Book <span>Appointment</span></h1>
@@ -228,10 +275,13 @@ export default function BookAppointmentPage() {
           <div className={`step-panel${step === 1 ? " active" : ""}`} id="step-1">
             <div className="panel-intro"><h2>Who would you like to see?</h2><p>Select a doctor from our network.</p></div>
             <div className="filter-chips" id="specialtyFilter">
-              <button className="chip active" onClick={(e) => { document.querySelectorAll(".chip").forEach(c => c.classList.remove("active")); (e.target as HTMLElement).classList.add("active"); document.querySelectorAll<HTMLElement>(".doctor-card").forEach(c => c.style.display = ""); }}>All Specialties</button>
+              <button className={`chip${activeSpecialty === "all" ? " active" : ""}`} onClick={() => filterBySpecialty("all")}>All Specialties</button>
+              {specialties.map((s) => (
+                <button key={s} className={`chip${activeSpecialty === s ? " active" : ""}`} onClick={() => filterBySpecialty(s)}>{s}</button>
+              ))}
             </div>
             <div className="doctor-grid" id="doctorGrid"></div>
-            <div className="step-footer"><span></span><button className="btn-primary" id="step1Next" disabled onClick={() => goTo(2)}>Continue →</button></div>
+            <div className="step-footer"><span></span><button className="btn-primary" id="step1Next" disabled={!doctorSelected} onClick={() => goTo(2)}>Continue →</button></div>
           </div>
 
           {/* Step 2 */}
@@ -252,7 +302,7 @@ export default function BookAppointmentPage() {
                 <div className="timeslot-grid" id="timeslotGrid"><p className="timeslot-placeholder">Please select a date.</p></div>
               </div>
             </div>
-            <div className="step-footer"><button className="btn-secondary" onClick={() => goTo(1)}>← Back</button><button className="btn-primary" id="step2Next" disabled onClick={() => goTo(3)}>Continue →</button></div>
+            <div className="step-footer"><button className="btn-secondary" onClick={() => goTo(1)}>← Back</button><button className="btn-primary" id="step2Next" disabled={!timeSelected} onClick={() => goTo(3)}>Continue →</button></div>
           </div>
 
           {/* Step 3 */}
@@ -275,7 +325,7 @@ export default function BookAppointmentPage() {
               <div className="booking-summary-card card">
                 <h4>Booking Summary</h4>
                 <div className="summary-item"><span className="summary-label">Doctor</span><span className="summary-val">{stateRef.current.doctor?.full_name || "—"}</span></div>
-                <div className="summary-item"><span className="summary-label">Date</span><span className="summary-val">{stateRef.current.date || "—"}</span></div>
+                <div className="summary-item"><span className="summary-label">Date</span><span className="summary-val">{formatDate(stateRef.current.date)}</span></div>
                 <div className="summary-item"><span className="summary-label">Time</span><span className="summary-val">{stateRef.current.time || "—"}</span></div>
               </div>
             </div>
@@ -295,12 +345,12 @@ export default function BookAppointmentPage() {
                   </div>
                 </div>
                 <div className="card confirm-details-card">
-                  <div className="confirm-row"><div className="confirm-icon-wrap teal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /></svg></div><div><div className="confirm-row-label">Date & Time</div><div className="confirm-row-val">{stateRef.current.date} at {stateRef.current.time}</div></div></div>
-                  <div className="confirm-row"><div className="confirm-icon-wrap amber"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /></svg></div><div><div className="confirm-row-label">Reason</div><div className="confirm-row-val">{stateRef.current.reason}</div></div></div>
+                  <div className="confirm-row"><div className="confirm-icon-wrap teal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /></svg></div><div><div className="confirm-row-label">Date & Time</div><div className="confirm-row-val">{formatDate(stateRef.current.date)} at {stateRef.current.time || "—"}</div></div></div>
+                  <div className="confirm-row"><div className="confirm-icon-wrap amber"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /></svg></div><div><div className="confirm-row-label">Reason</div><div className="confirm-row-val">{stateRef.current.reason || "Not specified"}</div></div></div>
                 </div>
                 <div className="confirm-consent">
                   <label className="checkbox-label">
-                    <input type="checkbox" id="consentCheck" onChange={(e) => { (document.getElementById("confirmBtn") as HTMLButtonElement).disabled = !e.target.checked; }} />
+                    <input type="checkbox" id="consentCheck" checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
                     <span className="checkbox-custom"></span>
                     I confirm the information above is correct.
                   </label>
@@ -309,29 +359,43 @@ export default function BookAppointmentPage() {
             </div>
             <div className="step-footer">
               <button className="btn-secondary" onClick={() => goTo(3)}>← Back</button>
-              <button className="btn-primary confirm-btn" id="confirmBtn" disabled onClick={submitBooking}>
+              <button className="btn-primary confirm-btn" id="confirmBtn" disabled={!consentChecked || submitting} onClick={submitBooking}>
                 <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
                 Confirm Appointment
               </button>
             </div>
           </div>
 
-          {/* Success */}
-          <div className="step-panel" id="step-success">
+        </div>
+      </div>
+
+      {/* Booking confirmation modal — replaces the old full-screen
+          "success" step. Auto-closes after 5s (see the effect above)
+          or via the × / "Book Another" buttons; either way it's a
+          full reload, which is also the simplest way to reset every
+          bit of imperative wizard state (grid, calendar, refs) back
+          to a clean slate. */}
+      {bookingResult && (
+        <div className="success-modal-overlay" onClick={(e) => { if ((e.target as HTMLElement).classList.contains("success-modal-overlay")) closeBookingModal(); }}>
+          <div className="success-modal">
+            <button className="success-modal-close" aria-label="Close" onClick={closeBookingModal}>
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
             <div className="success-screen">
               <div className="success-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg></div>
               <h2>Appointment Confirmed!</h2>
               <p>Your appointment has been successfully booked.</p>
-              <div className="success-ref">Booking Reference: <strong id="bookingRef">MB-2026-XXXX</strong></div>
+              <div className="success-ref">Booking Reference: <strong>{bookingResult.ref}</strong></div>
               <div className="success-actions">
-                <button className="btn-primary" onClick={() => window.location.reload()}>Book Another</button>
+                <button className="btn-primary" onClick={closeBookingModal}>Book Another</button>
                 <Link href="/my-appointments"><button className="btn-secondary">View Appointments</button></Link>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
+      {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
     </div>
     </div>
   );

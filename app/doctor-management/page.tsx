@@ -63,16 +63,21 @@ export default function DoctorManagementPage() {
     try {
       const ud = await getUserData();
       setUserData(ud);
-      const res = await fetch(`${apiUrl}/doctors`);
+      const [res, apptRes] = await Promise.all([
+        fetch(`${apiUrl}/doctors`),
+        fetch(`${apiUrl}/appointments`),
+      ]);
+
       if (!res.ok) { showToast("Failed to load doctors.", "error"); return; }
       const data = await res.json();
+      const apptData = await apptRes.json();
       setDoctors(data.doctors ?? []);
       setFiltered(data.doctors ?? []);
       setStats({
         total: (data.doctors??[]).length,
         active: data.countActive ?? 0,
         inactive: data.countInactive ?? 0,
-        appointments: 0,
+        appointments: apptData.appointments.length,
       });
     } catch (e) {
       console.error("Failed to load doctors:", e);

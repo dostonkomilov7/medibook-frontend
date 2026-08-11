@@ -1,12 +1,14 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import "./verify-email.style.css";
-import { setCookie, getCookie, apiUrl } from "../../lib/utils";
+import { setCookie, getCookie, deleteCookie, apiUrl } from "../../lib/utils";
 const TOTAL_DIGITS = 6;
 const RESEND_COOLDOWN = 60;
 const CIRCUMFERENCE = 97.4;
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_SECONDS = 3;
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -17,8 +19,29 @@ function VerifyEmailContent() {
   const resendTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoVerifyRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resendCountRef = useRef(0);
+  const failCountRef = useRef(0);
+  const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Once true, nothing on this page can dismiss it — no close button, no
+  // overlay-click, no Escape key — it only ever goes away by finishing
+  // its own 3-second countdown and redirecting to /register.
+  const [locked, setLocked] = useState(false);
+  const [lockoutCountdown, setLockoutCountdown] = useState(LOCKOUT_SECONDS);
 
   useEffect(() => {
+    // Registered first and unconditionally — same as login/register —
+    // so it's guaranteed to be attached before any of the early
+    // returns below can skip past it. It was previously set up after
+    // those checks, so swiping back via touchpad to restore this page
+    // from bfcache while accessToken/userId happened to be in the
+    // "redirect away" state never even reached the listener
+    // registration on the *original* mount that got bfcached — the
+    // restored snapshot had no pageshow handler to catch the restore
+    // and force a fresh reload, so the stale OTP form just sat there.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+
     // window.location.href (not router.push) for the dashboard
     // redirects: those pages' CSS is unscoped global stylesheets, and
     // a client-side transition could paint before it's loaded. A full
@@ -28,6 +51,22 @@ function VerifyEmailContent() {
       if (role === "Doctor") window.location.href = "/doctor-dashboard";
       else if (role === "User") window.location.href = "/user-dashboard";
       else if (role === "Admin") window.location.href = "/admin-dashboard";
+      return () => window.removeEventListener("pageshow", handlePageShow);
+    }
+
+    // Without a pending registration to verify, this page has nothing
+    // to do — either nobody ever registered in this browser, or a
+    // lockout already ran, deleted the account, and cleared this
+    // cookie, but the user then refreshed mid-countdown or after it.
+    // failCountRef/locked only ever lived in memory, so a refresh
+    // silently reset them and re-showed the OTP form for an account
+    // that no longer exists. Checking the cookie (cleared
+    // synchronously the instant lockout starts, not after the delete
+    // request finishes — see triggerLockout) catches that case on
+    // remount instead of letting it back in.
+    if (!getCookie("userId")) {
+      window.location.href = "/register";
+      return () => window.removeEventListener("pageshow", handlePageShow);
     }
 
     initParticles();
@@ -36,9 +75,12 @@ function VerifyEmailContent() {
     firstInput?.focus();
 
     return () => {
+      window.removeEventListener("pageshow", handlePageShow);
       if (resendTimerRef.current) clearInterval(resendTimerRef.current);
       if (autoVerifyRef.current) clearTimeout(autoVerifyRef.current);
+      if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
     };
+
   }, [router]);
 
   const initParticles = () => {
@@ -175,8 +217,16 @@ function VerifyEmailContent() {
         }
         setTimeout(showSuccessOverlay, 800);
       } else {
+        failCountRef.current += 1;
         setInputState("error");
-        setStatus("error", "Incorrect code. Please check your email and try again.");
+
+        if (failCountRef.current >= MAX_ATTEMPTS) {
+          triggerLockout();
+          return;
+        }
+
+        const attemptsLeft = MAX_ATTEMPTS - failCountRef.current;
+        setStatus("error", `Incorrect code. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} left.`);
         if (verifyBtn) {
           verifyBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify Email`;
           verifyBtn.disabled = false;
@@ -203,6 +253,46 @@ function VerifyEmailContent() {
     }
   };
 
+  // 3 wrong codes in a row: this registration is treated as abandoned.
+  // The half-created account (and, for a doctor sign-up, its linked
+  // doctor profile from /third-page) is deleted server-side, and the
+  // user is sent back to register from scratch — with a 3-second
+  // warning that can't be dismissed early, so it's actually read
+  // instead of reflexively clicked away.
+  const triggerLockout = async () => {
+    setLocked(true);
+
+    const userId = getCookie("userId");
+    // Cleared immediately, before the delete request even goes out —
+    // not after it resolves. A refresh a moment later (mid-request or
+    // mid-countdown) then hits the "no pending registration" guard in
+    // the mount effect above and bounces straight to /register instead
+    // of remounting a fresh, in-memory attempt counter and showing the
+    // OTP form again for an account that's being (or already was)
+    // deleted.
+    deleteCookie("userId");
+    deleteCookie("role");
+
+    if (userId) {
+      try {
+        await fetch(`${apiUrl}/users/${userId}`, { method: "DELETE" });
+      } catch (e) {
+        console.error("Failed to clean up the unverified account:", e);
+      }
+    }
+
+    let secs = LOCKOUT_SECONDS;
+    setLockoutCountdown(secs);
+    lockoutTimerRef.current = setInterval(() => {
+      secs -= 1;
+      setLockoutCountdown(secs);
+      if (secs <= 0) {
+        if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
+        window.location.href = "/register";
+      }
+    }, 1000);
+  };
+
   const showSuccessOverlay = () => {
     const overlay = document.getElementById("successOverlay");
     overlay?.classList.add("show");
@@ -210,7 +300,7 @@ function VerifyEmailContent() {
 
   const handleDirect = () => {
     const role = getCookie("role");
-    if (role === "Doctor") window.location.href = "/doctor-dashboard";
+    if (role === "Doctor") window.location.href = "/third-page";
     else if (role === "User") window.location.href = "/user-dashboard";
     else if (role === "Admin") window.location.href = "/admin-dashboard";
     else router.push("/");
@@ -389,6 +479,22 @@ function VerifyEmailContent() {
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
         </button>
       </div>
+
+      {/* LOCKOUT OVERLAY — intentionally has no close button, no
+          overlay-click handler, and no Escape-key handling. It can
+          only go away by finishing its own countdown. */}
+      {locked && (
+        <div className="lockout-overlay show">
+          <div className="lockout-icon-wrap">
+            <div className="lockout-circle">
+              <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+            </div>
+          </div>
+          <h2 className="lockout-title">Too many <em>failed attempts</em></h2>
+          <p className="lockout-desc">You&apos;ve entered the wrong code {MAX_ATTEMPTS} times. For your security, this registration has been cancelled — you&apos;ll need to sign up again.</p>
+          <div className="lockout-countdown">Redirecting …</div>
+        </div>
+      )}
     </div>
   );
 }

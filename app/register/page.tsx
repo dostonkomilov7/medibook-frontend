@@ -1,12 +1,23 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./register.style.css";
 import { setCookie, getCookie, apiUrl } from "../../lib/utils";
 
 export default function RegisterPage() {
   const router = useRouter();
+  // Was an uncontrolled radio pair where selecting "Doctor" tried to
+  // imperatively set `role-doctor`'s .value to "Doctor" from onChange
+  // (see updateSteps below) — but that input's JSX also declares a
+  // static value="User", and React's own input-value-tracking
+  // safeguard resets the DOM value back to match that JSX prop right
+  // after every change event fires, regardless of the imperative
+  // write. So "Doctor" never stuck: whichever role you picked, the
+  // read at submit time (`roleDoctorEl.value`) always came back
+  // "User". Driving the selection through real state sidesteps the
+  // fight with React entirely.
+  const [role, setRole] = useState<"User" | "Doctor">("User");
 
   useEffect(() => {
     // window.location.href (not router.push) for the dashboard
@@ -72,10 +83,7 @@ export default function RegisterPage() {
     }
   };
 
-  const updateSteps = (el: HTMLInputElement) => {
-    const doctor = document.getElementById("role-doctor") as HTMLInputElement;
-    if (el.id === "role-doctor") el.value = "Doctor";
-    else doctor.value = "User";
+  const updateSteps = () => {
     const steps = ["step-1", "step-2", "step-3"];
     steps.forEach((id, i) => {
       const el2 = document.getElementById(id) as HTMLElement;
@@ -95,8 +103,7 @@ export default function RegisterPage() {
     const termsEl = document.getElementById("terms") as HTMLInputElement | null;
     const alertEl = document.getElementById("alert") as HTMLElement | null;
     const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null;
-    const roleDoctorEl = document.getElementById("role-doctor") as HTMLInputElement | null;
-    if (!fnameEl || !lnameEl || !emailEl || !phoneEl || !dobEl || !pwEl || !termsEl || !alertEl || !submitBtn || !roleDoctorEl) return;
+    if (!fnameEl || !lnameEl || !emailEl || !phoneEl || !dobEl || !pwEl || !termsEl || !alertEl || !submitBtn) return;
 
     const fname = fnameEl.value.trim();
     const lname = lnameEl.value.trim();
@@ -105,7 +112,6 @@ export default function RegisterPage() {
     const dob = dobEl.value;
     const pw = pwEl.value;
     const terms = termsEl.checked;
-    const isDoctor = roleDoctorEl.value;
 
     if (!fname || !lname || !email || !pw || !phone) {
       alertEl.textContent = "Please fill in all required fields.";
@@ -139,7 +145,7 @@ export default function RegisterPage() {
           email,
           password: pw,
           phone,
-          role: isDoctor,
+          role,
         }),
       });
       const response = await res.json();
@@ -153,11 +159,7 @@ export default function RegisterPage() {
       setCookie("userId", response?.userId);
       setCookie("role", response?.role);
       const emailParam = encodeURIComponent(email);
-      if (response.role === "Doctor") {
-        router.push(`/third-page?email=${emailParam}`);
-      } else {
-        router.push(`/verify-email?email=${emailParam}`);
-      }
+      router.push(`/verify-email?email=${emailParam}`);
     } catch (error) {
       console.error(error);
       alertEl.textContent = "Something went wrong. Please check your connection and try again.";
@@ -200,7 +202,7 @@ export default function RegisterPage() {
           </div>
           <div className="role-selector">
             <div className="role-option">
-              <input type="radio" name="role" id="role-patient" defaultChecked onChange={(e) => updateSteps(e.target as HTMLInputElement)} />
+              <input type="radio" name="role" id="role-patient" checked={role === "User"} onChange={() => { setRole("User"); updateSteps(); }} />
               <label className="role-label" htmlFor="role-patient">
                 <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 <span>Patient</span>
@@ -208,7 +210,7 @@ export default function RegisterPage() {
               </label>
             </div>
             <div className="role-option">
-              <input type="radio" name="role" id="role-doctor" value="User" onChange={(e) => updateSteps(e.target as HTMLInputElement)} />
+              <input type="radio" name="role" id="role-doctor" checked={role === "Doctor"} onChange={() => { setRole("Doctor"); updateSteps(); }} />
               <label className="role-label" htmlFor="role-doctor">
                 <svg viewBox="0 0 24 24"><path d="M12 14v7M9 21h6M12 3C9.79 3 8 4.79 8 7v1H6v5a6 6 0 0012 0V8h-2V7c0-2.21-1.79-4-4-4z" /></svg>
                 <span>Doctor</span>

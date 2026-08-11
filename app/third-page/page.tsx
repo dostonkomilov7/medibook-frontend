@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import "./third.style.css";
-import { getCookie, apiUrl } from "../../lib/utils";
+import { getCookie, apiUrl, getUserData } from "../../lib/utils";
 
 const SPECIALTIES = [
   { id: "Cardiologist", name: "Cardiologist", icon: "heart", color: "#D85A30", bg: "#FAECE7" },
@@ -19,14 +19,15 @@ const SPECIALTIES = [
 ];
 
 const DEPARTMENTS = [
-  { id: "Cardiology", name: "Cardiology", sub: "Heart & Vascular", color: "#D85A30", bg: "#FAECE7" },
-  { id: "Neurology", name: "Neurology", sub: "Brain & Nervous", color: "#8B7EF8", bg: "#EEEDFE" },
-  { id: "Dermatology", name: "Dermatology", sub: "Skin & Aesthetics", color: "#378ADD", bg: "#E6F1FB" },
+  { id: "Cardiologist", name: "Cardiology", sub: "Heart & Vascular", color: "#D85A30", bg: "#FAECE7" },
+  { id: "Neurologist", name: "Neurology", sub: "Brain & Nervous", color: "#8B7EF8", bg: "#EEEDFE" },
+  { id: "Dermatologist", name: "Dermatology", sub: "Skin & Aesthetics", color: "#378ADD", bg: "#E6F1FB" },
   { id: "General", name: "General Practice", sub: "Primary Care", color: "#EF9F27", bg: "#FAEEDA" },
-  { id: "Orthopedics", name: "Orthopedics", sub: "Bones & Joints", color: "#34C97A", bg: "#E3F8EC" },
-  { id: "Pediatrics", name: "Pediatrics", sub: "Child Health", color: "#22C5D9", bg: "#E0F9FC" },
-  { id: "Oncology", name: "Oncology", sub: "Cancer Care", color: "#E0608A", bg: "#FAECF2" },
+  { id: "Orthopedician", name: "Orthopedics", sub: "Bones & Joints", color: "#34C97A", bg: "#E3F8EC" },
+  { id: "Pediatrician", name: "Pediatrics", sub: "Child Health", color: "#22C5D9", bg: "#E0F9FC" },
+  { id: "Oncologist", name: "Oncology", sub: "Cancer Care", color: "#E0608A", bg: "#FAECF2" },
   { id: "Emergency", name: "Emergency", sub: "Acute & Trauma", color: "#F07B3F", bg: "#FFF0E6" },
+  { id: "Radiologist", name: "Radiology", sub: "Angioplasty & Stenting", color: "#888780", bg: "#F7F6F2" },
 ];
 
 const WORK_TYPES = [
@@ -36,12 +37,22 @@ const WORK_TYPES = [
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const HOURS = ["06:00 AM","07:00 AM","08:00 AM","08:30 AM","09:00 AM","09:30 AM","10:00 AM","11:00 AM","12:00 PM","01:00 PM","02:00 PM","03:00 PM","04:00 PM","05:00 PM","06:00 PM","07:00 PM","08:00 PM"];
+const HOURS = ["06:00 AM", "07:00 AM", "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM"];
 
 function ThirdPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+  // const searchParams = useSearchParams();
+  const [name, setName] = useState()
+  // The Continue button used a static `disabled` literal in JSX while
+  // updateChecklist()/handleNext() tried to imperatively flip
+  // `nextBtn.disabled` — same failure mode as book-appointment's
+  // Continue/Confirm buttons had: React keeps its own copy of the
+  // `disabled` prop from the last render and re-syncs the DOM to match
+  // it after every relevant event, so the imperative write never
+  // actually stuck and the button was permanently unclickable. Driving
+  // it from real state fixes that at the root.
+  const [canContinue, setCanContinue] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const stateRef = useRef({
     specialty: "", department: "", workType: "",
@@ -67,7 +78,10 @@ function ThirdPageContent() {
     setTimeout(() => t.classList.remove("show"), 3500);
   };
 
-  const renderSpecialties = () => {
+  const renderSpecialties = async () => {
+    const userData = await getUserData();
+    setName(userData.users[0].full_name);
+
     const grid = document.getElementById("specialtyGrid");
     if (!grid) return;
     grid.innerHTML = SPECIALTIES.map((s) => `
@@ -125,7 +139,7 @@ function ThirdPageContent() {
     document.getElementById(`spec-${id}`)?.classList.add("selected");
     const wrap = document.getElementById("subSpecWrap");
     wrap?.classList.add("open");
-    const matchDept = DEPARTMENTS.find((d) => d.name === SPECIALTIES.find((s) => s.id === id)?.name);
+    const matchDept = DEPARTMENTS.find((d) => d.id === SPECIALTIES.find((s) => s.id === id)?.name);
     if (matchDept) selectDepartment(matchDept.id);
     updateChecklist(); updatePreview(); updateSidebarSteps();
   };
@@ -205,10 +219,9 @@ function ThirdPageContent() {
     if (compBar) compBar.style.width = pctStr;
     if (compPct) compPct.textContent = pctStr;
     if (footerPct) footerPct.textContent = pctStr;
-    if (topBar) topBar.style.width = `${25 + pct * 0.25}%`;
+    if (topBar) topBar.style.width = `${25 + pct * 0.80}%`;
     const coresDone = items.filter((i) => ["specialty", "department", "worktype"].includes(i.id)).every((i) => i.check);
-    const nextBtn = document.getElementById("nextBtn") as HTMLButtonElement;
-    if (nextBtn) nextBtn.disabled = !coresDone;
+    setCanContinue(coresDone);
   };
 
   const updatePreview = () => {
@@ -226,8 +239,9 @@ function ThirdPageContent() {
 
   const updateSidebarSteps = () => {
     const steps = [
-      { id: "ss-dept", done: !!stateRef.current.department },
-      { id: "ss-worktype", done: !!stateRef.current.workType },
+      { id: "ss-department", done: stateRef.current.department ? true : false },
+      { id: "ss-specialty", done: stateRef.current.specialty ? true : false },
+      { id: "ss-worktype", done: stateRef.current.workType ? true : false },
       { id: "ss-availability", done: stateRef.current.days.length > 0 },
       { id: "ss-experience", done: parseInt((document.getElementById("expVal") as HTMLElement)?.textContent || "0") > 0 },
       { id: "ss-bio", done: (document.getElementById("bioTextarea") as HTMLTextAreaElement)?.value?.trim().length >= 30 },
@@ -254,8 +268,7 @@ function ThirdPageContent() {
     if (missing.includes("worktype")) { showToast("Please select your work type.", "error"); scrollToBlock("worktype"); return; }
 
     const userId = getCookie("userId");
-    const nextBtn = document.getElementById("nextBtn") as HTMLButtonElement | null;
-    if (nextBtn) nextBtn.disabled = true;
+    setSubmitting(true);
 
     try {
       const res = await fetch(`${apiUrl}/doctors`, {
@@ -291,12 +304,12 @@ function ThirdPageContent() {
       // email came from a decoded search param — re-encode it before
       // putting it back into a URL, or a "+" or "&" in the address
       // would corrupt the query string on the next page.
-      setTimeout(() => { router.push(`/verify-email?email=${encodeURIComponent(email)}`); }, 1500);
+      setTimeout(() => { router.push(`/doctor-dashboard`); }, 1500);
     } catch (e) {
       console.error("Failed to save professional profile:", e);
       showToast("Something went wrong. Please check your connection and try again.", "error");
     } finally {
-      if (nextBtn) nextBtn.disabled = false;
+      setSubmitting(false);
     }
   };
 
@@ -307,6 +320,26 @@ function ThirdPageContent() {
     (window as any).__selectWorkType = selectWorkType;
     (window as any).__toggleDay = toggleDay;
   });
+
+  useEffect(() => {
+    const redirectIfAuth = () => {
+      if (getCookie("accessToken")) {
+        const role = getCookie("role");
+        if (role === "Doctor") window.location.href = "/doctor-dashboard";
+        else if (role === "User") window.location.href = "/user-dashboard";
+        else if (role === "Admin") window.location.href = "/admin-dashboard";
+        else router.push("/");
+      }
+    };
+
+    redirectIfAuth();
+    
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router])
 
   return (
     <div className="page-third">
@@ -339,7 +372,7 @@ function ThirdPageContent() {
               { id: "experience", title: "Experience", desc: "Years & credentials" },
               { id: "bio", title: "Bio & Profile", desc: "About you" },
             ].map((s, i) => (
-              <div key={s.id} className={`sidebar-step${i < 2 ? " completed" : ""}`} id={`ss-${s.id}`} onClick={() => scrollToBlock(s.id)}>
+              <div key={s.id} className='sidebar-step' id={`ss-${s.id}`} onClick={() => scrollToBlock(s.id)}>
                 <div className="ss-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /></svg></div>
                 <div className="ss-info"><div className="ss-title">{s.title}</div><div className="ss-desc">{s.desc}</div></div>
                 <div className="ss-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg></div>
@@ -352,7 +385,7 @@ function ThirdPageContent() {
               <div className="pp-row">
                 <div className="pp-avatar" id="previewAvatarSidebar">DR</div>
                 <div>
-                  <div className="pp-name" id="previewNameSidebar">Your Name</div>
+                  <div className="pp-name" id="previewNameSidebar">{name}</div>
                   <div className="pp-sub" id="previewSpecSidebar">Select specialty</div>
                 </div>
               </div>
@@ -373,31 +406,31 @@ function ThirdPageContent() {
           </div>
 
           {/* SPECIALTY */}
-          <div className="form-block" id="block-specialty">
+          <div className="form-block visible" id="block-specialty">
             <div className="block-title">Specialty</div>
             <div className="specialty-grid" id="specialtyGrid"></div>
             <div className="sub-spec-wrap" id="subSpecWrap">
-              <div className="field" style={{ marginTop: 10 }}>
+              {/* <div className="field" style={{ marginTop: 10 }}>
                 <label>Sub-specialty / Focus area <span style={{ color: "var(--gray-400)", fontWeight: 400 }}>(optional)</span></label>
                 <input className="field-input" id="subSpecInput" type="text" placeholder="e.g. Interventional Cardiology…" />
-              </div>
+              </div> */}
             </div>
           </div>
 
           {/* DEPARTMENT */}
-          <div className="form-block" id="block-department">
+          <div className="form-block visible" id="block-department">
             <div className="block-title">Department</div>
             <div className="dept-grid" id="deptGrid"></div>
           </div>
 
           {/* WORK TYPE */}
-          <div className="form-block" id="block-worktype">
+          <div className="form-block visible" id="block-worktype">
             <div className="block-title">Work Type</div>
             <div className="work-type-grid" id="workTypeGrid"></div>
           </div>
 
           {/* AVAILABILITY */}
-          <div className="form-block" id="block-availability">
+          <div className="form-block visible" id="block-availability">
             <div className="block-title">Availability</div>
             <div className="field">
               <label>Working Days</label>
@@ -414,7 +447,7 @@ function ThirdPageContent() {
           </div>
 
           {/* EXPERIENCE */}
-          <div className="form-block" id="block-experience">
+          <div className="form-block visible" id="block-experience">
             <div className="block-title">Experience</div>
             <div className="exp-row">
               <div className="field">
@@ -429,7 +462,7 @@ function ThirdPageContent() {
           </div>
 
           {/* BIO */}
-          <div className="form-block" id="block-bio">
+          <div className="form-block visible" id="block-bio">
             <div className="block-title">Bio & Profile</div>
             <div className="field">
               <label>Professional Bio</label>
@@ -445,10 +478,10 @@ function ThirdPageContent() {
                 <label>Room / Office</label>
                 <input className="field-input" id="roomInput" type="text" placeholder="e.g. 204B" />
               </div>
-              <div className="field">
+              {/* <div className="field">
                 <label>Hospital / Clinic Affiliation</label>
                 <input className="field-input" id="hospitalInput" type="text" placeholder="e.g. MediBook Main Hospital" />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -462,7 +495,7 @@ function ThirdPageContent() {
                 <div className="preview-avatar" id="previewAvatar">DR</div>
               </div>
               <div className="preview-card-body">
-                <div className="preview-name" id="previewName">Your Name</div>
+                <div className="preview-name" id="previewName">{name}</div>
                 <div className="preview-spec" id="previewSpec">Select a specialty to continue</div>
                 <div className="preview-tags" id="previewTags"></div>
                 <div className="preview-bio-text" id="previewBio"><span className="preview-placeholder">Your bio will appear here…</span></div>
@@ -498,7 +531,7 @@ function ThirdPageContent() {
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
             Back
           </button>
-          <button className="btn-next" id="nextBtn" disabled onClick={handleNext}>
+          <button className="btn-next" id="nextBtn" disabled={!canContinue || submitting} onClick={handleNext}>
             Continue
             <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
           </button>

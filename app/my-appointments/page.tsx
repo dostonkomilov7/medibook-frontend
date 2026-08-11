@@ -207,8 +207,8 @@ export default function MyAppointmentsPage() {
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Health</p>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg><span>Medical Records</span><span className="badge">Soon</span></a>
-          <a className="nav-item" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg><span>Health Metrics</span><span className="badge">Soon</span></a>
+          <Link prefetch={false} className="nav-item" href="/medical-records"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg><span>Medical Records</span></Link>
+          <Link prefetch={false} className="nav-item" href="/health-metrics"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg><span>Health Metrics</span></Link>
         </nav>
         <nav className="nav-section">
           <p className="nav-label">Account</p>

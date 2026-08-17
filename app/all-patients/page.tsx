@@ -9,7 +9,17 @@ import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75", "#378ADD", "#D85A30", "#EF9F27", "#8B7EF8", "#34C97A", "#E0608A", "#22C5D9", "#F07B3F"];
 const PER_PAGE = 8;
 
-function riskClass(r: string) { return ({ High: "high", Medium: "medium", Low: "low", Stable: "stable" }[r] || "stable"); }
+// "Risk" used to be a fully fake, hardcoded "Medium" everywhere (filter,
+// table, grid card, drawer) — the filter dropdown didn't even read its own
+// value (`riskFilter === "Medium"`, ignoring which option was picked), so
+// nothing here ever reflected a real patient. Now driven by each
+// appointment's real urgency field, same mapping doctor-dashboard uses.
+const URGENCY_RISK: Record<string, { cls: string; label: string }> = {
+  Urgent: { cls: "high", label: "Urgent" },
+  Soon: { cls: "medium", label: "Soon" },
+  Routine: { cls: "low", label: "Routine" },
+};
+function riskInfo(urgency: string) { return URGENCY_RISK[urgency] ?? URGENCY_RISK.Routine; }
 function statusClass(s: string) { return ({ Active: "active", Inactive: "inactive", Critical: "critical" }[s] || "inactive"); }
 
 export default function AllPatientsPage() {
@@ -83,7 +93,7 @@ export default function AllPatientsPage() {
 
       const userId = getCookie("userId");
       if (!userId) return;
-      const res = await fetch(`${apiUrl}/doctors/${userId}`);
+      const res = await fetch(`${apiUrl}/doctors/${userId}`, { credentials: "include" });
       if (!res.ok) { showToast("Failed to load patients.", "error"); return; }
       const data = await res.json();
       const appts = data.doctors?.[0]?.appointments || [];
@@ -106,11 +116,27 @@ export default function AllPatientsPage() {
         String(p.id).toLowerCase().includes(q)
       );
     }
-    if (riskFilter) list = list.filter(p => riskFilter === "Medium"); // same as original
+    if (riskFilter) list = list.filter(p => (p.urgency || "Routine") === riskFilter);
     if (statusFilter) list = list.filter(p => p.user?.status === statusFilter);
+
+    // "Sort" used to just sit there — sortKey was tracked in state but
+    // never actually applied to the list. "Visits" counts each patient's
+    // total appointments across the *unfiltered* list, since that's the
+    // real measure of "how many times has this patient been seen", not
+    // just how many of their rows survived the current filters.
+    if (sortKey === "name") {
+      list.sort((a, b) => (a.user?.full_name || "").localeCompare(b.user?.full_name || ""));
+    } else if (sortKey === "recent") {
+      list.sort((a, b) => String(b.appointment_date).localeCompare(String(a.appointment_date)));
+    } else if (sortKey === "visits") {
+      const visitCounts = new Map<number, number>();
+      patients.forEach(p => { const id = p.user?.id; if (id != null) visitCounts.set(id, (visitCounts.get(id) ?? 0) + 1); });
+      list.sort((a, b) => (visitCounts.get(b.user?.id) ?? 0) - (visitCounts.get(a.user?.id) ?? 0));
+    }
+
     setFiltered(list);
     setCurrentPage(1);
-  }, [search, riskFilter, statusFilter, patients]);
+  }, [search, riskFilter, statusFilter, sortKey, patients]);
 
   const pageSlice = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
@@ -127,7 +153,7 @@ export default function AllPatientsPage() {
   const cancelAppointment = async (id: string, status: string) => {
     if (status !== "Pending") { showToast("Only Pending status can be edited", "info"); return; }
     try {
-      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE", credentials: "include" });
       const response = await res.json();
       showToast(response.message ?? (res.ok ? "Appointment cancelled." : "Could not cancel appointment."), res.ok && response.success ? "info" : "error");
       if (res.ok && response.success) { const ud = await getUserData(); setUserData(ud); init(); }
@@ -141,7 +167,7 @@ export default function AllPatientsPage() {
     if (status === "Completed") { showToast("Appointment has been completed", "info"); return; }
     if (status === "Cancelled") { showToast("Appointment has been cancelled", "info"); return; }
     try {
-      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "PATCH" });
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "PATCH", credentials: "include" });
       const response = await res.json();
       showToast(response.message ?? (res.ok ? "Appointment updated." : "Could not update appointment."), res.ok && response.success ? "info" : "error");
       if (res.ok && response.success) init();
@@ -199,10 +225,10 @@ export default function AllPatientsPage() {
             />
           </div>
           <div className="topbar-right">
-            <button className="icon-btn">
+            {/* <button className="icon-btn">
               <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
               <span className="notif-dot"></span>
-            </button>
+            </button> */}
             <div className="avatar-btn">{userData?.users?.[0]?.full_name?.[0]?.toUpperCase()}</div>
           </div>
         </header>
@@ -243,11 +269,10 @@ export default function AllPatientsPage() {
           {/* Toolbar */}
           <div className="toolbar">
             <select className="filter-select" value={riskFilter} onChange={e => setRiskFilter(e.target.value)}>
-              <option value="">All Risk Levels</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-              <option value="Stable">Stable</option>
+              <option value="">All Urgency Levels</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Soon">Soon</option>
+              <option value="Routine">Routine</option>
             </select>
             <select className="filter-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               <option value="">All Status</option>
@@ -302,7 +327,7 @@ export default function AllPatientsPage() {
                       <td style={{ color: "var(--gray-600)", fontSize: "13px" }}>{getAge(p.user?.age)}</td>
                       <td style={{ fontSize: "13px", color: "var(--gray-600)" }}>Problem related to {doctor?.department }</td>
                       <td style={{ fontSize: "13px", color: "var(--gray-600)" }}>{strMonth(p.appointment_date)} {p.appointment_date?.split("-").at(2)}</td>
-                      <td><span className={`risk-pill ${riskClass("Medium")}`}>Medium</span></td>
+                      <td><span className={`risk-pill ${riskInfo(p.urgency).cls}`}>{riskInfo(p.urgency).label}</span></td>
                       <td><span className={`status-pill ${statusClass(p.user?.status)}`}>{p.user?.status}</span></td>
                       <td><span className={`status-pill ${p.status?.toLowerCase()}`}>{p.status}</span></td>
                       <td>
@@ -346,7 +371,7 @@ export default function AllPatientsPage() {
                 <div key={p.id} className="patient-card" style={{ animationDelay: `${i * 0.05}s` }} onClick={() => setDrawer(p)}>
                   <div className="pc-top">
                     <div className="pc-av" style={{ background: COLORS[i % COLORS.length] }}>{p.user?.full_name?.[0]?.toUpperCase()}</div>
-                    <span className={`risk-pill ${riskClass("Medium")}`}>Medium</span>
+                    <span className={`risk-pill ${riskInfo(p.urgency).cls}`}>{riskInfo(p.urgency).label}</span>
                   </div>
                   <div className="pc-name">{p.user?.full_name}</div>
                   <div className="pc-id">ID: {p.user?.id} · {getAge(p.user?.age)} y</div>
@@ -395,7 +420,7 @@ export default function AllPatientsPage() {
                   <div className="pt-hero-name">{drawer.user?.full_name}</div>
                   <div className="pt-hero-sub">ID: {drawer.user?.id} · {getAge(drawer.user?.age)} years</div>
                   <div className="pt-hero-tags">
-                    <span className={`risk-pill ${riskClass("Medium")}`}>Medium Risk</span>
+                    <span className={`risk-pill ${riskInfo(drawer.urgency).cls}`}>{riskInfo(drawer.urgency).label}</span>
                     <span className={`status-pill ${statusClass(drawer.user?.status)}`}>{drawer.user?.status}</span>
                   </div>
                 </div>

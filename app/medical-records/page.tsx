@@ -42,7 +42,7 @@ export default function MedicalRecordsPage() {
     const userId = getCookie("userId");
     if (!userId) return;
     try {
-      const res = await fetch(`${apiUrl}/users/${userId}`);
+      const res = await fetch(`${apiUrl}/users/${userId}`, { credentials: "include" });
       const data = await res.json();
       const user = data.users?.[0];
       if (user) setAdminName(user.full_name);
@@ -160,10 +160,10 @@ export default function MedicalRecordsPage() {
           <HamburgerToggle />
           <h1 className="topbar-title">Medical <span>Records</span></h1>
           <div className="topbar-actions">
-            <button className="icon-btn" aria-label="Notifications">
+            {/* <button className="icon-btn" aria-label="Notifications">
               <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
               <span className="notif-dot"></span>
-            </button>
+            </button> */}
             <div className="topbar-avatar">{adminName?.[0]?.toUpperCase() || "U"}</div>
           </div>
         </header>

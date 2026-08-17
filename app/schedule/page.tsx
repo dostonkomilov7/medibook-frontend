@@ -8,19 +8,56 @@ import { getCookie, apiUrl, escapeHtml, signOut, getUserData } from "../../lib/u
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
-type ApptType = "in-person" | "virtual";
 type ApptTag = "" | "followup" | "new-pt" | "urgent";
 type ApptStatus = "confirmed" | "pending" | "completed" | "cancelled";
-type Filter = "all" | "in-person" | "virtual" | "urgent";
+type Filter = "all" | "urgent";
 
 interface Appointment {
-  id: string; date: string; time: string; name: string;
-  reason: string; type: ApptType; tag: ApptTag; status: ApptStatus;
+  id: string; date: string; time: string; name: string; patientId: number | null;
+  reason: string; tag: ApptTag; status: ApptStatus;
 }
+
+// "09:00" (native <input type="time">) -> "9:00 AM", matching the format
+// every appointment_time is stored/displayed in elsewhere (book-appointment's
+// slot picker, splitTime()/timeToMinutes() above).
+const to12h = (hhmm: string) => {
+  const [hStr, mStr] = hhmm.split(":");
+  let h = parseInt(hStr, 10) % 12;
+  if (h === 0) h = 12;
+  const period = parseInt(hStr, 10) >= 12 ? "PM" : "AM";
+  return `${h}:${mStr} ${period}`;
+};
+
+// "9:00 AM"/"11:30 PM" → minutes since midnight, for real chronological
+// sorting. localeCompare() on these strings (what this page used
+// before) sorts lexically — "10:00 AM" comes before "9:00 AM" because
+// '1' < '9' as characters — so the timeline was silently out of order
+// any day with a 10+ o'clock appointment next to a single-digit one.
+const timeToMinutes = (t: string) => {
+  const [time, period] = t.split(" ");
+  const [h, m] = time.split(":").map(Number);
+  let hour = h % 12;
+  if (period === "PM") hour += 12;
+  return hour * 60 + (m || 0);
+};
+
+// Date -> "YYYY-MM-DD" using LOCAL calendar fields. Date.toISOString()
+// converts through UTC first, which silently shifts the date by a day in
+// any positive-UTC-offset timezone (e.g. Tashkent, UTC+5): local midnight
+// Aug 12 is still Aug 11 in UTC, so `.toISOString().slice(0,10)` reports
+// "Aug 11". That was the whole "Prev/Next day buttons don't work" bug —
+// shiftDay() built the target date, then this UTC round-trip snapped it
+// right back to the day it started from.
+const toLocalISODate = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 
 export default function SchedulePage() {
   const router = useRouter();
-  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const todayISO = () => toLocalISODate(new Date());
   const apptsRef = useRef<Appointment[]>([]);
   const stateRef = useRef({ currentDate: todayISO(), activeFilter: "all" as Filter, searchTerm: "", editingId: null as string | null });
   const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
@@ -47,6 +84,28 @@ export default function SchedulePage() {
   }, [router]);
 
 
+  // New Appointment modal — driven by real React state instead of
+  // document.getElementById(...).value reads, and now actually POSTs to
+  // /appointments instead of just toasting "not available".
+  const [modalOpen, setModalOpen] = useState(false);
+  const [formPatientId, setFormPatientId] = useState("");
+  const [formDate, setFormDate] = useState(todayISO());
+  const [formTime, setFormTime] = useState("09:00");
+  const [formReason, setFormReason] = useState("");
+  const [formNotes, setFormNotes] = useState("");
+  const [formUrgency, setFormUrgency] = useState("Routine");
+  const [saving, setSaving] = useState(false);
+
+  // A doctor can only schedule a new visit for a patient they already
+  // have a relationship with (no "search all patients" endpoint exists
+  // for this screen) — dedupe by patient id so returning patients with
+  // multiple past appointments only show once.
+  const uniquePatients = () => {
+    const seen = new Map<number, string>();
+    apptsRef.current.forEach((a) => { if (a.patientId != null && !seen.has(a.patientId)) seen.set(a.patientId, a.name); });
+    return Array.from(seen, ([id, name]) => ({ id, name }));
+  };
+
   // Previously this page showed the same 5 hardcoded fake appointments
   // no matter which date you navigated to or which doctor was signed
   // in — it never talked to the backend at all, so it didn't reflect
@@ -56,7 +115,7 @@ export default function SchedulePage() {
     const userId = getCookie("userId");
     if (!userId) return;
     try {
-      const res = await fetch(`${apiUrl}/doctors/${userId}`);
+      const res = await fetch(`${apiUrl}/doctors/${userId}`, { credentials: "include" });
       if (!res.ok) { render(); return; }
       const data = await res.json();
       setDoctor(data.doctors?.[0] ?? null);
@@ -66,9 +125,13 @@ export default function SchedulePage() {
         date: a.appointment_date,
         time: a.appointment_time,
         name: a.user?.full_name ?? "Unknown patient",
-        reason: `Appointment · ID #${a.user?.id ?? "—"}`,
-        type: "in-person",
-        tag: "",
+        patientId: a.user?.id ?? null,
+        reason: a.reason || "General checkup",
+        // Was always "" for real appointments (nothing ever set it),
+        // so the "Urgent" filter chip matched zero real appointments —
+        // clicking it silently showed an empty list no matter what.
+        // Now tied to the appointment's real urgency field.
+        tag: a.urgency === "Urgent" ? "urgent" : "",
         status: (a.status ?? "Pending").toLowerCase() as ApptStatus,
       }));
     } catch (e) {
@@ -111,15 +174,13 @@ export default function SchedulePage() {
     .filter((a) => a.date === stateRef.current.currentDate)
     .filter((a) => {
       const f = stateRef.current.activeFilter;
-      if (f === "all") return true;
-      if (f === "urgent") return a.tag === "urgent";
-      return a.type === f;
+      return f === "all" || a.tag === "urgent";
     })
     .filter((a) => {
       const s = stateRef.current.searchTerm.toLowerCase();
       return !s || a.name.toLowerCase().includes(s) || a.reason.toLowerCase().includes(s);
     })
-    .sort((a, b) => a.time.localeCompare(b.time));
+    .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
 
   const render = () => {
     formatLabels();
@@ -130,16 +191,15 @@ export default function SchedulePage() {
     list.innerHTML = items.map((a, i) => {
       const { hour, min } = splitTime(a.time);
       const tail = i < items.length - 1 ? '<div class="timeline-tail"></div>' : "";
-      const typeTag = `<span class="tag ${a.type === "virtual" ? "virtual" : "in-person"}">${a.type === "virtual" ? "Virtual" : "In-person"}</span>`;
       const tagMap: Record<string, string> = { followup: '<span class="tag followup">Follow-up</span>', "new-pt": '<span class="tag new-pt">New Patient</span>', urgent: '<span class="tag urgent">Urgent</span>' };
       return `
         <div class="schedule-item" data-id="${escapeHtml(a.id)}">
           <div class="schedule-time"><div class="hour">${escapeHtml(hour)}</div><div class="min">${escapeHtml(min)}</div></div>
-          <div class="schedule-line"><div class="timeline-dot ${a.type === "virtual" ? "teal" : "blue"}"></div>${tail}</div>
+          <div class="schedule-line"><div class="timeline-dot ${a.tag === "urgent" ? "coral" : "blue"}"></div>${tail}</div>
           <div class="schedule-body">
             <div class="appt-name">${escapeHtml(a.name)}</div>
             <div class="appt-sub">${escapeHtml(a.reason)}</div>
-            <div class="appt-tags">${typeTag}${a.tag ? tagMap[a.tag] || "" : ""}</div>
+            <div class="appt-tags">${a.tag ? tagMap[a.tag] || "" : ""}</div>
           </div>
           <div class="schedule-actions-group">
             <button class="schedule-action" data-del="${escapeHtml(a.id)}">Cancel</button>
@@ -158,59 +218,94 @@ export default function SchedulePage() {
     if (dateLabel) dateLabel.textContent = d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
   };
 
+  // "Virtual" was always 0 (no appointment is ever virtual — see the
+  // Appointment model, there's no such field). "Free slots" was
+  // `8 - day.length`, an invented "the day has exactly 8 slots"
+  // assumption with nothing real behind it. Both replaced with real
+  // counts instead.
   const updateStats = () => {
     const day = apptsRef.current.filter((a) => a.date === stateRef.current.currentDate && a.status !== "cancelled");
     const set = (id: string, v: number) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
     set("statTotal", day.length);
-    set("statVirtual", day.filter((a) => a.type === "virtual").length);
+    set("statConfirmed", day.filter((a) => a.status === "confirmed").length);
     set("statUrgent", day.filter((a) => a.tag === "urgent").length);
-    set("statFree", Math.max(0, 8 - day.length));
+    set("statPending", day.filter((a) => a.status === "pending").length);
   };
 
   const shiftDay = (delta: number) => {
     const d = new Date(stateRef.current.currentDate + "T00:00:00");
     d.setDate(d.getDate() + delta);
-    stateRef.current.currentDate = d.toISOString().slice(0, 10);
+    stateRef.current.currentDate = toLocalISODate(d);
     render();
   };
 
   const openModal = (id?: string) => {
     stateRef.current.editingId = id ?? null;
-    const modal = document.getElementById("modal") as HTMLElement;
-    const title = document.getElementById("modalTitle");
-    const deleteBtn = document.getElementById("deleteBtn") as HTMLElement;
-    if (title) title.textContent = id ? "Edit Appointment" : "New Appointment";
-    if (deleteBtn) deleteBtn.style.display = id ? "block" : "none";
-    const a = id ? apptsRef.current.find((x) => x.id === id) : undefined;
-    (document.getElementById("fName") as HTMLInputElement).value = a?.name ?? "";
-    (document.getElementById("fReason") as HTMLInputElement).value = a?.reason ?? "";
-    (document.getElementById("fTime") as HTMLInputElement).value = a?.time ?? "09:00";
-    (document.getElementById("fType") as HTMLSelectElement).value = a?.type ?? "in-person";
-    (document.getElementById("fTag") as HTMLSelectElement).value = a?.tag ?? "";
-    (document.getElementById("fStatus") as HTMLSelectElement).value = a?.status ?? "confirmed";
-    if (modal) modal.hidden = false;
+    const patients = uniquePatients();
+    setFormPatientId(patients[0] ? String(patients[0].id) : "");
+    setFormDate(stateRef.current.currentDate);
+    setFormTime("09:00");
+    setFormReason("");
+    setFormNotes("");
+    setFormUrgency("Routine");
+    setModalOpen(true);
   };
 
   const closeModal = () => {
-    const modal = document.getElementById("modal") as HTMLElement;
-    if (modal) modal.hidden = true;
+    setModalOpen(false);
     stateRef.current.editingId = null;
   };
 
-  // There's no backend flow for a doctor creating an ad-hoc appointment
-  // for an arbitrary walk-in name from this screen (booking requires a
-  // real patient_id — see book-appointment), and editing free-form
-  // fields here had nothing to persist to either. Both used to silently
-  // "succeed" against an in-memory array only, discarding the change on
-  // refresh. Be upfront about it instead.
-  const save = () => {
-    showToast("Creating or editing appointments isn't available from this screen yet.", "warning");
-    closeModal();
+  // Editing an existing appointment's fields isn't backed by any real
+  // endpoint (PATCH /appointments/:id only advances status, ignoring any
+  // body), so that path stays an honest "not available" — but creating a
+  // new one is now a real POST to /appointments instead of a no-op toast.
+  const save = async () => {
+    if (stateRef.current.editingId) {
+      showToast("Editing an existing appointment isn't available from this screen yet.", "warning");
+      closeModal();
+      return;
+    }
+    const doctorId = doctor?.id;
+    if (!formPatientId || !doctorId) {
+      showToast("Pick a patient first.", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(`${apiUrl}/appointments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          patient_id: Number(formPatientId),
+          doctor_id: doctorId,
+          appointment_date: formDate,
+          appointment_time: to12h(formTime),
+          reason: formReason,
+          notes: formNotes,
+          urgency: formUrgency,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        showToast("Could not create appointment", "error");
+        return;
+      }
+      showToast("Appointment created", "success");
+      closeModal();
+      loadAppointments();
+    } catch (e) {
+      console.error("Failed to create appointment:", e);
+      showToast("Something went wrong", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const removeAppt = async (id: string) => {
     try {
-      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE", credentials: "include" });
       const result = await res.json();
       if (!res.ok || !result.success) {
         showToast("Could not cancel appointment", "error");
@@ -271,7 +366,7 @@ export default function SchedulePage() {
               <input type="text" id="searchInput" placeholder="Search appointments…" onChange={(e) => { stateRef.current.searchTerm = e.target.value; render(); }} />
             </div>
             <div className="topbar-actions">
-              <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button>
+              {/* <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button> */}
               <div className="avatar-btn">DR</div>
             </div>
           </header>
@@ -286,7 +381,7 @@ export default function SchedulePage() {
               </div>
               <div className="toolbar-right">
                 <div className="filter-chips">
-                  {["all", "in-person", "virtual", "urgent"].map((f) => (
+                  {["all", "urgent"].map((f) => (
                     <button key={f} className={`chip${f === "all" ? " active" : ""}`} onClick={(e) => {
                       document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
                       (e.target as HTMLElement).classList.add("active");
@@ -300,9 +395,9 @@ export default function SchedulePage() {
 
             <div className="mini-stats">
               <div className="mini-stat"><span className="m-num" id="statTotal">0</span><span className="m-lbl">Scheduled</span></div>
-              <div className="mini-stat"><span className="m-num" id="statVirtual">0</span><span className="m-lbl">Virtual</span></div>
+              <div className="mini-stat"><span className="m-num" id="statConfirmed">0</span><span className="m-lbl">Confirmed</span></div>
               <div className="mini-stat"><span className="m-num" id="statUrgent">0</span><span className="m-lbl">Urgent</span></div>
-              <div className="mini-stat"><span className="m-num" id="statFree">0</span><span className="m-lbl">Free slots</span></div>
+              <div className="mini-stat"><span className="m-num" id="statPending">0</span><span className="m-lbl">Pending</span></div>
             </div>
 
             <div className="card">
@@ -318,32 +413,42 @@ export default function SchedulePage() {
         </div>
 
         {/* Modal */}
-        <div className="modal-overlay" id="modal" hidden onClick={(e) => { if ((e.target as HTMLElement).id === "modal") closeModal(); }}>
+        {modalOpen && (
+        <div className="modal-overlay" id="modal" onClick={(e) => { if ((e.target as HTMLElement).id === "modal") closeModal(); }}>
           <div className="modal-card">
             <div className="modal-head">
-              <h3 id="modalTitle">New Appointment</h3>
+              <h3 id="modalTitle">{stateRef.current.editingId ? "Edit Appointment" : "New Appointment"}</h3>
               <button className="icon-btn sm" onClick={closeModal}><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
             </div>
             <div className="modal-body">
-              <label className="field"><span>Patient name</span><input type="text" id="fName" placeholder="e.g. James Mitchell" /></label>
-              <label className="field"><span>Reason / notes</span><input type="text" id="fReason" placeholder="e.g. Cardiac follow-up" /></label>
+              <label className="field">
+                <span>Patient</span>
+                <select value={formPatientId} onChange={(e) => setFormPatientId(e.target.value)}>
+                  {uniquePatients().length === 0 && <option value="">No patients on file yet</option>}
+                  {uniquePatients().map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </label>
+              <label className="field"><span>Reason</span><input type="text" placeholder="e.g. Cardiac follow-up" value={formReason} onChange={(e) => setFormReason(e.target.value)} /></label>
               <div className="field-row">
-                <label className="field"><span>Time</span><input type="time" id="fTime" defaultValue="09:00" /></label>
-                <label className="field"><span>Type</span><select id="fType"><option value="in-person">In-person</option><option value="virtual">Virtual</option></select></label>
+                <label className="field"><span>Date</span><input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} /></label>
+                <label className="field"><span>Time</span><input type="time" value={formTime} onChange={(e) => setFormTime(e.target.value)} /></label>
               </div>
-              <div className="field-row">
-                <label className="field"><span>Category</span><select id="fTag"><option value="">None</option><option value="followup">Follow-up</option><option value="new-pt">New Patient</option><option value="urgent">Urgent</option></select></label>
-                <label className="field"><span>Status</span><select id="fStatus"><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
-              </div>
+              <label className="field"><span>Urgency</span>
+                <select value={formUrgency} onChange={(e) => setFormUrgency(e.target.value)}>
+                  <option value="Routine">Routine (Not urgent)</option>
+                  <option value="Soon">Soon (Within a week)</option>
+                  <option value="Urgent">Urgent (As soon as possible)</option>
+                </select>
+              </label>
+              <label className="field"><span>Notes (optional)</span><textarea rows={3} placeholder="Anything else the doctor should know…" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} /></label>
             </div>
             <div className="modal-foot">
-              <button className="tbl-btn" id="deleteBtn" style={{ display: "none" }} onClick={() => { if (stateRef.current.editingId) { removeAppt(stateRef.current.editingId); closeModal(); } }}>Delete</button>
-              <div style={{ flex: 1 }}></div>
               <button className="tbl-btn" onClick={closeModal}>Cancel</button>
-              <button className="btn-teal" onClick={save}>Save</button>
+              <button className="btn-teal" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save"}</button>
             </div>
           </div>
         </div>
+        )}
 
         {toast && <div className={`toast show ${toast.type}`}>{toast.msg}</div>}
       </div>

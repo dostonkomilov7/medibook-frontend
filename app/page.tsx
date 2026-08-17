@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 import "./home.style.css";
 
 export default function HomePage() {
@@ -288,7 +288,7 @@ export default function HomePage() {
               <div className="card-doc-av">SR</div>
               <div>
                 <div className="card-doc-name">Dr. Sarah Rahman</div>
-                <div className="card-doc-spec">Cardiologist · ⭐ 4.9</div>
+                <div className="card-doc-spec">Cardiologist</div>
               </div>
               <span className="card-tag">
                 <svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" /></svg>
@@ -304,8 +304,10 @@ export default function HomePage() {
               <div className="slot" onClick={(e) => selectSlot(e.currentTarget)}>3:30 PM</div>
               <div className="slot" onClick={(e) => selectSlot(e.currentTarget)}>4:00 PM</div>
             </div>
+            <Link href='/register'>
 
-            <button className="card-book-btn" onClick={openBookingModal}>Confirm Booking</button>
+              <button className="card-book-btn" onClick={openBookingModal}>Confirm Booking</button>
+            </Link>
           </div>
 
           <div className="float-badge fb-1">
@@ -417,10 +419,6 @@ export default function HomePage() {
             <h2 className="section-title">Meet our <em>top doctors.</em></h2>
             <p>Handpicked specialists with exceptional track records.</p>
           </div>
-          <Link href="/register" className="view-all-link">
-            View all 340+ doctors
-            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-          </Link>
         </div>
         <div className="doctors-grid reveal" id="doctorsGrid"></div>
       </section >

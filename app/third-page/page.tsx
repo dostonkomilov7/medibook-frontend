@@ -274,6 +274,7 @@ function ThirdPageContent() {
       const res = await fetch(`${apiUrl}/doctors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           specialization: stateRef.current.specialty,
           department: stateRef.current.department,
@@ -290,6 +291,7 @@ function ThirdPageContent() {
       const res1 = await fetch(`${apiUrl}/schedules`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           work_day: stateRef.current.days.join(", "),
           start_time: stateRef.current.hours[0],

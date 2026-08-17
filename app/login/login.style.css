@@ -453,6 +453,25 @@ body {
         height: 18px;
     }
 
+.page-login .google-btn-wrap {
+        position: relative;
+    }
+
+.page-login .google-btn-wrap .btn-social {
+        pointer-events: none; /* purely visual — see the comment in the JSX */
+    }
+
+/* Google's real button, sized to match .btn-social and stacked exactly on
+   top of it, fully transparent — this is what actually receives the click. */
+.page-login .google-btn-real {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 46px;
+        overflow: hidden;
+        opacity: 0;
+    }
+
 .page-login /* Alert */ .alert {
         background: #FEF2F2;
         border: 1px solid #FECACA;

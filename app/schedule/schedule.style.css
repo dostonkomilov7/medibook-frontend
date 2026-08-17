@@ -229,7 +229,8 @@
 }
 
 .page-schedule .field input,
-.page-schedule .field select {
+.page-schedule .field select,
+.page-schedule .field textarea {
     font-family: var(--font-body);
     font-size: 13.5px;
     color: var(--gray-800);
@@ -241,8 +242,14 @@
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+.page-schedule .field textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
 .page-schedule .field input:focus,
-.page-schedule .field select:focus {
+.page-schedule .field select:focus,
+.page-schedule .field textarea:focus {
     border-color: var(--teal-400);
     box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
     background: var(--white);

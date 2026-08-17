@@ -8,13 +8,13 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
 const SPEC_CLASS: Record<string,string> = {
-  Cardiology:"cardio",Dermatology:"derm",Neurology:"neuro",
+  Cardiology:"cardio",Dermatology:"derm",Neurology:"neuro", Radiology: "radiology",
   "General Practice":"general",Orthopedics:"ortho",Pediatrics:"pediatric",Oncology:"oncology"
 };
 const PER_PAGE = 8;
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const SPECIALTIES = ["Cardiologist","Dermatologist","Neurologist","General Practice","Orthopedic","Pediatrician","Oncologist"];
-const DEPARTMENTS = ["Cardiology","Dermatology","Neurology","Surgery","General Practice","Orthopedics","Pediatrics","Oncology"];
+const SPECIALTIES = ["Cardiologist","Dermatologist","Neurologist", "Radiologist", "General Practice","Orthopedician","Pediatrician","Oncologist"];
+const DEPARTMENTS = ["Cardiology","Dermatology","Neurology","Radiology","General Practice","Orthopedics","Pediatrics","Oncology"];
 
 function strJoined(date: string) {
   const parts = date.split("-");
@@ -64,8 +64,8 @@ export default function DoctorManagementPage() {
       const ud = await getUserData();
       setUserData(ud);
       const [res, apptRes] = await Promise.all([
-        fetch(`${apiUrl}/doctors`),
-        fetch(`${apiUrl}/appointments`),
+        fetch(`${apiUrl}/doctors`, { credentials: "include" }),
+        fetch(`${apiUrl}/appointments`, { credentials: "include" }),
       ]);
 
       if (!res.ok) { showToast("Failed to load doctors.", "error"); return; }
@@ -88,7 +88,7 @@ export default function DoctorManagementPage() {
   useEffect(()=>{
     let list = [...doctors];
     if (search) { const q=search.toLowerCase(); list=list.filter(d=>d.user?.full_name?.toLowerCase().includes(q)||d.user?.email?.toLowerCase().includes(q)); }
-    if (specFilter) list = list.filter(d=>d.department===specFilter);
+    if (specFilter) list = list.filter(d=>d.specialization===specFilter);
     if (statusFilter) list = list.filter(d=>d.user?.status===statusFilter);
     if (typeFilter) list = list.filter(d=>d.type===typeFilter);
     setFiltered(list);
@@ -102,7 +102,7 @@ export default function DoctorManagementPage() {
     if (!delTarget) return;
     const d = doctors.find(x=>x.id===delTarget);
     try {
-      const res = await fetch(`${apiUrl}/doctors/${delTarget}`,{method:"DELETE"});
+      const res = await fetch(`${apiUrl}/doctors/${delTarget}`,{method:"DELETE",credentials:"include"});
       const r = await res.json();
       if (!res.ok || !r.success) { showToast(`${d?.user?.full_name??"Doctor"} could not be removed.`,"error"); return; }
       setDoctors(prev=>prev.filter(x=>x.id!==delTarget));
@@ -118,7 +118,7 @@ export default function DoctorManagementPage() {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
     const results = await Promise.allSettled(
-      ids.map((id) => fetch(`${apiUrl}/doctors/${id}`, { method: "DELETE" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
+      ids.map((id) => fetch(`${apiUrl}/doctors/${id}`, { method: "DELETE", credentials: "include" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
     );
     const succeededIds = new Set(
       results.filter((r): r is PromiseFulfilledResult<{ id: string; ok: boolean }> => r.status === "fulfilled" && r.value.ok).map((r) => r.value.id)
@@ -138,10 +138,10 @@ export default function DoctorManagementPage() {
     if (!pass||pass.length<8) { showToast("Password must be at least 8 characters.","error"); return; }
     if (!fname||!lname||!email||!phone||!spec||!dept||!type||!room||!bio) { showToast("Please fill in all required fields.","error"); return; }
     try {
-      const res1 = await fetch(`${apiUrl}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({full_name:`${fname} ${lname}`,age:null,email,password:pass,phone,role:"Doctor"})});
+      const res1 = await fetch(`${apiUrl}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({full_name:`${fname} ${lname}`,age:null,email,password:pass,phone,role:"Doctor"})});
       const r1 = await res1.json();
       if (!res1.ok || !r1.success) { showToast(r1.message ?? "Could not create the doctor's account.","error"); return; }
-      const res2 = await fetch(`${apiUrl}/doctors`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({specialization:spec,department:dept,experience,bio,type,room_number:room,user_id:r1.userId})});
+      const res2 = await fetch(`${apiUrl}/doctors`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({specialization:spec,department:dept,experience,bio,type,room_number:room,user_id:r1.userId})});
       const r2 = await res2.json();
       if (!res2.ok || !r2.success) { showToast(r2.message ?? "Could not create the doctor profile.","error"); return; }
       showToast(`Dr. ${fname} ${lname} added successfully.`,"success");
@@ -233,7 +233,7 @@ export default function DoctorManagementPage() {
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>
           <div className="topbar-right">
-            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span className="notif-dot"></span></button>
+            {/* <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span className="notif-dot"></span></button> */}
             <div className="admin-avatar top-avatar" style={{width:"36px",height:"36px",fontSize:"12px",cursor:"pointer"}}>{adminName?.[0]?.toUpperCase()}</div>
           </div>
         </header>
@@ -265,7 +265,7 @@ export default function DoctorManagementPage() {
             </div>
             <select className="filter-select" value={specFilter} onChange={e=>setSpecFilter(e.target.value)}>
               <option value="">All Specialties</option>
-              {DEPARTMENTS.map(s=><option key={s} value={s}>{s}</option>)}
+              {SPECIALTIES.map(s=><option key={s} value={s}>{s}</option>)}
             </select>
             <select className="filter-select" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
               <option value="">All Status</option>
@@ -444,10 +444,10 @@ export default function DoctorManagementPage() {
                   <div className="drawer-av" style={{width:"56px",height:"56px",fontSize:"18px",background:COLORS[0],borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:600}}>{drawerDoc.user?.full_name?.[0]?.toUpperCase()}</div>
                   <div className="drawer-doc-info">
                     <div className="d-name">{drawerDoc.user?.full_name}</div>
-                    <div className="d-spec">{drawerDoc.specialization} · {drawerDoc.type}</div>
+                    <div className="d-spec">{drawerDoc?.user?.email}</div>
                     <div className="d-tags">
-                      <span className={`spec-badge ${SPEC_CLASS[drawerDoc.specialization]||"general"}`}>{drawerDoc.specialization}</span>
                       <span className={`status-pill ${drawerDoc.user?.status?.toLowerCase()}`}>{drawerDoc.user?.status}</span>
+                      <span className={`role-pill patient`}>{drawerDoc.type.toUpperCase()}</span>
                     </div>
                   </div>
                 </div>
@@ -455,10 +455,31 @@ export default function DoctorManagementPage() {
                   <h4>Contact &amp; Identity</h4>
                   <div className="info-grid">
                     <div className="info-item"><div className="i-label">Doctor ID</div><div className="i-val">{drawerDoc.id}</div></div>
-                    <div className="info-item"><div className="i-label">Email</div><div className="i-val">{drawerDoc.user?.email}</div></div>
+                    <div className="info-item"><div className="i-label">Phone</div><div className="i-val">{drawerDoc.user?.phone}</div></div>
                     <div className="info-item"><div className="i-label">Room</div><div className="i-val">{drawerDoc.room_number}</div></div>
                     <div className="info-item"><div className="i-label">Department</div><div className="i-val">{drawerDoc.department}</div></div>
+                    <div className="info-item"><div className="i-label">Experience</div><div className="i-val">{drawerDoc.experience}</div></div>
+                    <div className="info-item"><div className="i-label">Appointments</div><div className="i-val">{drawerDoc.appointments?.length ?? 0}</div></div>
                   </div>
+                </div>
+                <div className="info-section">
+                  <h4>Work Hours</h4>
+                  {(drawerDoc.schedules?.length ?? 0) === 0 ? (
+                    <p style={{fontSize:"13px",color:"var(--text-3)"}}>No schedule on file.</p>
+                  ) : (
+                    <div className="info-grid">
+                      {drawerDoc.schedules.map((s: any) => (
+                        <div className="info-item full" key={s.id}>
+                          <div className="i-label">{s.work_day}</div>
+                          <div className="i-val">{s.start_time} – {s.end_time}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="info-section">
+                  <h4>Bio</h4>
+                  <p style={{fontSize:"13px",color:"var(--text-2)",lineHeight:1.6}}>{drawerDoc.bio || "No bio on file."}</p>
                 </div>
               </div>
             )}

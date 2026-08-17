@@ -1,12 +1,67 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import Script from "next/script";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./login.style.css";
 import { setCookie, getCookie, apiUrl } from "../../lib/utils";
 
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
 export default function LoginPage() {
   const router = useRouter();
+  // Google's Identity Services button only renders as a real (iframe-based)
+  // widget — you can't style it as our own "Continue with Google" button
+  // and can't synthetically .click() into an iframe from JS. So it's
+  // rendered here at the same size, stacked exactly on top of our styled
+  // button and made invisible; clicks land on Google's real button while
+  // what's visible underneath is ours.
+  const googleBtnHostRef = useRef<HTMLDivElement>(null);
+
+  const completeLogin = (response: { accessToken?: string; refreshToken?: string; userId: string | number; role: string }) => {
+    setCookie("accessToken", String(response.accessToken ?? "1"));
+    setCookie("refreshToken", String(response.refreshToken ?? "1"));
+    setCookie("userId", String(response.userId));
+    setCookie("role", response.role);
+    if (response.role === "Doctor") window.location.href = "/doctor-dashboard";
+    else if (response.role === "User") window.location.href = "/user-dashboard";
+    else window.location.href = "/admin-dashboard";
+  };
+
+  const handleGoogleCredential = async (credentialResponse: { credential: string }) => {
+    const alertEl = document.getElementById("alert") as HTMLElement | null;
+    try {
+      const res = await fetch(`${apiUrl}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
+      });
+      const response = await res.json();
+      if (!res.ok || !response.success) {
+        if (alertEl) {
+          alertEl.textContent = response.message || "Google sign-in failed. Please try again.";
+          alertEl.style.display = "block";
+        }
+        return;
+      }
+      completeLogin(response);
+    } catch (error) {
+      console.error(error);
+      if (alertEl) {
+        alertEl.textContent = "Something went wrong. Please check your connection and try again.";
+        alertEl.style.display = "block";
+      }
+    }
+  };
+
+  const initGoogleButton = () => {
+    if (!googleClientId || !googleBtnHostRef.current || typeof window === "undefined") return;
+    const google = (window as any).google;
+    if (!google?.accounts?.id) return;
+    google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
+    google.accounts.id.renderButton(googleBtnHostRef.current, { type: "standard", theme: "outline", size: "large", width: 340 });
+  };
 
   useEffect(() => {
     // redirectIfAuth
@@ -80,6 +135,7 @@ export default function LoginPage() {
       const res = await fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password: pw }),
       });
       const response = await res.json();
@@ -90,14 +146,7 @@ export default function LoginPage() {
         return;
       }
 
-      setCookie("accessToken", response?.accessToken);
-      setCookie("refreshToken", response?.refreshToken);
-      setCookie("userId", response?.userId);
-      setCookie("role", response?.role);
-      // Full-page nav, not router.push() — see comment above.
-      if (response?.role === "Doctor") window.location.href = "/doctor-dashboard";
-      else if (response?.role === "User") window.location.href = "/user-dashboard";
-      else window.location.href = "/admin-dashboard";
+      completeLogin(response);
     } catch (error) {
       console.error(error);
       alertEl.textContent = "Something went wrong. Please check your connection and try again.";
@@ -193,24 +242,31 @@ export default function LoginPage() {
             <div className="divider-line"></div>
           </div>
 
-          <button className="btn-social">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-            </svg>
-            Continue with Google
-          </button>
-
-          <button className="btn-social">
-            <svg viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>
-            Continue with Facebook
-          </button>
+          <div className="google-btn-wrap">
+            <button className="btn-social" type="button" tabIndex={-1}>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              Continue with Google
+            </button>
+            {/* Google's real (iframe-based) button, invisible and stacked
+                exactly on top of the styled one above — see the comment on
+                googleBtnHostRef. Clicks land here; the styled button is
+                purely visual. */}
+            <div className="google-btn-real" ref={googleBtnHostRef}></div>
+          </div>
         </div>
       </div>
+      {googleClientId && (
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="afterInteractive"
+          onLoad={initGoogleButton}
+        />
+      )}
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function AllUsersPage() {
     try {
       const ud = await getUserData();
       setUserData(ud);
-      const res = await fetch(`${apiUrl}/users`);
+      const res = await fetch(`${apiUrl}/users`, { credentials: "include" });
       if (!res.ok) { showToast("Failed to load users.", "error"); return; }
       const data = await res.json();
       const rows = (data.users?.rows ?? []).map((u: any) => ({...u, id: String(u.id)}));
@@ -117,7 +117,7 @@ export default function AllUsersPage() {
 
   const deleteSingle = async (id: string) => {
     const u = allUsers.find(x=>x.id===id);
-    const res = await fetch(`${apiUrl}/users/${id}`,{method:"DELETE"});
+    const res = await fetch(`${apiUrl}/users/${id}`,{method:"DELETE",credentials:"include"});
     const r = await res.json();
     if (!r.success) { showToast(`Could not remove user.`,"error"); return; }
     setAllUsers(prev=>prev.filter(x=>x.id!==id));
@@ -134,7 +134,7 @@ export default function AllUsersPage() {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
     const results = await Promise.allSettled(
-      ids.map((id) => fetch(`${apiUrl}/users/${id}`, { method: "DELETE" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
+      ids.map((id) => fetch(`${apiUrl}/users/${id}`, { method: "DELETE", credentials: "include" }).then((r) => r.json().then((body) => ({ id, ok: r.ok && body.success }))))
     );
     const succeededIds = new Set(
       results.filter((r): r is PromiseFulfilledResult<{ id: string; ok: boolean }> => r.status === "fulfilled" && r.value.ok).map((r) => r.value.id)
@@ -219,7 +219,7 @@ export default function AllUsersPage() {
             <div className="topbar-sub">MediBook Admin Panel · {fullDate}</div>
           </div>
           <div className="topbar-right">
-            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span className="notif-dot"></span></button>
+            {/* <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span className="notif-dot"></span></button> */}
             <div className="admin-av topbar-av">{adminName?.[0]?.toUpperCase()}</div>
           </div>
         </header>

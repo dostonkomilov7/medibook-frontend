@@ -201,6 +201,7 @@ function VerifyEmailContent() {
       const response = await fetch(`${apiUrl}/auth/activate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, code }),
       });
       const res = await response.json();
@@ -275,7 +276,7 @@ function VerifyEmailContent() {
 
     if (userId) {
       try {
-        await fetch(`${apiUrl}/users/${userId}`, { method: "DELETE" });
+        await fetch(`${apiUrl}/users/${userId}/cancel-registration`, { method: "DELETE" });
       } catch (e) {
         console.error("Failed to clean up the unverified account:", e);
       }

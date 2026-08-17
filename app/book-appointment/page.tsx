@@ -15,12 +15,13 @@ function formatDate(dateStr: string | null) {
 export default function BookAppointmentPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const stateRef = useRef({ doctor: null as DoctorData | null, date: null as string | null, time: null as string | null, visitType: "In-Person", reason: "", notes: "" });
+  const stateRef = useRef({ doctor: null as DoctorData | null, date: null as string | null, time: null as string | null, visitType: "In-Person", reason: "", notes: "", urgency: "Routine" });
   const doctorsRef = useRef<DoctorData[]>([]);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [activeSpecialty, setActiveSpecialty] = useState("all");
+  const [urgency, setUrgency] = useState("Routine");
   // These three drive the step "Continue"/"Confirm" buttons' disabled
   // state. They used to be toggled imperatively via
   // `document.getElementById(...).disabled = false`, but the JSX had
@@ -68,7 +69,7 @@ export default function BookAppointmentPage() {
   }, [router]);
 
   const fetchDoctors = async () => {
-    const res = await fetch(`${apiUrl}/doctors`);
+    const res = await fetch(`${apiUrl}/doctors`, { credentials: "include" });
     const data = await res.json();
     const doctors = data.doctors || [];
     doctorsRef.current = doctors;
@@ -127,7 +128,7 @@ export default function BookAppointmentPage() {
     const doctorId = stateRef.current.doctor?.id;
     let taken = new Set<string>();
     try {
-      const res = await fetch(`${apiUrl}/appointments`);
+      const res = await fetch(`${apiUrl}/appointments`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         const list: any[] = data.appointments ?? [];
@@ -221,7 +222,7 @@ export default function BookAppointmentPage() {
     const userId = getCookie("userId");
     try {
       const res = await fetch(`${apiUrl}/appointments`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify({
           doctor_id: stateRef.current.doctor?.id,
           patient_id: userId,
@@ -229,6 +230,7 @@ export default function BookAppointmentPage() {
           appointment_time: stateRef.current.time,
           reason: stateRef.current.reason || undefined,
           notes: stateRef.current.notes || undefined,
+          urgency: stateRef.current.urgency,
         }),
       });
       const response = await res.json();
@@ -321,6 +323,22 @@ export default function BookAppointmentPage() {
                   <label>Describe your symptoms</label>
                   <textarea id="symptomsNote" rows={4} placeholder="Describe what you're experiencing…" onChange={(e) => { stateRef.current.notes = e.target.value; }}></textarea>
                 </div>
+                <div className="form-group">
+                  <label>Urgency</label>
+                  <div className="urgency-row">
+                    {[
+                      { id: "Routine", label: "Routine", desc: "Not urgent" },
+                      { id: "Soon", label: "Soon", desc: "Within a week" },
+                      { id: "Urgent", label: "Urgent", desc: "As soon as possible" },
+                    ].map((u) => (
+                      <button type="button" key={u.id} className={`urgency-chip${urgency === u.id ? " selected" : ""}`}
+                        onClick={() => { stateRef.current.urgency = u.id; setUrgency(u.id); }}>
+                        <span className="urgency-chip-label">{u.label}</span>
+                        <span className="urgency-chip-desc">{u.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="booking-summary-card card">
                 <h4>Booking Summary</h4>
@@ -347,6 +365,7 @@ export default function BookAppointmentPage() {
                 <div className="card confirm-details-card">
                   <div className="confirm-row"><div className="confirm-icon-wrap teal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /></svg></div><div><div className="confirm-row-label">Date & Time</div><div className="confirm-row-val">{formatDate(stateRef.current.date)} at {stateRef.current.time || "—"}</div></div></div>
                   <div className="confirm-row"><div className="confirm-icon-wrap amber"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /></svg></div><div><div className="confirm-row-label">Reason</div><div className="confirm-row-val">{stateRef.current.reason || "Not specified"}</div></div></div>
+                  <div className="confirm-row"><div className="confirm-icon-wrap coral"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg></div><div><div className="confirm-row-label">Urgency</div><div className="confirm-row-val">{urgency}</div></div></div>
                 </div>
                 <div className="confirm-consent">
                   <label className="checkbox-label">

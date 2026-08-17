@@ -1,14 +1,49 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./doctor-dashboard.style.css";
 import { getCookie, getUserData, strMonth, getAge, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
+const URGENCY_RISK: Record<string, { cls: string; label: string }> = {
+  Urgent: { cls: "high", label: "Urgent" },
+  Soon: { cls: "medium", label: "Soon" },
+  Routine: { cls: "low", label: "Routine" },
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  Confirmed: "#1D9E75",
+  Pending: "#EF9F27",
+  Completed: "#378ADD",
+  Cancelled: "#9A9890",
+};
+const DONUT_R = 38;
+const DONUT_C = 2 * Math.PI * DONUT_R;
+
+// "9:00 AM"/"11:30 PM" -> minutes since midnight, for correctly ordering
+// same-day visits (a plain string compare puts "10:00 AM" before "9:00 AM").
+function timeToMinutes(t: string): number {
+  const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i.exec(String(t).trim());
+  if (!m) return 0;
+  let h = parseInt(m[1], 10) % 12;
+  if (m[3]?.toUpperCase() === "PM") h += 12;
+  return h * 60 + parseInt(m[2], 10);
+}
+
+type Stats = {
+  todaysAppts: number; totalPatients: number; pendingCount: number;
+  totalAppointments: number; urgentCount: number; weeklyTotal: number; completedCount: number;
+};
+
 export default function DoctorDashboardPage() {
   const router = useRouter();
+  const [stats, setStats] = useState<Stats>({
+    todaysAppts: 0, totalPatients: 0, pendingCount: 0,
+    totalAppointments: 0, urgentCount: 0, weeklyTotal: 0, completedCount: 0,
+  });
+  const [weeklyBreakdown, setWeeklyBreakdown] = useState<{ status: string; count: number }[]>([]);
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
@@ -44,20 +79,31 @@ export default function DoctorDashboardPage() {
   const getDoctorApp = async () => {
     const userId = getCookie("userId");
     if (!userId) return;
-    const res = await fetch(`${apiUrl}/doctors/${userId}`);
+    const res = await fetch(`${apiUrl}/doctors/${userId}`, { credentials: "include" });
     const data = await res.json();
     const recentPatients = document.querySelector(".recent-patients");
     if (!recentPatients || !data.doctors?.[0]) return;
 
-    const userData = await getUserData();
-    const doctor = userData?.users[0]?.doctors?.[0];
+    const appointments: any[] = data.doctors[0].appointments ?? [];
 
     // Reset before appending — without this, re-running getDoctorApp
     // (e.g. React Strict Mode double-invoking effects in dev, or the
     // user navigating back to this page) kept appending rows on top
     // of the ones already rendered, duplicating the list.
     recentPatients.innerHTML = "";
-    data.doctors[0].appointments.forEach((element: any) => {
+    // Cap to the 5 most recent visits here — the rest is a click away via
+    // "All patients →". Sorted by date (then time) descending so "recent"
+    // actually means recent, not just whatever order the API happened to
+    // return rows in.
+    const recentFive = [...appointments]
+      .sort((a: any, b: any) => {
+        const dateDiff = String(b.appointment_date).localeCompare(String(a.appointment_date));
+        if (dateDiff !== 0) return dateDiff;
+        return timeToMinutes(b.appointment_time) - timeToMinutes(a.appointment_time);
+      })
+      .slice(0, 5);
+    recentFive.forEach((element: any) => {
+      const risk = URGENCY_RISK[element.urgency] ?? URGENCY_RISK.Routine;
       recentPatients.innerHTML += `
         <tr>
           <td>
@@ -70,11 +116,37 @@ export default function DoctorDashboardPage() {
             </div>
           </td>
           <td style="color:var(--gray-600);font-size:13px;">${strMonth(element.appointment_date)} ${element.appointment_date.split("-").at(2)}</td>
-          <td style="font-size:13px;color:var(--gray-600);">Problem related to ${escapeHtml(doctor?.department || "")}</td>
-          <td><span class="risk-pill medium">Medium</span></td>
+          <td><span class="risk-pill ${risk.cls}">${risk.label}</span></td>
+          <td style="font-size:13px;color:var(--gray-600);">${escapeHtml(element.reason || "Not specified")}</td>
           <td><span class="status-pill ${element.status.toLowerCase()}">${escapeHtml(element.status)}</span></td>
         </tr>`;
     });
+
+    // Every number below used to be a hardcoded mockup value (7 today's
+    // appts, 142 active patients, a fake donut chart keyed off a
+    // "type" field the Appointment model doesn't even have…). All of
+    // it is now derived from this doctor's real appointment list.
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todaysAppts = appointments.filter((a) => a.appointment_date === todayStr).length;
+    const totalPatients = new Set(appointments.map((a) => a.user?.id)).size;
+    const pendingCount = appointments.filter((a) => a.status === "Pending").length;
+    const urgentCount = appointments.filter((a) => a.urgency === "Urgent" && a.status !== "Cancelled" && a.status !== "Completed").length;
+    const completedCount = appointments.filter((a) => a.status === "Completed").length;
+    console.log(appointments, "AAA")
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 6);
+    const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+    const thisWeek = appointments.filter((a) => a.appointment_date >= weekAgoStr && a.appointment_date <= todayStr);
+    const byStatus: Record<string, number> = {};
+    thisWeek.forEach((a) => { byStatus[a.status] = (byStatus[a.status] ?? 0) + 1; });
+    const breakdown = Object.entries(byStatus).map(([status, count]) => ({ status, count }));
+
+    setStats({
+      todaysAppts, totalPatients, pendingCount,
+      totalAppointments: appointments.length, urgentCount, weeklyTotal: thisWeek.length, completedCount,
+    });
+    setWeeklyBreakdown(breakdown);
   };
 
   const accessTelegram = () => {
@@ -125,7 +197,7 @@ export default function DoctorDashboardPage() {
             <input type="text" placeholder="Search patients, records…" />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button>
+            {/* <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button> */}
             <div className="avatar-btn"></div>
           </div>
         </header>
@@ -139,32 +211,38 @@ export default function DoctorDashboardPage() {
               <p>Have a Nice Day Mr Doctor</p>
             </div>
             <div className="banner-stats">
-              <div className="banner-stat"><div className="num">7</div><div className="lbl">Today&apos;s Appts</div></div>
+              <div className="banner-stat"><div className="num">{stats.todaysAppts}</div><div className="lbl">Today&apos;s Appts</div></div>
               <div className="banner-divider"></div>
-              <div className="banner-stat"><div className="num">142</div><div className="lbl">Active Patients</div></div>
+              <div className="banner-stat"><div className="num">{stats.totalPatients}</div><div className="lbl">Active Patients</div></div>
               <div className="banner-divider"></div>
-              <div className="banner-stat"><div className="num">4</div><div className="lbl">Messages</div></div>
+              <div className="banner-stat"><div className="num">{stats.pendingCount}</div><div className="lbl">Pending Requests</div></div>
             </div>
             <button className="btn-teal" onClick={accessTelegram}>Go To Telegram</button>
           </div>
 
-          {/* Stats */}
+          {/* Stats — every card here used to be a fixed mockup number
+              (142 patients, 3 urgent, 18 "Lab Results" — a feature that
+              doesn't exist server-side, 4.9★ "Patient Rating" — no
+              rating system exists either). All four are now computed
+              from this doctor's real appointment list; the fake
+              "↑ X this week"/"94%" trend badges were dropped since
+              there's no real trend computation behind them. */}
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-top"><div className="stat-icon teal"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></div><span className="stat-change up">↑ 8 this week</span></div>
-              <div className="stat-value">142</div><div className="stat-label">Total Active Patients</div>
+              <div className="stat-top"><div className="stat-icon teal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg></div></div>
+              <div className="stat-value">{stats.totalAppointments}</div><div className="stat-label">Total Appointments</div>
             </div>
             <div className="stat-card">
-              <div className="stat-top"><div className="stat-icon coral"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg></div><span className="stat-change down">↑ 2 critical</span></div>
-              <div className="stat-value">3</div><div className="stat-label">Urgent Cases</div>
+              <div className="stat-top"><div className="stat-icon coral"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg></div></div>
+              <div className="stat-value">{stats.urgentCount}</div><div className="stat-label">Urgent Cases</div>
             </div>
             <div className="stat-card">
-              <div className="stat-top"><div className="stat-icon amber"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div><span className="stat-change warn">2 pending</span></div>
-              <div className="stat-value">18</div><div className="stat-label">Lab Results</div>
+              <div className="stat-top"><div className="stat-icon amber"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg></div></div>
+              <div className="stat-value">{stats.weeklyTotal}</div><div className="stat-label">Appointments This Week</div>
             </div>
             <div className="stat-card">
-              <div className="stat-top"><div className="stat-icon blue"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div><span className="stat-change up">↑ 94%</span></div>
-              <div className="stat-value">4.9<small style={{ fontSize: 16, color: "var(--gray-400)" }}>★</small></div><div className="stat-label">Patient Rating</div>
+              <div className="stat-top"><div className="stat-icon blue"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg></div></div>
+              <div className="stat-value">{stats.completedCount}</div><div className="stat-label">Completed Appointments</div>
             </div>
           </div>
 
@@ -177,8 +255,11 @@ export default function DoctorDashboardPage() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Patient</th><th>Visit Date</th><th>Condition</th>
-                        <th>Risk</th><th>Appointment Status</th>
+                        <th>Patient</th>
+                        <th>Visit Date</th>
+                        <th>Urgency</th>
+                        <th>Reason</th>
+                        <th>Appointment Status</th>
                       </tr>
                     </thead>
                     <tbody className="recent-patients"></tbody>
@@ -188,20 +269,43 @@ export default function DoctorDashboardPage() {
             </div>
             <div className="right-col">
               <div className="card">
-                <div className="section-head" style={{ marginBottom: "1.1rem" }}><h3>This Week</h3><a href="#">Details →</a></div>
+                <div className="section-head" style={{ marginBottom: "1.1rem" }}><h3>This Week</h3></div>
+                {/* This whole widget used to be a fixed illustration —
+                    fake arc lengths adding up to a fake "28 appts", with
+                    a legend keyed off a "type" (in-person/virtual) that
+                    the Appointment model doesn't even have a column
+                    for. It's now a real donut: one arc per appointment
+                    status that actually occurred this week, sized to
+                    its real share of the week's total. */}
                 <div className="donut-wrap">
                   <svg className="donut-svg" width="100" height="100" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#EDEDEA" strokeWidth="14" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#1D9E75" strokeWidth="14" strokeDasharray="107 239" strokeDashoffset="0" strokeLinecap="butt" transform="rotate(-90 50 50)" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#378ADD" strokeWidth="14" strokeDasharray="83 239" strokeDashoffset="-107" strokeLinecap="butt" transform="rotate(-90 50 50)" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#EDEDEA" strokeWidth="14" strokeDasharray="48 239" strokeDashoffset="-190" strokeLinecap="butt" transform="rotate(-90 50 50)" />
-                    <text x="50" y="47" textAnchor="middle" fontFamily="DM Serif Display,serif" fontSize="18" fill="#2C2C2A">28</text>
+                    <circle cx="50" cy="50" r={DONUT_R} fill="none" stroke="#EDEDEA" strokeWidth="14" />
+                    {stats.weeklyTotal > 0 && (() => {
+                      let offset = 0;
+                      return weeklyBreakdown.map(({ status, count }) => {
+                        const len = (count / stats.weeklyTotal) * DONUT_C;
+                        const el = (
+                          <circle key={status} cx="50" cy="50" r={DONUT_R} fill="none"
+                            stroke={STATUS_COLORS[status] ?? "#9A9890"} strokeWidth="14"
+                            strokeDasharray={`${len} ${DONUT_C}`} strokeDashoffset={-offset}
+                            strokeLinecap="butt" transform="rotate(-90 50 50)" />
+                        );
+                        offset += len;
+                        return el;
+                      });
+                    })()}
+                    <text x="50" y="47" textAnchor="middle" fontFamily="DM Serif Display,serif" fontSize="18" fill="#2C2C2A">{stats.weeklyTotal}</text>
                     <text x="50" y="58" textAnchor="middle" fontFamily="DM Sans,sans-serif" fontSize="8" fill="#888780">appts</text>
                   </svg>
                   <div className="donut-legend">
-                    <div className="legend-item"><div className="legend-dot" style={{ background: "var(--teal-400)" }}></div><span className="lbl">In-person</span><span className="val">13</span></div>
-                    <div className="legend-item"><div className="legend-dot" style={{ background: "var(--blue-400)" }}></div><span className="lbl">Virtual</span><span className="val">10</span></div>
-                    <div className="legend-item"><div className="legend-dot" style={{ background: "var(--gray-200)" }}></div><span className="lbl">Cancelled</span><span className="val">5</span></div>
+                    {weeklyBreakdown.length === 0 ? (
+                      <div className="legend-item"><span className="lbl">No appointments this week yet.</span></div>
+                    ) : weeklyBreakdown.map(({ status, count }) => (
+                      <div className="legend-item" key={status}>
+                        <div className="legend-dot" style={{ background: STATUS_COLORS[status] ?? "#9A9890" }}></div>
+                        <span className="lbl">{status}</span><span className="val">{count}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

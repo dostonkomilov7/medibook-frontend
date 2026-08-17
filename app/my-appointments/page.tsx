@@ -44,7 +44,7 @@ export default function MyAppointmentsPage() {
   const loadAppointments = async () => {
     const userId = getCookie("userId");
     if (!userId) return;
-    const res = await fetch(`${apiUrl}/appointments/${userId}`);
+    const res = await fetch(`${apiUrl}/appointments/${userId}`, { credentials: "include" });
     const data = await res.json();
     appointmentsRef.current = data.appointments?.rows ?? [];
 
@@ -142,7 +142,7 @@ export default function MyAppointmentsPage() {
         const id = cancelBtn.dataset.cancelId!;
         cancelBtn.setAttribute("disabled", "true");
         try {
-          const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE" });
+          const res = await fetch(`${apiUrl}/appointments/${id}`, { method: "DELETE", credentials: "include" });
           const result = await res.json();
           if (!res.ok || !result.success) {
             showToast("Could not cancel appointment", "error");
@@ -202,7 +202,7 @@ export default function MyAppointmentsPage() {
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
           <Link prefetch={false} className="nav-item" href="/user-dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></Link>
-          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span><span className="badge">3</span></a>
+          <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span></a>
           <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
@@ -231,7 +231,7 @@ export default function MyAppointmentsPage() {
             <input type="text" placeholder="Search doctor, specialty…" onChange={(e) => handleSearch(e.target.value)} />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button>
+            {/* <button className="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg><span className="notif-dot"></span></button> */}
             <div className="topbar-avatar">U</div>
           </div>
         </header>

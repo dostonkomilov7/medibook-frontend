@@ -36,6 +36,10 @@ export default function UserDashboardPage() {
   const [detailAppt, setDetailAppt] = useState<any | null>(null);
   const [healthMetrics, setHealthMetrics] = useState<any[]>([]);
   const [medications, setMedications] = useState<any[]>([]);
+  // Only Pending/Confirmed appointments belong in an "Upcoming" preview —
+  // Completed/Cancelled ones cluttered this table before with visits that
+  // are already over.
+  const upcomingAppointments = appointments.filter((a: any) => a.status === "Pending" || a.status === "Confirmed");
 
   useEffect(() => {
     if (!getCookie("accessToken")) { router.push("/login"); return; }
@@ -128,7 +132,7 @@ export default function UserDashboardPage() {
         <nav className="nav-section">
           <p className="nav-label">Overview</p>
           <a className="nav-item active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></a>
-          <Link prefetch={false} className="nav-item" href="/my-appointments"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span><span className="badge">3</span></Link>
+          <Link prefetch={false} className="nav-item" href="/my-appointments"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>Appointments</span></Link>
           <Link prefetch={false} className="nav-item" href="/chat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg><span>Messages</span></Link>
         </nav>
         <nav className="nav-section">
@@ -161,10 +165,10 @@ export default function UserDashboardPage() {
             <input type="text" placeholder="Search doctors, records…" />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn" aria-label="Notifications">
+            {/* <button className="icon-btn" aria-label="Notifications">
               <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
               <span className="notif-dot"></span>
-            </button>
+            </button> */}
             <div className="topbar-avatar">U</div>
           </div>
         </header>
@@ -223,9 +227,9 @@ export default function UserDashboardPage() {
                 <table>
                   <thead><tr><th>Doctor</th><th>Date & Time</th><th>Type</th><th>Status</th><th></th></tr></thead>
                   <tbody className="app-list">
-                    {appointments.length === 0 ? (
+                    {upcomingAppointments.length === 0 ? (
                       <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px 0", color: "var(--gray-400)" }}>Appointments not found</td></tr>
-                    ) : appointments.map((a: any) => (
+                    ) : upcomingAppointments.map((a: any) => (
                       <tr key={a.id} onClick={() => setDetailAppt(a)}>
                         <td>
                           <div className="doctor-cell">
@@ -338,7 +342,8 @@ export default function UserDashboardPage() {
                 <div className="detail-item"><div className="detail-label">Time</div><div className="detail-val">{detailAppt.appointment_time}</div></div>
                 <div className="detail-item"><div className="detail-label">Department</div><div className="detail-val">{detailAppt.doctor?.department ?? "—"}</div></div>
                 <div className="detail-item"><div className="detail-label">Room</div><div className="detail-val">{detailAppt.doctor?.room_number ?? "—"}</div></div>
-                <div className="detail-item full"><div className="detail-label">Reason for Visit</div><div className="detail-val">{detailAppt.reason || "Not specified"}</div></div>
+                <div className="detail-item"><div className="detail-label">Urgency</div><div className="detail-val">{detailAppt.urgency || "Routine"}</div></div>
+                <div className="detail-item"><div className="detail-label">Reason for Visit</div><div className="detail-val">{detailAppt.reason || "Not specified"}</div></div>
                 <div className="detail-item full"><div className="detail-label">Notes</div><div className="detail-val">{detailAppt.notes || "—"}</div></div>
               </div>
             </div>

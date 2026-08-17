@@ -8,7 +8,11 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (window.location.search.includes("expired=1")) {
+    // No signed link in the URL at all (e.g. someone navigated here
+    // directly) — there's nothing to submit, so go straight to the
+    // "request a new one" state instead of showing a form that can only
+    // ever fail.
+    if (window.location.search.includes("expired=1") || !window.location.search.includes("signed=")) {
       showState("state-expired");
       return;
     }
@@ -117,8 +121,12 @@ export default function ResetPasswordPage() {
     resetBtn.disabled = true;
     resetBtn.innerHTML = `<div class="spinner"></div><span>Updating…</span>`;
 
-    // Get token from URL
-    const token = new URLSearchParams(window.location.search).get("token");
+    // The emailed link is a whole URL signed by the `signed` package
+    // (e.g. "…/reset-password?userId=42&signed=e_…-r_…-<hash>") — the
+    // signature covers the full query string, not a single opaque token,
+    // so the entire thing (minus the leading "?") has to be replayed
+    // verbatim for the backend to re-verify it.
+    const token = window.location.search.slice(1);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/auth/reset-password`, {
         method: "POST",
@@ -130,7 +138,15 @@ export default function ResetPasswordPage() {
       // failed/network-errored request told the user their password
       // had been updated.
       if (!res.ok) {
-        setFieldError("confirmPassword", "Could not reset your password. The link may have expired.");
+        if (res.status === 409) {
+          // Our own ConflictException from an expired/invalid signature —
+          // route to the same "request a new one" state the direct-visit
+          // case above uses, rather than an inline error on a form that
+          // can no longer succeed.
+          showState("state-expired");
+          return;
+        }
+        setFieldError("confirmPassword", "Could not reset your password. Please try again.");
         return;
       }
       showState("state-success");

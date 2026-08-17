@@ -32,7 +32,7 @@ export const deleteCookie = (name: string) => {
 export const getUserData = async () => {
   const userId = getCookie('userId');
   if (!userId) return null;
-  const res = await fetch(`${apiUrl}/users/${userId}`);
+  const res = await fetch(`${apiUrl}/users/${userId}`, { credentials: 'include' });
   return res.json();
 };
 

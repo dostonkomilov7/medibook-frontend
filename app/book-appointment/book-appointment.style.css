@@ -862,6 +862,51 @@ body {
     gap: 18px;
 }
 
+.page-book-appointment .urgency-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.page-book-appointment .urgency-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s, background .15s;
+}
+
+.page-book-appointment .urgency-chip:hover {
+    border-color: var(--teal-mid);
+}
+
+.page-book-appointment .urgency-chip.selected {
+    border-color: var(--teal);
+    background: var(--teal-light);
+}
+
+.page-book-appointment .urgency-chip-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.page-book-appointment .urgency-chip.selected .urgency-chip-label {
+    color: var(--teal-800);
+}
+
+.page-book-appointment .urgency-chip-desc {
+    font-size: 11.5px;
+    color: var(--gray-400);
+    font-weight: 400;
+}
+
 .page-book-appointment label {
     font-size: 13px;
     font-weight: 600;

@@ -46,7 +46,7 @@ function VerifyEmailContent() {
     // redirects: those pages' CSS is unscoped global stylesheets, and
     // a client-side transition could paint before it's loaded. A full
     // page nav always waits for CSS first — see app/login/page.tsx.
-    if (getCookie("accessToken")) {
+    if (getCookie("userId")) {
       const role = getCookie("role");
       if (role === "Doctor") window.location.href = "/doctor-dashboard";
       else if (role === "User") window.location.href = "/user-dashboard";
@@ -207,8 +207,12 @@ function VerifyEmailContent() {
       const res = await response.json();
 
       if (res.success) {
-        setCookie("accessToken", res?.accessToken);
-        setCookie("refreshToken", res?.refreshToken);
+        // accessToken/refreshToken are real HttpOnly cookies the backend
+        // already set on this response — trying to also set them from JS
+        // is not just pointless, browsers silently block it outright (a
+        // script can't clobber an existing HttpOnly cookie with a
+        // same-named non-HttpOnly one). role is the only one of these
+        // this app can actually read back later.
         setCookie("role", res?.role);
         setInputState("success");
         setStatus("success", "Code verified successfully!");

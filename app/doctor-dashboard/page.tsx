@@ -46,7 +46,7 @@ export default function DoctorDashboardPage() {
   const [weeklyBreakdown, setWeeklyBreakdown] = useState<{ status: string; count: number }[]>([]);
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
       notFound();

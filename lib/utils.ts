@@ -50,8 +50,18 @@ export const getRole = async (): Promise<string | null> => {
   return getCookie('role');
 };
 
+// "Am I logged in?" is decided from the userId cookie, not accessToken.
+// accessToken/refreshToken are real HttpOnly cookies set by the backend —
+// a script can never read them, and (this was the actual bug) a script
+// can't even overwrite them with a same-named non-HttpOnly cookie either;
+// the browser silently no-ops that write to stop pages from stripping
+// HttpOnly protection off an existing cookie. So document.cookie never
+// contains "accessToken" at all, and checking for it here always found
+// nothing — even right after a fully successful login — bouncing every
+// dashboard straight back to /login. userId (and role) are plain cookies
+// this app really does set from JS, so they're the real signal.
 export const redirectIfAuth = async (router: { push: (path: string) => void }) => {
-  const token = getCookie('accessToken');
+  const token = getCookie('userId');
   if (token) {
     const role = getCookie('role');
     if (role === 'Doctor') {
@@ -67,13 +77,22 @@ export const redirectIfAuth = async (router: { push: (path: string) => void }) =
 };
 
 export const redirectIfNotAuth = (router: { push: (path: string) => void }) => {
-  const token = getCookie('accessToken');
+  const token = getCookie('userId');
   if (!token) {
     router.push('/login');
   }
 };
 
-export const signOut = () => {
+export const signOut = async () => {
+  // deleteCookie('accessToken'/'refreshToken') never did anything real —
+  // same HttpOnly protection that blocks setting them from JS also blocks
+  // "clearing" them this way, so the real session cookie was never
+  // actually invalidated server-side. Ask the backend to clear it instead.
+  try {
+    await fetch(`${apiUrl}/auth/logout`, { method: 'POST', credentials: 'include' });
+  } catch (e) {
+    console.error('Failed to log out on the server:', e);
+  }
   deleteCookie('accessToken');
   deleteCookie('refreshToken');
   deleteCookie('userId');

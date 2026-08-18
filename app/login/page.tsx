@@ -18,9 +18,15 @@ export default function LoginPage() {
   // what's visible underneath is ours.
   const googleBtnHostRef = useRef<HTMLDivElement>(null);
 
-  const completeLogin = (response: { accessToken?: string; refreshToken?: string; userId: string | number; role: string }) => {
-    setCookie("accessToken", String(response.accessToken ?? "1"));
-    setCookie("refreshToken", String(response.refreshToken ?? "1"));
+  const completeLogin = (response: { userId: string | number; role: string }) => {
+    // accessToken/refreshToken are real HttpOnly cookies the backend
+    // already set on this same response — a script can't read them, and
+    // (this was the actual bug) can't even overwrite them with a
+    // same-named plain cookie either, since browsers silently block a
+    // non-HttpOnly write from clobbering an existing HttpOnly one. userId
+    // and role are the only things this app can and does read back from
+    // document.cookie, so they're what every page's "am I logged in?"
+    // check uses.
     setCookie("userId", String(response.userId));
     setCookie("role", response.role);
     if (response.role === "Doctor") window.location.href = "/doctor-dashboard";
@@ -72,7 +78,7 @@ export default function LoginPage() {
     // layout until a manual refresh. window.location.href forces a
     // real full-page load, which always waits for CSS first.
     const redirectIfAuth = () => {
-      if (getCookie("accessToken")) {
+      if (getCookie("userId")) {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";

@@ -21,7 +21,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     loadDoctors();
     // initSocket() sets socketRef.current asynchronously; disconnecting
     // here on unmount (instead of relying on initSocket's own unused

@@ -74,7 +74,7 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
       notFound();

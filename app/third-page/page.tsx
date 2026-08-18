@@ -325,7 +325,7 @@ function ThirdPageContent() {
 
   useEffect(() => {
     const redirectIfAuth = () => {
-      if (getCookie("accessToken")) {
+      if (getCookie("userId")) {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";

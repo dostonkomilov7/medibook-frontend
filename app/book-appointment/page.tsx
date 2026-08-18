@@ -60,7 +60,7 @@ export default function BookAppointmentPage() {
   const allSlots = ["8:00 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "User" && role !== "Admin") {
       notFound();

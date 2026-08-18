@@ -21,7 +21,7 @@ export default function MyAppointmentsPage() {
   };
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "User" && role !== "Admin") {
       notFound();

@@ -66,7 +66,7 @@ export default function DepartmentManagementPage() {
   };
 
   useEffect(()=>{
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
       notFound();
     }

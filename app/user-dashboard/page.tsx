@@ -42,7 +42,7 @@ export default function UserDashboardPage() {
   const upcomingAppointments = appointments.filter((a: any) => a.status === "Pending" || a.status === "Confirmed");
 
   useEffect(() => {
-    if (!getCookie("accessToken")) { router.push("/login"); return; }
+    if (!getCookie("userId")) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "User") {
       notFound();

@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import "./auth.style.css";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { apiUrl } from "../../lib/utils";
 
 export default function ForgotPasswordPage() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);

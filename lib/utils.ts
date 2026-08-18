@@ -1,6 +1,12 @@
 // MediBook utility functions - ported from frontend/src/main.ts
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+// Always same-origin — proxied to the real backend by next.config.ts's
+// rewrites(). A direct cross-site call to the backend's own URL would work
+// for the request itself, but the browser silently drops the auth cookie
+// from a cross-site Set-Cookie response (Safari ITP blocks it outright;
+// Chrome does too with strict third-party-cookie settings). Routing every
+// call through our own origin keeps the cookie first-party instead.
+const apiUrl = '/api';
 
 export { apiUrl };
 

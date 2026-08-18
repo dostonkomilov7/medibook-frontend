@@ -3,11 +3,10 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./all-users.style.css";
-import { getCookie, deleteCookie, getUserData } from "../../lib/utils";
+import { getCookie, deleteCookie, getUserData, apiUrl } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8"];
 const PER_PAGE = 15;
 

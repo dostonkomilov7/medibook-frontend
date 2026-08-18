@@ -24,12 +24,24 @@ async function proxy(req: NextRequest, path: string[]) {
     redirect: "manual",
   });
 
+  // Fully read the body instead of piping backendRes.body straight through.
+  // fetch()'s Body-reading methods (.arrayBuffer() etc.) are guaranteed to
+  // hand back fully decompressed bytes; the raw .body stream is not always
+  // decompressed the same way depending on the runtime. Render compresses
+  // responses at its edge, so piping the raw stream while also stripping
+  // Content-Encoding (telling the browser "this is already plain") risked
+  // handing it still-gzipped bytes labeled as plain JSON — which is exactly
+  // what "SyntaxError: The string did not match the expected pattern"
+  // (Safari's res.json() choking on unparsable bytes) looks like.
+  const bodyBuffer = await backendRes.arrayBuffer();
+
   const resHeaders = new Headers(backendRes.headers);
-  resHeaders.delete("content-encoding"); // already decoded by fetch — forwarding this would tell the browser to decode it again
+  resHeaders.delete("content-encoding");
   resHeaders.delete("transfer-encoding");
+  resHeaders.delete("content-length"); // recomputed from bodyBuffer below
   resHeaders.delete("set-cookie"); // re-added below, one at a time
 
-  const response = new NextResponse(backendRes.body, {
+  const response = new NextResponse(bodyBuffer, {
     status: backendRes.status,
     headers: resHeaders,
   });

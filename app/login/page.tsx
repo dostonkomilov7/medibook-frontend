@@ -159,7 +159,6 @@ export default function LoginPage() {
 
   return (
     <div className="page-login">
-      {/* LEFT PANEL */}
       <div className="panel-left">
         <div className="brand">
           <div className="brand-icon">
@@ -190,7 +189,7 @@ export default function LoginPage() {
         <div className="form-card">
           <div className="form-header">
             <h2>Welcome back</h2>
-            <p>Don&apos;t have an account? <Link href="/register">Create one</Link></p>
+            <p>Don't have an account? <Link href="/register">Create one</Link></p>
           </div>
 
           <div className="alert" id="alert" style={{ display: "none" }}>Incorrect email or password. Please try again.</div>
@@ -252,10 +251,6 @@ export default function LoginPage() {
               </svg>
               Continue with Google
             </button>
-            {/* Google's real (iframe-based) button, invisible and stacked
-                exactly on top of the styled one above — see the comment on
-                googleBtnHostRef. Clicks land here; the styled button is
-                purely visual. */}
             <div className="google-btn-real" ref={googleBtnHostRef}></div>
           </div>
         </div>

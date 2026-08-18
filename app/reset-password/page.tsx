@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./auth.style.css";
+import { apiUrl } from "../../lib/utils";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -128,7 +129,7 @@ export default function ResetPasswordPage() {
     // verbatim for the backend to re-verify it.
     const token = window.location.search.slice(1);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/auth/reset-password`, {
+      const res = await fetch(`${apiUrl}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password: pw }),

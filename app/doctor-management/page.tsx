@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./doctor-management.style.css";
-import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, getUserData, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 const COLORS = ["#1D9E75","#378ADD","#D85A30","#EF9F27","#8B7EF8","#34C97A","#E0608A","#22C5D9","#F07B3F"];
@@ -52,7 +52,7 @@ export default function DoctorManagementPage() {
   };
 
   useEffect(()=>{
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
       notFound();
     }

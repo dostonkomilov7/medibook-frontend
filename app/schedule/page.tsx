@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "../doctor-dashboard/doctor-dashboard.style.css";
 import "./schedule.style.css";
-import { getCookie, apiUrl, escapeHtml, signOut, getUserData } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, apiUrl, escapeHtml, signOut, getUserData } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
@@ -74,7 +74,7 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "Doctor") {
       notFound();

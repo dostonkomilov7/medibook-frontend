@@ -50,18 +50,24 @@ export const getRole = async (): Promise<string | null> => {
   return getCookie('role');
 };
 
-// "Am I logged in?" is decided from the userId cookie, not accessToken.
-// accessToken/refreshToken are real HttpOnly cookies set by the backend —
-// a script can never read them, and (this was the actual bug) a script
-// can't even overwrite them with a same-named non-HttpOnly cookie either;
-// the browser silently no-ops that write to stop pages from stripping
-// HttpOnly protection off an existing cookie. So document.cookie never
-// contains "accessToken" at all, and checking for it here always found
-// nothing — even right after a fully successful login — bouncing every
-// dashboard straight back to /login. userId (and role) are plain cookies
-// this app really does set from JS, so they're the real signal.
+// "Am I logged in?" is decided from the "authenticated" cookie, not
+// accessToken. accessToken/refreshToken are real HttpOnly cookies set by
+// the backend — a script can never read them, and (this was a real bug)
+// a script can't even overwrite them with a same-named non-HttpOnly
+// cookie either; the browser silently no-ops that write to stop pages
+// from stripping HttpOnly protection off an existing cookie.
+//
+// It also can't just be userId: that gets set as soon as *registration*
+// starts (before OTP verification even happens), not only on a real
+// login — checking userId here made verify-email think a brand-new,
+// unverified signup was already fully authenticated and skip straight to
+// the dashboard without ever showing the OTP form. "authenticated" is set
+// only where a real session actually starts (login/activateUser/google),
+// never on register.
+export const AUTH_COOKIE = 'authenticated';
+
 export const redirectIfAuth = async (router: { push: (path: string) => void }) => {
-  const token = getCookie('userId');
+  const token = getCookie(AUTH_COOKIE);
   if (token) {
     const role = getCookie('role');
     if (role === 'Doctor') {
@@ -77,7 +83,7 @@ export const redirectIfAuth = async (router: { push: (path: string) => void }) =
 };
 
 export const redirectIfNotAuth = (router: { push: (path: string) => void }) => {
-  const token = getCookie('userId');
+  const token = getCookie(AUTH_COOKIE);
   if (!token) {
     router.push('/login');
   }
@@ -97,6 +103,7 @@ export const signOut = async () => {
   deleteCookie('refreshToken');
   deleteCookie('userId');
   deleteCookie('role');
+  deleteCookie(AUTH_COOKIE);
   if (typeof localStorage !== 'undefined') localStorage.clear();
   window.location.href = '/';
 };

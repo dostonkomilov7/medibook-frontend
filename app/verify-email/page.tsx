@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import "./verify-email.style.css";
-import { setCookie, getCookie, deleteCookie, apiUrl } from "../../lib/utils";
+import { setCookie, getCookie, deleteCookie, apiUrl, AUTH_COOKIE } from "../../lib/utils";
 const TOTAL_DIGITS = 6;
 const RESEND_COOLDOWN = 60;
 const CIRCUMFERENCE = 97.4;
@@ -32,7 +32,7 @@ function VerifyEmailContent() {
     // so it's guaranteed to be attached before any of the early
     // returns below can skip past it. It was previously set up after
     // those checks, so swiping back via touchpad to restore this page
-    // from bfcache while accessToken/userId happened to be in the
+    // from bfcache while AUTH_COOKIE/userId happened to be in the
     // "redirect away" state never even reached the listener
     // registration on the *original* mount that got bfcached — the
     // restored snapshot had no pageshow handler to catch the restore
@@ -46,7 +46,13 @@ function VerifyEmailContent() {
     // redirects: those pages' CSS is unscoped global stylesheets, and
     // a client-side transition could paint before it's loaded. A full
     // page nav always waits for CSS first — see app/login/page.tsx.
-    if (getCookie("userId")) {
+    //
+    // This has to be AUTH_COOKIE, not userId: userId gets set the moment
+    // *registration* starts, well before OTP verification — checking
+    // userId here made this page think a brand-new, unverified signup
+    // was already fully logged in and skipped straight to the dashboard
+    // without ever showing the OTP form.
+    if (getCookie(AUTH_COOKIE)) {
       const role = getCookie("role");
       if (role === "Doctor") window.location.href = "/doctor-dashboard";
       else if (role === "User") window.location.href = "/user-dashboard";
@@ -212,8 +218,11 @@ function VerifyEmailContent() {
         // is not just pointless, browsers silently block it outright (a
         // script can't clobber an existing HttpOnly cookie with a
         // same-named non-HttpOnly one). role is the only one of these
-        // this app can actually read back later.
+        // this app can actually read back later. AUTH_COOKIE marks the
+        // OTP as genuinely verified — see the mount effect above for why
+        // this can't just be userId.
         setCookie("role", res?.role);
+        setCookie(AUTH_COOKIE, "1");
         setInputState("success");
         setStatus("success", "Code verified successfully!");
         if (verifyBtn) {

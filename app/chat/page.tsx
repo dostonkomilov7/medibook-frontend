@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCookie, apiUrl as BASE } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, apiUrl as BASE } from "../../lib/utils";
 import "./chat.style.css";
 
 interface Doctor { id: number; user: { id: number; full_name: string }; specialization: string; }
@@ -21,7 +21,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     loadDoctors();
     // initSocket() sets socketRef.current asynchronously; disconnecting
     // here on unmount (instead of relying on initSocket's own unused

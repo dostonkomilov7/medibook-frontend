@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./register.style.css";
-import { setCookie, getCookie, apiUrl } from "../../lib/utils";
+import { setCookie, getCookie, AUTH_COOKIE, apiUrl } from "../../lib/utils";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function RegisterPage() {
     // a client-side transition could paint before it's loaded. A full
     // page nav always waits for CSS first — see app/login/page.tsx.
     const redirectIfAuth = () => {
-      if (getCookie("userId")) {
+      if (getCookie(AUTH_COOKIE)) {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";

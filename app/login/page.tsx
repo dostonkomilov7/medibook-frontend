@@ -4,7 +4,7 @@ import Script from "next/script";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./login.style.css";
-import { setCookie, getCookie, apiUrl } from "../../lib/utils";
+import { setCookie, getCookie, apiUrl, AUTH_COOKIE } from "../../lib/utils";
 
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
@@ -21,14 +21,15 @@ export default function LoginPage() {
   const completeLogin = (response: { userId: string | number; role: string }) => {
     // accessToken/refreshToken are real HttpOnly cookies the backend
     // already set on this same response — a script can't read them, and
-    // (this was the actual bug) can't even overwrite them with a
-    // same-named plain cookie either, since browsers silently block a
-    // non-HttpOnly write from clobbering an existing HttpOnly one. userId
-    // and role are the only things this app can and does read back from
-    // document.cookie, so they're what every page's "am I logged in?"
-    // check uses.
+    // can't even overwrite them with a same-named plain cookie either,
+    // since browsers silently block a non-HttpOnly write from clobbering
+    // an existing HttpOnly one. AUTH_COOKIE is what every page's "am I
+    // logged in?" check reads instead — set only here (a real, completed
+    // login), never on register, so a brand-new signup that hasn't
+    // verified its OTP yet doesn't read as "already logged in".
     setCookie("userId", String(response.userId));
     setCookie("role", response.role);
+    setCookie(AUTH_COOKIE, "1");
     if (response.role === "Doctor") window.location.href = "/doctor-dashboard";
     else if (response.role === "User") window.location.href = "/user-dashboard";
     else window.location.href = "/admin-dashboard";
@@ -78,7 +79,7 @@ export default function LoginPage() {
     // layout until a manual refresh. window.location.href forces a
     // real full-page load, which always waits for CSS first.
     const redirectIfAuth = () => {
-      if (getCookie("userId")) {
+      if (getCookie(AUTH_COOKIE)) {
         const role = getCookie("role");
         if (role === "Doctor") window.location.href = "/doctor-dashboard";
         else if (role === "User") window.location.href = "/user-dashboard";

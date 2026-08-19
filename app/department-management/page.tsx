@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./department-management.style.css";
-import { getCookie, getUserData, signOut } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, getUserData, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
@@ -66,7 +66,7 @@ export default function DepartmentManagementPage() {
   };
 
   useEffect(()=>{
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     if (getCookie("role") !== "Admin") {
       notFound();
     }

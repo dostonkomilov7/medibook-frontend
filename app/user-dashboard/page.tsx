@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./user-dashboard.style.css";
-import { getCookie, getUserData, apiUrl, signOut } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, getUserData, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
@@ -42,7 +42,7 @@ export default function UserDashboardPage() {
   const upcomingAppointments = appointments.filter((a: any) => a.status === "Pending" || a.status === "Confirmed");
 
   useEffect(() => {
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "User") {
       notFound();

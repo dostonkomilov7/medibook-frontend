@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import "./health-metrics.style.css";
-import { getCookie, apiUrl, signOut } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
@@ -36,7 +36,7 @@ export default function HealthMetricsPage() {
   };
 
   useEffect(() => {
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "Admin" && role !== "User") {
       notFound();

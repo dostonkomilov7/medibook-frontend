@@ -324,18 +324,13 @@ function ThirdPageContent() {
   });
 
   useEffect(() => {
-    const redirectIfAuth = () => {
-      if (getCookie("userId")) {
-        const role = getCookie("role");
-        if (role === "Doctor") window.location.href = "/doctor-dashboard";
-        else if (role === "User") window.location.href = "/user-dashboard";
-        else if (role === "Admin") window.location.href = "/admin-dashboard";
-        else router.push("/");
-      }
-    };
-
-    redirectIfAuth();
-    
+    // No "already logged in, redirect away" guard here on purpose: this
+    // page is reached right after verify-email, which is exactly when a
+    // new doctor account gets a real session for the first time — an
+    // "am I authenticated?" check would fire immediately and bounce them
+    // to their dashboard before they ever get to fill in their
+    // specialty/department/schedule, since finishing onboarding is the
+    // one thing this page is for.
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) window.location.reload();
     };

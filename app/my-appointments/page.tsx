@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import "./my-appointments.style.css";
-import { getCookie, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
+import { getCookie, AUTH_COOKIE, getUserData, strMonth, escapeHtml, apiUrl, signOut } from "../../lib/utils";
 import Sidebar from "../../components/sidebar/Sidebar";
 import HamburgerToggle from "../../components/sidebar/HamburgerToggle";
 
@@ -21,7 +21,7 @@ export default function MyAppointmentsPage() {
   };
 
   useEffect(() => {
-    if (!getCookie("userId")) { router.push("/login"); return; }
+    if (!getCookie(AUTH_COOKIE)) { router.push("/login"); return; }
     const role = getCookie("role");
     if (role !== "User" && role !== "Admin") {
       notFound();

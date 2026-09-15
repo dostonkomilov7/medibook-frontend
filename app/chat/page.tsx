@@ -17,6 +17,11 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
   const [socketId, setSocketId] = useState("Offline");
+  // There's no real-time chat backend yet (no Socket.IO server on the
+  // API) — without limiting retries, socket.io-client's default is to
+  // reconnect forever, silently hammering /socket.io/... in the
+  // background for as long as this page stays open.
+  const [unavailable, setUnavailable] = useState(false);
   const socketRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -62,16 +67,21 @@ export default function ChatPage() {
     // Dynamic import to avoid SSR issues
     const { io } = await import("socket.io-client");
     const userId = getCookie("userId");
-    const socket = io(BASE, { auth: { id: userId } });
+    const socket = io(BASE, { auth: { id: userId }, reconnectionAttempts: 3, timeout: 5000 });
     socketRef.current = socket;
 
     socket.on("connect", () => {
       setConnected(true);
+      setUnavailable(false);
       setSocketId(socket.id?.substring(0, 8) ?? "");
     });
     socket.on("disconnect", () => {
       setConnected(false);
       setSocketId("Offline");
+    });
+    socket.on("reconnect_failed", () => {
+      setUnavailable(true);
+      socket.disconnect();
     });
     socket.on("message", (data: { message: string; userId: string }) => {
       const msg: Message = { text: data.message, senderId: data.userId, isMe: false };
@@ -147,6 +157,13 @@ export default function ChatPage() {
           </header>
 
           <main style={{flex:1,overflowY:"auto",padding:"1.5rem",display:"flex",flexDirection:"column",gap:"1rem"}}>
+            {unavailable && (
+              <div style={{display:"flex",justifyContent:"center"}}>
+                <span style={{fontSize:"12px",fontWeight:500,color:"#fb7185",background:"rgba(244,63,94,0.1)",padding:"8px 16px",borderRadius:"10px",border:"1px solid rgba(244,63,94,0.3)"}}>
+                  Live chat isn&apos;t available yet — check back soon.
+                </span>
+              </div>
+            )}
             {currentMeta && (
               <div style={{display:"flex",justifyContent:"center"}}>
                 <span style={{fontSize:"11px",fontWeight:500,letterSpacing:"0.1em",textTransform:"uppercase",color:"#64748b",background:"rgba(15,23,42,0.4)",padding:"4px 12px",borderRadius:"100px",border:"1px solid rgba(30,41,59,0.8)"}}>
@@ -171,12 +188,13 @@ export default function ChatPage() {
             <form onSubmit={sendMessage} style={{display:"flex",gap:"8px",alignItems:"center"}}>
               <input
                 type="text"
-                placeholder="Send room message..."
+                placeholder={unavailable ? "Chat unavailable" : "Send room message..."}
                 value={input}
+                disabled={unavailable}
                 onChange={e=>setInput(e.target.value)}
-                style={{flex:1,background:"rgba(15,23,42,0.8)",color:"#f1f5f9",fontSize:"14px",padding:"14px 16px",borderRadius:"12px",border:"1px solid rgba(71,85,105,0.8)",outline:"none",fontFamily:"system-ui,sans-serif"}}
+                style={{flex:1,background:"rgba(15,23,42,0.8)",color:"#f1f5f9",fontSize:"14px",padding:"14px 16px",borderRadius:"12px",border:"1px solid rgba(71,85,105,0.8)",outline:"none",fontFamily:"system-ui,sans-serif",opacity:unavailable?0.5:1}}
               />
-              <button type="submit" style={{background:"#4f46e5",color:"#fff",fontWeight:500,fontSize:"14px",padding:"14px 20px",borderRadius:"12px",border:"none",cursor:"pointer",boxShadow:"0 4px 14px rgba(79,70,229,0.3)"}}>
+              <button type="submit" disabled={unavailable} style={{background:"#4f46e5",color:"#fff",fontWeight:500,fontSize:"14px",padding:"14px 20px",borderRadius:"12px",border:"none",cursor:unavailable?"not-allowed":"pointer",boxShadow:"0 4px 14px rgba(79,70,229,0.3)",opacity:unavailable?0.5:1}}>
                 Send
               </button>
             </form>

@@ -144,7 +144,7 @@ export default function HomePage() {
     ];
     if (testiGrid) {
       testiGrid.innerHTML = testimonials.map((t) => `
-        < div class="testi-card" >
+        <div class="testi-card">
           <p class="testi-text">"${t.text}"</p>
           <div class="testi-author">
             <div class="testi-av">${t.name[0]}</div>
@@ -153,7 +153,7 @@ export default function HomePage() {
               <div class="testi-role">${t.role}</div>
             </div>
           </div>
-        </div >
+        </div>
         `).join("");
     }
 

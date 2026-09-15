@@ -1371,6 +1371,7 @@ body {
       font-size: 13px;
       font-weight: 600;
       color: #fff;
+      background: var(--teal-600);
       flex-shrink: 0;
   }
 

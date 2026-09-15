@@ -90,10 +90,6 @@ export const redirectIfNotAuth = (router: { push: (path: string) => void }) => {
 };
 
 export const signOut = async () => {
-  // deleteCookie('accessToken'/'refreshToken') never did anything real —
-  // same HttpOnly protection that blocks setting them from JS also blocks
-  // "clearing" them this way, so the real session cookie was never
-  // actually invalidated server-side. Ask the backend to clear it instead.
   try {
     await fetch(`${apiUrl}/auth/logout`, { method: 'POST', credentials: 'include' });
   } catch (e) {

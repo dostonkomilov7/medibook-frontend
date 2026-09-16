@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthGuardInit from "./AuthGuardInit";
 
 export const metadata: Metadata = {
   title: "MediBook — Smart Clinic Appointments",
@@ -19,7 +20,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <AuthGuardInit />
+        {children}
+      </body>
     </html>
   );
 }

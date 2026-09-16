@@ -20,6 +20,14 @@ function VerifyEmailContent() {
   const autoVerifyRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resendCountRef = useRef(0);
   const failCountRef = useRef(0);
+  // Typing the last digit schedules an auto-verify timeout, but pressing
+  // Enter (or clicking Verify) right after does too — without this guard
+  // both fire /auth/activate with the same code. The backend clears the
+  // OTP on the first success, so the second, still-in-flight request then
+  // reads a null otp and comes back "invalid" — whichever response lands
+  // last stomps the UI, which is how a *correct* code could flash
+  // "N attempts left" right before the success overlay.
+  const verifyingRef = useRef(false);
   const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Once true, nothing on this page can dismiss it — no close button, no
   // overlay-click, no Escape key — it only ever goes away by finishing
@@ -198,7 +206,9 @@ function VerifyEmailContent() {
   };
 
   const handleVerify = async () => {
-    if (!isComplete()) return;
+    if (!isComplete() || verifyingRef.current) return;
+    verifyingRef.current = true;
+    if (autoVerifyRef.current) { clearTimeout(autoVerifyRef.current); autoVerifyRef.current = null; }
     const code = otpValuesRef.current.join("");
     const verifyBtn = document.getElementById("verifyBtn") as HTMLButtonElement;
     if (verifyBtn) { verifyBtn.innerHTML = '<div class="spinner"></div>'; verifyBtn.disabled = true; }
@@ -245,6 +255,7 @@ function VerifyEmailContent() {
           verifyBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify Email`;
           verifyBtn.disabled = false;
         }
+        verifyingRef.current = false;
         setTimeout(() => {
           otpValuesRef.current = Array(TOTAL_DIGITS).fill("");
           for (let i = 0; i < TOTAL_DIGITS; i++) {
@@ -264,6 +275,7 @@ function VerifyEmailContent() {
         verifyBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify Email`;
         verifyBtn.disabled = false;
       }
+      verifyingRef.current = false;
     }
   };
 

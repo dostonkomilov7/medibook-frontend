@@ -104,6 +104,47 @@ export const signOut = async () => {
   window.location.href = '/';
 };
 
+// Every dashboard page's mount-time auth check only looks at the
+// `authenticated` marker cookie above, which has no expiry of its own and
+// says nothing about whether the real (HttpOnly) accessToken/refreshToken
+// pair backing it is still valid server-side. So once that pair actually
+// expires or is rejected (an expired refresh token, or a backend redeploy
+// that invalidated existing sessions), the marker cookie is still there,
+// the page renders as if logged in, and every data fetch on it then comes
+// back 401 forever — reloading doesn't help, because the same stale
+// marker cookie passes the same check again. This patches window.fetch
+// once, globally, so any 401 from a protected (non-/auth/*) API call
+// clears the stale cookies and sends the user to /login instead of
+// leaving the page stuck with no data.
+let authFetchGuardInstalled = false;
+
+export const installAuthFetchGuard = () => {
+  if (typeof window === 'undefined' || authFetchGuardInstalled) return;
+  authFetchGuardInstalled = true;
+
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async (...args: Parameters<typeof fetch>) => {
+    const response = await originalFetch(...args);
+
+    if (response.status === 401) {
+      const input = args[0];
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const isProtectedApiCall = url.startsWith(`${apiUrl}/`) && !url.startsWith(`${apiUrl}/auth/`);
+
+      if (isProtectedApiCall && window.location.pathname !== '/login') {
+        deleteCookie('accessToken');
+        deleteCookie('refreshToken');
+        deleteCookie('userId');
+        deleteCookie('role');
+        deleteCookie(AUTH_COOKIE);
+        window.location.href = '/login';
+      }
+    }
+
+    return response;
+  };
+};
+
 export const strMonth = (date: string): string => {
   const month = date.split('-').at(1);
   const months: Record<string, string> = {
